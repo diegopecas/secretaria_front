@@ -1,0 +1,1033 @@
+// Importamos FontAwesome en lugar de Material Design Icons
+@import "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css";
+
+// Variables de color - esquema negro y dorado
+$color-primary: #ffbd31; // Color dorado base
+$color-primary-light: #fff3d8; // Dorado claro
+$color-primary-dark: #e6a400; // Dorado oscuro
+$color-text-dark: #212529; // Texto oscuro
+$color-text-muted: #6c757d; // Texto secundario
+$color-border: #dfdfe3; // Color de borde
+$color-background: #ffffff; // Fondo
+$color-hover: rgba(255, 189, 49, 0.15); // Color al pasar el ratón
+
+.icono {
+  font-size: 24px;
+}
+
+.form-tablas {
+  padding: 10px;
+  box-sizing: border-box;
+  box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.3);
+  display: flex;
+  border-radius: 5px;
+  background-color: #ffffff;
+  font-weight: 500;
+  margin-left: 20px;
+  margin-right: 20px;
+  font-family: 'Material Design Icons', sans-serif;
+  font-size: 20px;
+  overflow: hidden;
+  overflow-x: auto;
+  height: auto;
+
+  // Estilos para el contenedor de filtros
+  .dropdown {
+    position: relative;
+
+    // Corregir el posicionamiento del menú desplegable
+    .dropdown-menu {
+      position: relative;
+      top: 100%;
+      left: 0;
+      z-index: 1000;
+      display: none;
+      float: left;
+      min-width: 10rem;
+      padding: 0.5rem 0;
+      margin: 0.125rem 0 0;
+      font-size: 1rem;
+      color: #212529;
+      text-align: left;
+      list-style: none;
+      background-color: #fff;
+      background-clip: padding-box;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 0.25rem;
+
+      &.show {
+        display: block !important;
+      }
+    }
+  }
+
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+    margin-bottom: 0;
+    border: 1px solid $color-border;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    font-size: 0.875rem;
+
+    thead {
+      tr {
+        background-color: $color-primary;
+
+        th {
+          text-align: center;
+          vertical-align: middle;
+          color: $color-text-dark;
+          font-weight: 600;
+          border: none;
+          border-bottom: 1px solid $color-border;
+          padding: 0.75rem 1rem;
+          white-space: nowrap;
+          font-size: 0.875rem;
+          letter-spacing: 0.02em;
+          text-transform: uppercase;
+          transition: background-color 0.2s;
+
+          &:not(:last-child) {
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+          }
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        transition: all 0.2s;
+
+        &:nth-child(even) {
+          background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        &:hover {
+          background-color: $color-hover;
+        }
+
+        td {
+          vertical-align: middle;
+          color: $color-text-dark;
+          font-weight: 400;
+          border: none;
+          border-bottom: 1px solid $color-border;
+          padding: 0.75rem 1rem;
+          white-space: nowrap;
+
+          &:not(:last-child) {
+            border-right: 1px solid rgba(0, 0, 0, 0.03);
+          }
+
+          label {
+            display: block;
+            margin-bottom: 0;
+          }
+
+          .accion {
+            text-align: center;
+            margin-bottom: 0;
+
+            i {
+              font-size: 1.1rem;
+              padding: 0.5rem;
+              cursor: pointer;
+              border-radius: 50%;
+              transition: all 0.2s;
+              color: $color-text-dark;
+
+              &.fa-eye {
+                color: #6c757d;
+
+                &:hover {
+                  color: #5a6268;
+                  background-color: rgba(108, 117, 125, 0.1);
+                }
+              }
+
+              &.fa-pen-to-square {
+                color: #0d6efd;
+
+                &:hover {
+                  color: #0a58ca;
+                  background-color: rgba(13, 110, 253, 0.1);
+                }
+              }
+
+              &.fa-trash-can {
+                color: #dc3545;
+
+                &:hover {
+                  color: #bb2d3b;
+                  background-color: rgba(220, 53, 69, 0.1);
+                }
+              }
+            }
+          }
+
+          .centrado {
+            text-align: center;
+          }
+
+          .izquierda {
+            text-align: left;
+          }
+
+          .derecha {
+            text-align: right;
+          }
+        }
+
+        &:last-child td {
+          border-bottom: none;
+        }
+      }
+    }
+  }
+
+}
+
+// Las demás clases existentes se mantienen intactas
+.form-tablas-sm {
+  padding: 10px;
+  box-sizing: border-box;
+  box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.3);
+  display: block;
+  border-radius: 5px;
+  background-color: #ffffff;
+  font-weight: 500;
+  margin-left: 20px;
+  margin-right: 20px;
+  font-family: 'Tektur', sans-serif;
+  font-size: 20px;
+  height: auto;
+
+  .row {
+    width: 100% !important;
+    margin: 0 !important;
+    word-break: break-all;
+  }
+
+  // Estilos para el buscador móvil
+  app-buscar {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  // Estilo para el contador de registros en móvil
+  .registros-contador-mobile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .badge {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+
+      &.bg-secondary {
+        background-color: $color-primary !important;
+        color: $color-text-dark;
+      }
+
+      &.bg-light {
+        border: 1px solid $color-border;
+      }
+    }
+  }
+}
+
+.mdi-dark:before {
+  color: #FF5722 !important;
+}
+
+.fuente-1 {
+  font-size: 1rem !important;
+}
+
+// Estilos mejorados para los dropdowns de filtro
+.dropdown {
+  position: relative;
+
+  .dropdown-toggle {
+    position: relative;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+    }
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1500;
+    min-width: 250px;
+    max-height: 350px;
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0.75rem;
+    overflow: hidden;
+    display: none;
+
+    &.show {
+      display: block !important;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .search-filter {
+      position: sticky;
+      top: 0;
+      background-color: #fff;
+      padding: 0.25rem 0;
+      margin-bottom: 0.5rem;
+
+      input {
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+
+        &:focus {
+          border-color: #ffbd31;
+          box-shadow: 0 0 0 0.25rem rgba(255, 189, 49, 0.25);
+          outline: 0;
+        }
+      }
+    }
+
+    .dropdown-divider {
+      margin: 0.5rem 0;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .options-container {
+      max-height: 200px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: #ccc;
+      }
+
+      .form-check {
+        margin-bottom: 0.5rem;
+
+        .form-check-input {
+          margin-right: 8px;
+          cursor: pointer;
+
+          &:checked {
+            background-color: #ffbd31;
+            border-color: #ffbd31;
+          }
+
+          &:focus {
+            box-shadow: 0 0 0 0.25rem rgba(255, 189, 49, 0.25);
+          }
+        }
+
+        .form-check-label {
+          cursor: pointer;
+          font-size: 0.875rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: block;
+        }
+      }
+    }
+
+    .filter-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+
+      button {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+
+        &.btn-primary {
+          background-color: #ffbd31;
+          border-color: #ffbd31;
+          color: #212529;
+
+          &:hover {
+            background-color: #ffa500;
+            border-color: #ffa500;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Mejoras en la visualización de filtros activos
+.filter-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+
+  .filter-icon {
+    color: #ffbd31;
+    font-size: 1rem;
+  }
+}
+
+// Botón de reset de filtros mejorado
+.btn-reset-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #fff3d8;
+  border-color: #ffbd31;
+  color: #212529;
+
+  &:hover {
+    background-color: #ffbd31;
+  }
+
+  .filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffbd31;
+    color: #212529;
+    border-radius: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+}
+
+// Nuevos estilos para el menú desplegable de acciones
+/* Mejoras para el menú desplegable de acciones */
+.acciones-dropdown {
+  position: relative;
+
+  .dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: auto;
+    padding: 0.375rem 0.75rem;
+    white-space: nowrap;
+
+    i {
+      font-size: 0.875rem;
+    }
+  }
+
+  .acciones-menu {
+    position: absolute;
+    left: 0;
+    min-width: 220px;
+    /* Aumentamos el ancho mínimo */
+    max-height: 400px;
+    /* Alto máximo antes de hacer scroll */
+    padding: 0.5rem 0;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    z-index: 1500;
+    overflow-y: auto;
+    /* Añadimos scroll si hay muchas opciones */
+
+    /* Estilo para el scrollbar */
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #ddd;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: #ccc;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      color: $color-text-dark;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: $color-hover;
+      }
+
+      img {
+        margin-right: 0.5rem;
+        width: 20px;
+        height: auto;
+        object-fit: contain;
+      }
+    }
+  }
+}
+
+// Estilos específicos para el menú de acciones en móvil
+.acciones-dropdown-mobile {
+  width: 100%;
+
+  .dropdown-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .acciones-menu {
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Estilos para el contador de registros
+.registros-contador {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .badge {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &.bg-secondary {
+      background-color: $color-primary !important;
+      color: $color-text-dark;
+    }
+
+    &.bg-light {
+      border: 1px solid $color-border;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Estilos para badges
+.badge {
+  display: inline-block;
+  padding: 0.35em 0.65em;
+  font-size: 0.75em;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+
+  // Solo las clases genéricas de Bootstrap
+  &.badge-primary {
+    background-color: #007bff !important;
+    color: #ffffff !important;
+  }
+
+  &.badge-secondary {
+    background-color: #6c757d !important;
+    color: #ffffff !important;
+  }
+
+  &.badge-success {
+    background-color: #28a745 !important;
+    color: #ffffff !important;
+  }
+
+  &.badge-danger {
+    background-color: #dc3545 !important;
+    color: #ffffff !important;
+  }
+
+  &.badge-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+  }
+
+  &.badge-info {
+    background-color: #17a2b8 !important;
+    color: #ffffff !important;
+  }
+
+  &.badge-light {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+  }
+
+  &.badge-dark {
+    background-color: #343a40 !important;
+    color: #ffffff !important;
+  }
+}
+
+// Estilos para barras de progreso
+.progress {
+  display: flex;
+  height: 1rem;
+  overflow: hidden;
+  font-size: 0.75rem;
+  background-color: #e9ecef;
+  border-radius: 0.25rem;
+
+  .progress-bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #007bff;
+    transition: width 0.6s ease;
+
+    &.bg-success {
+      background-color: #28a745 !important;
+    }
+
+    &.bg-warning {
+      background-color: #ffc107 !important;
+      color: #212529 !important;
+    }
+
+    &.bg-danger {
+      background-color: #dc3545 !important;
+    }
+
+    &.bg-info {
+      background-color: #17a2b8 !important;
+    }
+
+    &.bg-secondary {
+      background-color: #6c757d !important;
+    }
+  }
+}
+
+// Estilos para iconos
+.fa-check {
+  &.text-success {
+    color: #28a745 !important;
+  }
+}
+
+.fa-times {
+  &.text-danger {
+    color: #dc3545 !important;
+  }
+}
+
+.fa-star {
+  &.text-warning {
+    color: #ffc107 !important;
+  }
+}
+
+.fa-clipboard-check {
+  &.text-info {
+    color: #17a2b8 !important;
+  }
+}
+
+.text-muted {
+  opacity: 0.3 !important;
+}
+
+// Estilos para la vista móvil de los nuevos tipos
+.form-tablas-sm {
+
+  // Badge en móvil
+  .badge {
+    font-size: 0.875rem;
+    padding: 0.4em 0.8em;
+  }
+
+  // Progreso en móvil
+  .progress {
+    height: 1.25rem;
+    margin: 0.5rem 0;
+
+    .progress-bar {
+      font-size: 0.875rem;
+    }
+  }
+
+  // Iconos en móvil
+  .fa-check,
+  .fa-times,
+  .fa-star,
+  .fa-clipboard-check {
+    font-size: 1.25rem;
+  }
+}
+
+// Agregar al final de tablas.component.scss
+
+// ========================================
+// TEMA OSCURO
+// ========================================
+
+// Variables para tema oscuro
+$dark-background: #1a1a1a;
+$dark-surface: #2d2d2d;
+$dark-surface-light: #3a3a3a;
+$dark-text: #e0e0e0;
+$dark-text-muted: #a0a0a0;
+$dark-border: #404040;
+$dark-hover: rgba(255, 189, 49, 0.1);
+
+// Selectores para tema oscuro
+:host-context(.theme-dark) {
+  app-buscar {
+    .form-buscar-texto {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid $dark-border;
+
+      .input-buscar-texto {
+        color: $dark-text;
+
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.5); // Más claro
+          opacity: 1;
+        }
+
+        &:focus {
+          color: $color-primary;
+        }
+      }
+    }
+  }
+
+  // Mejorar bordes de la tabla
+  .form-tablas {
+    table {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+
+      thead tr th {
+        border-bottom: 2px solid rgba(0, 0, 0, 0.3);
+      }
+
+      tbody tr td {
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+      }
+    }
+  }
+
+  // Mejorar contraste del texto en el contador
+  .registros-contador {
+    .badge {
+      &.bg-secondary {
+        background-color: $color-primary !important;
+        color: $color-text-dark !important;
+      }
+    }
+  }
+
+  // Contenedor principal de tabla
+  .form-tablas {
+    background-color: $dark-surface;
+    box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.5);
+
+    // Tabla
+    table {
+      border-color: $dark-border;
+      background-color: $dark-surface;
+
+      thead {
+        tr {
+          // Mantener el dorado en el header pero con mejor contraste
+          background-color: $color-primary;
+
+          th {
+            color: $color-text-dark; // Mantener texto oscuro sobre dorado
+            border-bottom-color: $dark-border;
+
+            &:not(:last-child) {
+              border-right-color: rgba(0, 0, 0, 0.2);
+            }
+          }
+        }
+      }
+
+      tbody {
+        tr {
+          &:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.2);
+          }
+
+          &:hover {
+            background-color: $dark-hover;
+          }
+
+          td {
+            color: $dark-text;
+            border-bottom-color: $dark-border;
+
+            &:not(:last-child) {
+              border-right-color: rgba(255, 255, 255, 0.05);
+            }
+
+            label {
+              color: $dark-text;
+            }
+
+            a {
+              color: $color-primary;
+
+              &:hover {
+                color: $color-primary-light;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Vista móvil
+  .form-tablas-sm {
+    background-color: $dark-surface;
+    box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.5);
+
+    p,
+    label {
+      color: $dark-text;
+    }
+
+    sub {
+      color: $dark-text-muted;
+    }
+  }
+
+  // Dropdown de filtros
+  .dropdown {
+    .dropdown-toggle {
+      background-color: $dark-surface-light;
+      border-color: $dark-border;
+      color: $dark-text;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: $color-primary;
+      }
+
+      .badge {
+        &.bg-warning {
+          background-color: $color-primary !important;
+          color: $color-text-dark !important;
+        }
+      }
+    }
+
+    .dropdown-menu {
+      background-color: $dark-surface;
+      border-color: $dark-border;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+      .search-filter {
+        input {
+          background-color: $dark-surface-light;
+          border-color: $dark-border;
+          color: $dark-text;
+
+          &::placeholder {
+            color: $dark-text-muted;
+          }
+
+          &:focus {
+            background-color: $dark-surface-light;
+            border-color: $color-primary;
+            color: $dark-text;
+          }
+        }
+      }
+
+      .dropdown-divider {
+        border-top-color: $dark-border;
+      }
+
+      .form-check-label {
+        color: $dark-text;
+      }
+
+      .text-muted {
+        color: $dark-text-muted !important;
+      }
+
+      .btn-secondary {
+        background-color: $dark-surface-light;
+        border-color: $dark-border;
+        color: $dark-text;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+      }
+    }
+  }
+
+  // Botón reset filtros
+  .btn-reset-filters {
+    background-color: $dark-surface-light;
+    border-color: $color-primary;
+    color: $dark-text;
+
+    &:hover {
+      background-color: $color-primary;
+      color: $color-text-dark;
+    }
+  }
+
+  // Menú de acciones
+  .acciones-dropdown {
+    .dropdown-toggle {
+      background-color: $dark-surface-light;
+      border-color: $dark-border;
+      color: $dark-text;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: $color-primary;
+      }
+    }
+
+    .acciones-menu {
+      background-color: $dark-surface;
+      border-color: $dark-border;
+
+      .dropdown-item {
+        color: $dark-text;
+
+        &:hover {
+          background-color: $dark-hover;
+          color: $color-primary;
+        }
+
+        img {
+          // Invertir colores de las imágenes para mejor visibilidad
+          filter: brightness(0.8);
+        }
+      }
+    }
+  }
+
+  // Paginación
+  .btn-outline-secondary {
+    background-color: transparent;
+    border-color: $dark-border;
+    color: $dark-text;
+
+    &:hover {
+      background-color: $dark-surface-light;
+      border-color: $color-primary;
+      color: $color-primary;
+    }
+  }
+
+  .btn-warning {
+    // Mantener el dorado para botones activos
+    background-color: $color-primary !important;
+    border-color: $color-primary !important;
+    color: $color-text-dark !important;
+  }
+
+  // Badges en tema oscuro
+  .badge {
+    &.bg-secondary {
+      background-color: $dark-surface-light !important;
+      color: $dark-text !important;
+    }
+
+    &.bg-light {
+      background-color: $dark-surface-light !important;
+      color: $dark-text !important;
+      border-color: $dark-border !important;
+    }
+  }
+
+  // Texto
+  .text-muted {
+    color: $dark-text-muted !important;
+  }
+
+  .fuente-1 {
+    color: $dark-text;
+  }
+
+  // Componente de búsqueda
+  app-buscar {
+    .form-buscar-texto {
+      background-color: $dark-surface-light;
+
+      .input-buscar-texto {
+        background-color: $dark-surface-light;
+        color: $color-primary;
+
+        &::placeholder {
+          color: $dark-text-muted;
+        }
+      }
+    }
+  }
+
+  // Progress bars en tema oscuro
+  .progress {
+    background-color: $dark-surface-light;
+  }
+
+  // Ajuste para iconos en tema oscuro
+  i.fas {
+    &.fa-check.text-success {
+      color: #4caf50 !important;
+    }
+
+    &.fa-times.text-danger {
+      color: #f44336 !important;
+    }
+  }
+}

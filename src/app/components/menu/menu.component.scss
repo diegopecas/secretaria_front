@@ -1,0 +1,13 @@
+// src/app/components/menu/menu.component.scss
+@use '../../../styles/variables' as *;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: $color-gris-claro;
+}
+
+// Asegurar que todas las cards tengan la misma altura
+.h-100 {
+  height: 100%;
+}

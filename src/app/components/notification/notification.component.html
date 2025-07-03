@@ -1,0 +1,38 @@
+<div class="notification-container">
+  <div 
+    *ngFor="let notification of notifications" 
+    class="notification notification-{{ notification.type }}"
+    [class.notification-leaving]="notification.isLeaving">
+    
+    <div class="notification-content" *ngIf="notification.message">
+      <div class="notification-icon">
+        {{ getIcon(notification.type) }}
+      </div>
+      
+      <div class="notification-body">
+        <h4 class="notification-title" *ngIf="notification.title">
+          {{ notification.title }}
+        </h4>
+        <p class="notification-message">
+          {{ notification.message }}
+        </p>
+        
+        <div class="notification-actions" *ngIf="notification.actions && notification.actions.length > 0">
+          <button 
+            *ngFor="let action of notification.actions"
+            class="notification-action-btn"
+            (click)="handleAction(notification, action)">
+            {{ action.label }}
+          </button>
+        </div>
+      </div>
+      
+      <button 
+        class="notification-close"
+        (click)="removeNotification(notification.id!)"
+        *ngIf="!notification.actions || notification.actions.length === 0">
+        ×
+      </button>
+    </div>
+  </div>
+</div>

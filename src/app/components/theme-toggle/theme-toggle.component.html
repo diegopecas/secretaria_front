@@ -1,0 +1,7 @@
+<button 
+  class="theme-toggle-icon-only"
+  (click)="toggleTheme()"
+  [attr.aria-label]="'Cambiar a ' + (isDark ? 'tema claro' : 'tema oscuro')"
+  [attr.data-tooltip]="themeLabel">
+  <span class="theme-icon">{{ themeIcon }}</span>
+</button>

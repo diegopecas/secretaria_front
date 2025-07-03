@@ -1,0 +1,473 @@
+<!-- Sección de búsqueda -->
+<div class="form-tablas mt-3 mb-1 d-none d-sm-block">
+    <app-buscar (buscar)="buscar($event)" *ngIf="buscador"></app-buscar>
+</div>
+
+<!-- Sección de filtros estilo Excel mejorada -->
+<div class="form-tablas mt-3 mb-1 d-none d-sm-block" *ngIf="columnasFiltro && columnasFiltro.length > 0">
+    <div class="row">
+        <ng-container *ngFor="let titulo of tabla.titulos">
+            <div class="col-md-3 mb-2"
+                *ngIf="columnasFiltro.includes(titulo.alias) && opcionesFiltro[titulo.clave] && opcionesFiltro[titulo.clave].length > 0">
+                <div class="dropdown">
+                    <button
+                        class="btn btn-sm btn-outline-secondary dropdown-toggle w-100 d-flex justify-content-between align-items-center"
+                        type="button" (click)="toggleFiltro(titulo.clave); cerrarOtrosDropdowns(titulo.clave)">
+                        <span>{{ titulo.alias }}</span>
+                        <span
+                            *ngIf="filtrosActivos[titulo.clave] && filtrosActivos[titulo.clave].length < opcionesFiltro[titulo.clave].length"
+                            class="badge bg-warning rounded-pill ms-2">
+                            {{ filtrosActivos[titulo.clave].length }} / {{ opcionesFiltro[titulo.clave].length }}
+                        </span>
+                    </button>
+                    <div class="dropdown-menu p-3" [ngClass]="{'show': filtroAbierto[titulo.clave]}"
+                        (click)="$event.stopPropagation()">
+                        <!-- Campo de búsqueda -->
+                        <div class="search-filter">
+                            <input type="text" class="form-control form-control-sm" placeholder="Buscar..."
+                                [(ngModel)]="busquedaFiltro[titulo.clave]" (input)="filtrarOpciones(titulo.clave)">
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox"
+                                    [checked]="todosSeleccionados[titulo.clave]" (change)="toggleTodos(titulo.clave)"
+                                    id="check-todos-{{titulo.clave}}">
+                                <label class="form-check-label" for="check-todos-{{titulo.clave}}">
+                                    Seleccionar todos
+                                </label>
+                            </div>
+                            <small class="text-muted">{{ contarSeleccionados(titulo.clave) }} de {{
+                                (opcionesFiltroFiltradas[titulo.clave] || []).length }}</small>
+                        </div>
+
+                        <div class="dropdown-divider"></div>
+
+                        <!-- Lista de opciones con scroll -->
+                        <div class="options-container">
+                            <div class="form-check mb-1"
+                                *ngFor="let opcion of opcionesFiltroFiltradas[titulo.clave]; let i = index">
+                                <input class="form-check-input" type="checkbox" [checked]="opcion.seleccionado"
+                                    (change)="toggleOpcion(titulo.clave, getOpcionOriginalIndex(titulo.clave, opcion))"
+                                    id="check-{{titulo.clave}}-{{i}}">
+                                <label class="form-check-label" for="check-{{titulo.clave}}-{{i}}"
+                                    [title]="opcion.valor">
+                                    {{ opcion.valor }}
+                                </label>
+                            </div>
+                            <div *ngIf="opcionesFiltroFiltradas[titulo.clave]?.length === 0"
+                                class="text-center text-muted py-2">
+                                No se encontraron resultados
+                            </div>
+                        </div>
+
+                        <div class="dropdown-divider"></div>
+
+                        <!-- Botones de acción -->
+                        <div class="filter-actions">
+                            <button class="btn btn-sm btn-secondary"
+                                (click)="toggleFiltro(titulo.clave)">Cerrar</button>
+                            <button class="btn btn-sm btn-primary"
+                                (click)="aplicarSeleccion(titulo.clave); toggleFiltro(titulo.clave)">
+                                Aplicar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+
+        <!-- Botón para resetear filtros mejorado -->
+        <div class="col-md-3 mb-2 d-flex align-items-start" *ngIf="cantidadFiltrosActivos > 0">
+            <button class="btn btn-sm btn-reset-filters" (click)="resetFiltros()">
+                <i class="mdi mdi-filter-remove"></i>
+                Limpiar filtros
+                <span class="filter-count">{{ cantidadFiltrosActivos }}</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla -->
+<div class="form-tablas mt-1 d-none d-sm-block" (click)="cerrarTodosLosDropdowns()">
+    <table>
+        <thead>
+            <tr>
+                <!-- Columna de acciones con menú desplegable -->
+                <th [attr.colspan]="1" *ngIf="tieneAcciones">Acciones</th>
+                <ng-container *ngFor="let titulo of tabla.titulos">
+                    <th rowspan="2">
+                        {{ titulo.alias }}
+                    </th>
+                </ng-container>
+            </tr>
+            <tr>
+                <!-- Eliminamos la fila de encabezados de acciones, ya que ahora será un menú -->
+                <th *ngIf="tieneAcciones"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Mensaje cuando no hay datos -->
+            <tr *ngIf="tabla.datosFiltrados.length === 0">
+                <td [attr.colspan]="tabla.titulos.length + (tieneAcciones ? 1 : 0)" class="text-center py-3">
+                    No se encontraron resultados
+                </td>
+            </tr>
+
+            <!-- Datos de la tabla -->
+            <ng-container *ngIf="tabla.datosFiltrados.length > 0 && tabla.paginas[tabla.paginaActual]">
+                <tr *ngFor="let dato of tabla.paginas[tabla.paginaActual]"
+                    [style]="dato.color ? 'background-color: ' + dato.color : 'background-color: none'">
+                    <!-- Menú desplegable de acciones -->
+                    <td *ngIf="tieneAcciones">
+                        <div class="dropdown acciones-dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                (click)="toggleAccionesMenu(dato.id)" [id]="'dropdown-acciones-' + dato.id">
+                                <i class="fa fa-ellipsis-v"></i> Acciones
+                            </button>
+                            <div class="dropdown-menu acciones-menu" [ngClass]="{'show': accionesMenuAbierto[dato.id]}"
+                                (click)="$event.stopPropagation()">
+                                <!-- Acción de editar primero (si está activada) -->
+                                <a class="dropdown-item" *ngIf="accionEditarActivo"
+                                    (click)="seleccionar('editar', dato.id, dato)">
+                                    <img src="/assets/images/editar.png" width="20" class="me-2" /> Editar
+                                </a>
+
+                                <!-- Todas las acciones personalizadas -->
+                                <ng-container *ngFor="let accion of tabla.acciones">
+                                    <a class="dropdown-item" (click)="seleccionar(accion.id, dato.id, dato)">
+                                        <img [src]="accion.icono ? accion.icono : '/assets/images/detalle.png'"
+                                            width="20" class="me-2" />
+                                        {{ accion.label }}
+                                    </a>
+                                </ng-container>
+
+                                <!-- Otras acciones predefinidas al final -->
+                                <a class="dropdown-item" *ngIf="accionVerActivo"
+                                    (click)="seleccionar('consultar', dato.id, dato)">
+                                    <img src="/assets/images/detalle.png" width="20" class="me-2" /> Ver detalle
+                                </a>
+                                <a class="dropdown-item" *ngIf="accionEliminarActivo"
+                                    (click)="seleccionar('eliminar', dato.id, dato)">
+                                    <img src="/assets/images/eliminar.png" width="20" class="me-2" /> Eliminar
+                                </a>
+                            </div>
+                        </div>
+                    </td>
+                    <ng-container *ngFor="let titulo of tabla.titulos">
+                        <td>
+                            <!-- Tipo no especificado (texto simple) -->
+                            <label [class]="titulo.alinear" *ngIf="titulo.tipo == undefined || titulo.tipo == null">
+                                {{ dato[titulo.clave] }}
+                            </label>
+
+                            <!-- Formato Money actual -->
+                            <label [class]="titulo.alinear" *ngIf="titulo.tipo == 'money'">
+                                $ {{ dato[titulo.clave] | customDecimalFormat:2 }}
+                            </label>
+
+                            <!-- Formato Currency (alternativa a money)-->
+                            <label [class]="titulo.alinear" *ngIf="titulo.tipo == 'currency'">
+                                {{ formatValue(dato[titulo.clave], 'currency', formatConfig[titulo.clave]) }}
+                            </label>
+
+                            <!-- Formato de Números -->
+                            <label [class]="titulo.alinear" *ngIf="titulo.tipo == 'number'">
+                                {{ formatValue(dato[titulo.clave], 'number', formatConfig[titulo.clave]) }}
+                            </label>
+
+                            <!-- Formato de Enteros -->
+                            <label [class]="titulo.alinear" *ngIf="titulo.tipo == 'integer'">
+                                {{ formatValue(dato[titulo.clave], 'integer', formatConfig[titulo.clave]) }}
+                            </label>
+
+                            <!-- Formato de Porcentaje -->
+                            <label [class]="titulo.alinear" *ngIf="titulo.tipo == 'percent'">
+                                {{ formatValue(dato[titulo.clave], 'percent', formatConfig[titulo.clave]) }}
+                            </label>
+
+                            <!-- Formato de Fecha -->
+                            <label [class]="titulo.alinear" *ngIf="titulo.tipo == 'date'">
+                                {{ formatValue(dato[titulo.clave], 'date', formatConfig[titulo.clave]) }}
+                            </label>
+
+                            <!-- Formato de Fecha y Hora -->
+                            <label [class]="titulo.alinear" *ngIf="titulo.tipo == 'datetime'">
+                                {{ formatValue(dato[titulo.clave], 'datetime', formatConfig[titulo.clave]) }}
+                            </label>
+
+                            <!-- Formato de Hora -->
+                            <label [class]="titulo.alinear" *ngIf="titulo.tipo == 'time'">
+                                {{ formatValue(dato[titulo.clave], 'time', formatConfig[titulo.clave]) }}
+                            </label>
+
+                            <!-- Formato de Link (actual) -->
+                            <a target="_blank" [attr.href]="dato[titulo.clave]" [class]="titulo.alinear"
+                                *ngIf="titulo.tipo == 'link'">
+                                abrir
+                            </a>
+
+                            <!-- Tipo Badge -->
+                            <span [class]="'badge ' + (dato[titulo.claseCSS] || titulo.claseCSS || 'badge-secondary')"
+                                *ngIf="titulo.tipo == 'badge'">
+                                {{ dato[titulo.clave] }}
+                            </span>
+
+                            <!-- Tipo Progreso -->
+                            <div class="progress" *ngIf="titulo.tipo == 'progreso'" style="min-width: 100px;">
+                                <div class="progress-bar"
+                                    [class]="dato[titulo.claseCSS] || titulo.claseCSS || 'bg-primary'"
+                                    [style.width.%]="dato[titulo.clave] || 0" role="progressbar"
+                                    [attr.aria-valuenow]="dato[titulo.clave] || 0" aria-valuemin="0"
+                                    aria-valuemax="100">
+                                    {{ dato[titulo.clave] || 0 }}%
+                                </div>
+                            </div>
+
+                            <!-- Tipo HTML (para iconos o contenido HTML) -->
+                            <span [innerHTML]="dato[titulo.clave]" *ngIf="titulo.tipo == 'html'"></span>
+
+                            <!-- Tipo Icono (alternativa más segura) -->
+                            <span *ngIf="titulo.tipo == 'icono'" [class]="titulo.alinear">
+                                <i [class]="dato[titulo.clave + '_class'] || titulo.iconoClase || 'fas fa-circle'"
+                                    [style.color]="dato[titulo.clave + '_color'] || titulo.iconoColor"
+                                    [title]="dato[titulo.clave + '_title'] || ''"></i>
+                                <span class="ms-1" *ngIf="dato[titulo.clave + '_texto']">{{ dato[titulo.clave +
+                                    '_texto'] }}</span>
+                            </span>
+
+                            <!-- Tipo Booleano (para mostrar checks o X) -->
+                            <span *ngIf="titulo.tipo == 'booleano'" [class]="titulo.alinear">
+                                <i class="fas"
+                                    [ngClass]="{'fa-check text-success': dato[titulo.clave] == 1 || dato[titulo.clave] === true,
+                                               'fa-times text-danger': dato[titulo.clave] == 0 || dato[titulo.clave] === false}"
+                                    [title]="(dato[titulo.clave] == 1 || dato[titulo.clave] === true) ? 'Sí' : 'No'"></i>
+                            </span>
+                        </td>
+                    </ng-container>
+                </tr>
+            </ng-container>
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginación - Solo se muestra si hay datos -->
+<div class="form-tablas mt-1 d-none d-sm-block" *ngIf="tabla.datosFiltrados.length > 0">
+    <div class="row">
+        <div class="col-md-4">
+            <label class="fw-light fuente-1 me-2">Registros por página:</label>
+            <button (click)="cambiarTamanoPagina(10)"
+                [ngClass]="registrosPagina == 10 ? 'btn btn-sm btn-warning rounded-0' : 'btn btn-sm btn-outline-secondary rounded-0'">10</button>
+            <button (click)="cambiarTamanoPagina(20)"
+                [ngClass]="registrosPagina == 20 ? 'btn btn-sm btn-warning rounded-0' : 'btn btn-sm btn-outline-secondary rounded-0'">20</button>
+            <button (click)="cambiarTamanoPagina(40)"
+                [ngClass]="registrosPagina == 40 ? 'btn btn-sm btn-warning rounded-0' : 'btn btn-sm btn-outline-secondary rounded-0'">40</button>
+        </div>
+
+        <!-- Contador de registros totales -->
+        <div class="col-md-4 text-center d-flex align-items-center justify-content-center">
+            <div class="registros-contador">
+                <span class="badge bg-secondary">Total: {{ tabla.datosFiltrados.length }} registros</span>
+                <span class="badge bg-light text-dark ms-2" *ngIf="tabla.datos.length !== tabla.datosFiltrados.length">
+                    (Filtrados de {{ tabla.datos.length }})
+                </span>
+            </div>
+        </div>
+
+        <div class="col-md-4 d-md-flex justify-content-md-end">
+            <label class="fw-light fuente-1 me-2">Página actual:</label>
+            @if(tabla.paginaActual > 0) {
+            <button (click)="cambiarPaginaActual(0)" [ngClass]="'btn btn-sm btn-outline-secondary rounded-0'">
+                {{ '<<' }} </button>
+                    <button (click)="cambiarPaginaActual(tabla.paginaActual - 1)"
+                        [ngClass]="'btn btn-sm btn-outline-secondary rounded-0'">
+                        {{ '<' }} </button>
+                            }
+                            @for (item of tabla.paginas; track item; let i = $index) {
+                            @if(i > tabla.paginaActual - 5 && i < tabla.paginaActual + 5) { <button
+                                (click)="cambiarPaginaActual(i)"
+                                [ngClass]="tabla.paginaActual == i ? 'btn btn-sm btn-warning rounded-0' : 'btn btn-sm btn-outline-secondary rounded-0'">
+                                {{i+1}}
+                    </button>
+                    }
+                    }
+                    @if(tabla.paginaActual < tabla.paginas.length - 1) { <button
+                        (click)="cambiarPaginaActual(tabla.paginaActual + 1)"
+                        [ngClass]="'btn btn-sm btn-outline-secondary rounded-0'">
+                        {{ '>' }}
+            </button>
+            <button (click)="cambiarPaginaActual(tabla.paginas.length - 1)"
+                [ngClass]="'btn btn-sm btn-outline-secondary rounded-0'">
+                {{ '>>' }}
+            </button>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Vista móvil - Solo mostramos el mensaje si no hay datos -->
+<div class="form-tablas-sm mt-3 mb-1 d-block d-sm-none">
+    <app-buscar (buscar)="buscar($event)" *ngIf="buscador"></app-buscar>
+</div>
+
+<!-- Vista móvil - Contador de registros filtrados -->
+<div class="form-tablas-sm mt-3 mb-2 d-block d-sm-none text-center" *ngIf="tabla.datosFiltrados.length > 0">
+    <div class="registros-contador-mobile">
+        <span class="badge bg-secondary">Total: {{ tabla.datosFiltrados.length }} registros</span>
+        <span class="badge bg-light text-dark mt-1" *ngIf="tabla.datos.length !== tabla.datosFiltrados.length">
+            (Filtrados de {{ tabla.datos.length }})
+        </span>
+    </div>
+</div>
+
+<div class="form-tablas-sm mt-3 mb-3 d-block d-sm-none text-center" *ngIf="tabla.datosFiltrados.length === 0">
+    No se encontraron resultados
+</div>
+
+<!-- Vista móvil - Contenido normal -->
+<ng-container *ngIf="tabla.datosFiltrados.length > 0">
+    <div *ngFor="let dato of tabla.datosFiltrados" class="form-tablas-sm mt-3 mb-3 d-block d-sm-none">
+        <div class="row" data-bs-toggle="collapse">
+            <ng-container *ngFor="let titulo of tabla.titulos">
+                <div [style]="dato.color ? 'background-color: ' + dato.color : 'background-color: none'">
+                    <!-- Formato estándar (sin tipo) -->
+                    <p [class]="titulo.alinear" *ngIf="titulo.tipo == undefined || titulo.tipo == null">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />{{ dato[titulo.clave] }}
+                    </p>
+
+                    <!-- Formato Money -->
+                    <p [class]="titulo.alinear" *ngIf="titulo.tipo == 'money'">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />$ {{ dato[titulo.clave] | customDecimalFormat:2 }}
+                    </p>
+
+                    <!-- Formato Currency -->
+                    <p [class]="titulo.alinear" *ngIf="titulo.tipo == 'currency'">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />{{ formatValue(dato[titulo.clave], 'currency',
+                        formatConfig[titulo.clave]) }}
+                    </p>
+
+                    <!-- Formato Número -->
+                    <p [class]="titulo.alinear" *ngIf="titulo.tipo == 'number'">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />{{ formatValue(dato[titulo.clave], 'number',
+                        formatConfig[titulo.clave]) }}
+                    </p>
+
+                    <!-- Formato Entero -->
+                    <p [class]="titulo.alinear" *ngIf="titulo.tipo == 'integer'">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />{{ formatValue(dato[titulo.clave], 'integer',
+                        formatConfig[titulo.clave]) }}
+                    </p>
+
+                    <!-- Formato Porcentaje -->
+                    <p [class]="titulo.alinear" *ngIf="titulo.tipo == 'percent'">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />{{ formatValue(dato[titulo.clave], 'percent',
+                        formatConfig[titulo.clave]) }}
+                    </p>
+
+                    <!-- Formato Fecha -->
+                    <p [class]="titulo.alinear" *ngIf="titulo.tipo == 'date'">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />{{ formatValue(dato[titulo.clave], 'date',
+                        formatConfig[titulo.clave]) }}
+                    </p>
+
+                    <!-- Formato Fecha y Hora -->
+                    <p [class]="titulo.alinear" *ngIf="titulo.tipo == 'datetime'">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />{{ formatValue(dato[titulo.clave], 'datetime',
+                        formatConfig[titulo.clave]) }}
+                    </p>
+
+                    <!-- Formato Hora -->
+                    <p [class]="titulo.alinear" *ngIf="titulo.tipo == 'time'">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />{{ formatValue(dato[titulo.clave], 'time',
+                        formatConfig[titulo.clave]) }}
+                    </p>
+
+                    <!-- Formato Link -->
+                    <a target="_blank" [attr.href]="dato[titulo.clave]" [class]="titulo.alinear"
+                        *ngIf="titulo.tipo == 'link'">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />abrir
+                    </a>
+
+                    <!-- Tipo Badge -->
+                    <p [class]="titulo.alinear" *ngIf="titulo.tipo == 'badge'">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />
+                        <span [class]="'badge ' + (dato[titulo.claseCSS] || titulo.claseCSS || 'badge-secondary')"
+                            *ngIf="titulo.tipo == 'badge'">
+                            {{ dato[titulo.clave] }}
+                        </span>
+                    </p>
+
+                    <!-- Tipo Progreso -->
+                    <div *ngIf="titulo.tipo == 'progreso'">
+                        <sub>{{ titulo.alias + ':' }}</sub>
+                        <div class="progress mt-1">
+                            <div class="progress-bar" [class]="dato[titulo.claseCSS] || titulo.claseCSS || 'bg-primary'"
+                                [style.width.%]="dato[titulo.clave] || 0" role="progressbar"
+                                [attr.aria-valuenow]="dato[titulo.clave] || 0" aria-valuemin="0" aria-valuemax="100">
+                                {{ dato[titulo.clave] || 0 }}%
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tipo HTML -->
+                    <p [class]="titulo.alinear" *ngIf="titulo.tipo == 'html'">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />
+                        <span [innerHTML]="dato[titulo.clave]"></span>
+                    </p>
+
+                    <!-- Tipo Icono -->
+                    <p *ngIf="titulo.tipo == 'icono'" [class]="titulo.alinear">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />
+                        <i [class]="dato[titulo.clave + '_class'] || titulo.iconoClase || 'fas fa-circle'"
+                            [style.color]="dato[titulo.clave + '_color'] || titulo.iconoColor"
+                            [title]="dato[titulo.clave + '_title'] || ''"></i>
+                        <span class="ms-1" *ngIf="dato[titulo.clave + '_texto']">{{ dato[titulo.clave + '_texto']
+                            }}</span>
+                    </p>
+
+                    <!-- Tipo Booleano -->
+                    <p *ngIf="titulo.tipo == 'booleano'" [class]="titulo.alinear">
+                        <sub>{{ titulo.alias + ':' }}</sub><br />
+                        <i class="fas"
+                            [ngClass]="{'fa-check text-success': dato[titulo.clave] == 1 || dato[titulo.clave] === true,
+                                       'fa-times text-danger': dato[titulo.clave] == 0 || dato[titulo.clave] === false}"
+                            [title]="(dato[titulo.clave] == 1 || dato[titulo.clave] === true) ? 'Sí' : 'No'"></i>
+                    </p>
+                </div>
+            </ng-container>
+        </div>
+        <!-- Vista móvil -->
+        <div class="row">
+            <!-- Acción de editar primero (similar al menú desplegable) -->
+            <div class="col" *ngIf="accionEditarActivo">
+                <p class="accion">
+                    <img src="/assets/images/editar.png" width="50" (click)="seleccionar('editar', dato.id, dato)" />
+                </p>
+            </div>
+
+            <!-- Acciones personalizadas -->
+            <ng-container *ngFor="let accion of tabla.acciones">
+                <div class="col">
+                    <p class="accion">
+                        <img [src]="accion.icono ? accion.icono : '/assets/images/detalle.png'" width="50"
+                            (click)="seleccionar(accion.id, dato.id, dato)" />
+                    </p>
+                </div>
+            </ng-container>
+
+            <!-- Otras acciones predefinidas al final -->
+            <div class="col" *ngIf="accionVerActivo">
+                <p class="accion">
+                    <img src="/assets/images/detalle.png" width="50"
+                        (click)="seleccionar('consultar', dato.id, dato)" />
+                </p>
+            </div>
+            <div class="col" *ngIf="accionEliminarActivo">
+                <p class="accion">
+                    <img src="/assets/images/eliminar.png" width="50"
+                        (click)="seleccionar('eliminar', dato.id, dato)" />
+                </p>
+            </div>
+        </div>
+    </div>
+</ng-container>

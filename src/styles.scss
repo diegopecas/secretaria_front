@@ -1,0 +1,990 @@
+// src/styles.scss
+
+// Importar variables y mixins
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+@use 'styles/themes' as *;
+
+// Reset global
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+// Estilos base
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  background: var(--color-background);
+  min-height: 100vh;
+  color: var(--color-text);
+}
+
+// Tipografía global
+h1 {
+  font-size: $font-size-h1;
+  color: var(--color-text);
+  margin-bottom: $spacing-xs;
+}
+
+h2 {
+  font-size: $font-size-h2;
+  color: var(--color-text);
+  margin-bottom: $spacing-xs;
+}
+
+h3 {
+  font-size: $font-size-h3;
+  color: var(--color-text);
+  margin-bottom: $spacing-xs;
+}
+
+p {
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+a {
+  color: var(--color-primary-dark);
+  text-decoration: none;
+  transition: $transition-fast;
+  
+  &:hover {
+    color: var(--color-primary);
+  }
+}
+
+// =============================================
+// NUEVO SISTEMA DE GRID RESPONSIVE - 12 COLUMNAS
+// =============================================
+
+// Container responsive
+.container {
+  width: 100%;
+  padding-right: $spacing-md;
+  padding-left: $spacing-md;
+  margin-right: auto;
+  margin-left: auto;
+
+  @include mobile-up {
+    max-width: 540px;
+  }
+
+  @include tablet-up {
+    max-width: 720px;
+    padding-right: $spacing-lg;
+    padding-left: $spacing-lg;
+  }
+
+  @include desktop-up {
+    max-width: 960px;
+  }
+
+  @include wide-up {
+    max-width: 1140px;
+  }
+
+  @include ultra-wide-up {
+    max-width: 1320px;
+  }
+}
+
+.container-fluid {
+  width: 100%;
+  padding-right: $spacing-md;
+  padding-left: $spacing-md;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+// Row del grid
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -$spacing-sm;
+  margin-left: -$spacing-sm;
+
+  @include tablet-up {
+    margin-right: -$spacing-md;
+    margin-left: -$spacing-md;
+  }
+}
+
+// Columnas base
+[class*='col'] {
+  position: relative;
+  width: 100%;
+  padding-right: $spacing-sm;
+  padding-left: $spacing-sm;
+
+  @include tablet-up {
+    padding-right: $spacing-md;
+    padding-left: $spacing-md;
+  }
+}
+
+// Columnas automáticas
+.col {
+  flex: 1 0 0%;
+}
+
+.col-auto {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+// Generar columnas para cada breakpoint
+@for $i from 1 through 12 {
+  .col-#{$i} {
+    flex: 0 0 calc(#{$i} * 100% / 12);
+    max-width: calc(#{$i} * 100% / 12);
+  }
+}
+
+// Columnas para móvil y arriba (por defecto)
+@include mobile-up {
+  @for $i from 1 through 12 {
+    .col-sm-#{$i} {
+      flex: 0 0 calc(#{$i} * 100% / 12);
+      max-width: calc(#{$i} * 100% / 12);
+    }
+  }
+  .col-sm-auto {
+    flex: 0 0 auto;
+    width: auto;
+  }
+}
+
+// Columnas para tablet y arriba
+@include tablet-up {
+  @for $i from 1 through 12 {
+    .col-md-#{$i} {
+      flex: 0 0 calc(#{$i} * 100% / 12);
+      max-width: calc(#{$i} * 100% / 12);
+    }
+  }
+  .col-md-auto {
+    flex: 0 0 auto;
+    width: auto;
+  }
+}
+
+// Columnas para desktop y arriba
+@include desktop-up {
+  @for $i from 1 through 12 {
+    .col-lg-#{$i} {
+      flex: 0 0 calc(#{$i} * 100% / 12);
+      max-width: calc(#{$i} * 100% / 12);
+    }
+  }
+  .col-lg-auto {
+    flex: 0 0 auto;
+    width: auto;
+  }
+}
+
+// Columnas para pantallas anchas
+@include wide-up {
+  @for $i from 1 through 12 {
+    .col-xl-#{$i} {
+      flex: 0 0 calc(#{$i} * 100% / 12);
+      max-width: calc(#{$i} * 100% / 12);
+    }
+  }
+  .col-xl-auto {
+    flex: 0 0 auto;
+    width: auto;
+  }
+}
+
+// Offset responsive
+@include mobile-up {
+  @for $i from 0 through 11 {
+    .offset-sm-#{$i} {
+      margin-left: calc(#{$i} * 100% / 12);
+    }
+  }
+}
+
+@include tablet-up {
+  @for $i from 0 through 11 {
+    .offset-md-#{$i} {
+      margin-left: calc(#{$i} * 100% / 12);
+    }
+  }
+}
+
+@include desktop-up {
+  @for $i from 0 through 11 {
+    .offset-lg-#{$i} {
+      margin-left: calc(#{$i} * 100% / 12);
+    }
+  }
+}
+
+@include wide-up {
+  @for $i from 0 through 11 {
+    .offset-xl-#{$i} {
+      margin-left: calc(#{$i} * 100% / 12);
+    }
+  }
+}
+
+// Orden de columnas
+@for $i from 1 through 12 {
+  .order-#{$i} { order: $i; }
+}
+.order-first { order: -1; }
+.order-last { order: 13; }
+
+@include mobile-up {
+  @for $i from 1 through 12 {
+    .order-sm-#{$i} { order: $i; }
+  }
+  .order-sm-first { order: -1; }
+  .order-sm-last { order: 13; }
+}
+
+@include tablet-up {
+  @for $i from 1 through 12 {
+    .order-md-#{$i} { order: $i; }
+  }
+  .order-md-first { order: -1; }
+  .order-md-last { order: 13; }
+}
+
+@include desktop-up {
+  @for $i from 1 through 12 {
+    .order-lg-#{$i} { order: $i; }
+  }
+  .order-lg-first { order: -1; }
+  .order-lg-last { order: 13; }
+}
+
+// Utilidades de flexbox para el row
+.row {
+  &.align-items-start { align-items: flex-start; }
+  &.align-items-center { align-items: center; }
+  &.align-items-end { align-items: flex-end; }
+  
+  &.justify-content-start { justify-content: flex-start; }
+  &.justify-content-center { justify-content: center; }
+  &.justify-content-end { justify-content: flex-end; }
+  &.justify-content-between { justify-content: space-between; }
+  &.justify-content-around { justify-content: space-around; }
+  
+  &.no-gutters {
+    margin-right: 0;
+    margin-left: 0;
+    
+    > [class*='col'] {
+      padding-right: 0;
+      padding-left: 0;
+    }
+  }
+}
+
+// Sistema Grid simple (para compatibilidad)
+.grid {
+  display: grid;
+  gap: $spacing-md;
+  
+  @include tablet-up {
+    gap: $spacing-lg;
+  }
+  
+  &.grid-2 {
+    grid-template-columns: 1fr;
+    
+    @include tablet-up {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  &.grid-3 {
+    grid-template-columns: 1fr;
+    
+    @include mobile-up {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @include desktop-up {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  &.grid-4 {
+    grid-template-columns: 1fr;
+    
+    @include mobile-up {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @include desktop-up {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  // Variantes con diferentes gaps
+  &.gap-sm { gap: $spacing-sm; }
+  &.gap-md { gap: $spacing-md; }
+  &.gap-lg { gap: $spacing-lg; }
+  &.gap-xl { gap: $spacing-xl; }
+}
+
+// Clases de visibilidad responsive
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-flex { display: flex !important; }
+.d-grid { display: grid !important; }
+
+@include mobile-up {
+  .d-sm-none { display: none !important; }
+  .d-sm-block { display: block !important; }
+  .d-sm-flex { display: flex !important; }
+  .d-sm-grid { display: grid !important; }
+}
+
+@include tablet-up {
+  .d-md-none { display: none !important; }
+  .d-md-block { display: block !important; }
+  .d-md-flex { display: flex !important; }
+  .d-md-grid { display: grid !important; }
+}
+
+@include desktop-up {
+  .d-lg-none { display: none !important; }
+  .d-lg-block { display: block !important; }
+  .d-lg-flex { display: flex !important; }
+  .d-lg-grid { display: grid !important; }
+}
+
+// =============================================
+// ESTILOS ANTERIORES (mantenidos)
+// =============================================
+
+// Clases utilitarias globales
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+// Logo global
+.logo {
+  width: 80px;
+  height: 80px;
+  @include gradient-dorado();
+  border-radius: $border-radius-round;
+  @include center-flex();
+  font-size: 2.5rem;
+  color: $color-negro;
+  font-weight: bold;
+  box-shadow: $shadow-dorado;
+  
+  &.logo-small {
+    width: 45px;
+    height: 45px;
+    font-size: 1.5rem;
+  }
+}
+
+// Botones globales
+.btn {
+  @include button-base();
+  
+  &.btn-primary {
+    @include button-primary();
+  }
+  
+  &.btn-secondary {
+    @include button-base();
+    background: $color-gris;
+    color: $color-blanco;
+    
+    &:hover {
+      background: $color-gris-oscuro;
+    }
+  }
+  
+  &.btn-block {
+    width: 100%;
+  }
+}
+
+// Formularios globales
+.form-group {
+  margin-bottom: $spacing-md;
+  
+  label {
+    display: block;
+    color: var(--color-text);
+    font-weight: 500;
+    margin-bottom: $spacing-xs;
+    font-size: 0.9rem;
+  }
+  
+  input,
+  textarea,
+  select {
+    @include input-base();
+    
+    &::placeholder {
+      color: var(--color-text-secondary);
+      opacity: 0.7;
+    }
+  }
+  
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  
+  select {
+    cursor: pointer;
+  }
+}
+
+// Alertas globales
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: $border-radius-medium;
+  margin-bottom: $spacing-md;
+  font-size: 0.9rem;
+  
+  &.alert-error {
+    background: $color-error-fondo;
+    border: 1px solid $color-error-borde;
+    color: #c33;
+  }
+  
+  &.alert-success {
+    background: #e8f5e9;
+    border: 1px solid #4caf50;
+    color: #2e7d32;
+  }
+}
+
+// Mensajes de error
+.error-message {
+  color: $color-error;
+  font-size: $font-size-small;
+  margin-top: $spacing-xs;
+}
+
+// Cards globales
+.card {
+  background: var(--card-bg);
+  border-radius: $border-radius-xl;
+  padding: $spacing-lg;
+  box-shadow: var(--shadow-medium);
+  transition: $transition-base;
+  border: 1px solid var(--color-border);
+  
+  &:hover {
+    transform: var(--card-hover-transform);
+    box-shadow: var(--shadow-large);
+  }
+  
+  &.card-hover {
+    cursor: pointer;
+  }
+  
+  &.card-clickable {
+    @extend .card-hover;
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-color, $color-dorado), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+}
+
+// Iconos de tarjetas
+.card-icon {
+  font-size: 3rem;
+  margin-bottom: $spacing-sm;
+  display: block;
+  text-align: center;
+  filter: grayscale(0.2);
+  transition: filter 0.3s;
+  
+  .card:hover & {
+    filter: grayscale(0);
+    transform: scale(1.1);
+  }
+  
+  // En tema oscuro, hacer los iconos más brillantes
+  body.theme-dark & {
+    filter: brightness(1.2) grayscale(0.1);
+    
+    .card:hover & {
+      filter: brightness(1.4) grayscale(0);
+    }
+  }
+}
+
+.card-title {
+  font-size: 1.4rem;
+  color: var(--color-text);
+  margin-bottom: $spacing-xs;
+  font-weight: 600;
+}
+
+.card-description {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+// Secciones
+.section {
+  margin-bottom: $spacing-xl;
+  
+  &.section-centered {
+    text-align: center;
+  }
+}
+
+.section-title {
+  font-size: $font-size-h2;
+  color: $color-negro;
+  margin-bottom: $spacing-xs;
+}
+
+.section-subtitle {
+  color: $color-gris;
+  font-size: $font-size-large;
+  margin-bottom: $spacing-lg;
+}
+
+// Layouts
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
+  
+  .page-content {
+    flex: 1;
+    padding: $spacing-xl 0;
+    background: var(--color-background);
+  }
+}
+
+// User info widget
+.user-widget {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  
+  .user-info {
+    text-align: right;
+    
+    .user-name {
+      font-weight: 500;
+      color: $color-dorado;
+      font-size: 0.95rem;
+    }
+    
+    .user-email {
+      font-size: $font-size-small;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .user-roles {
+      margin-top: 0.25rem;
+      
+      .badge {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.5rem;
+      }
+    }
+  }
+  
+  @include tablet-down {
+    flex-direction: column;
+    
+    .user-info {
+      text-align: center;
+    }
+  }
+}
+
+// Logo variations
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  
+  .logo-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+  }
+}
+
+// Animaciones reutilizables
+@for $i from 1 through 10 {
+  .fade-in-#{$i} {
+    @include fadeIn(#{$i * 0.1}s);
+  }
+}
+
+// Estados
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+// Utilidades de espaciado (ahora responsive)
+.mt-0 { margin-top: 0 !important; }
+.mt-1 { margin-top: $spacing-xs !important; }
+.mt-2 { margin-top: $spacing-sm !important; }
+.mt-3 { margin-top: $spacing-md !important; }
+.mt-4 { margin-top: $spacing-lg !important; }
+.mt-5 { margin-top: $spacing-xl !important; }
+
+.mb-0 { margin-bottom: 0 !important; }
+.mb-1 { margin-bottom: $spacing-xs !important; }
+.mb-2 { margin-bottom: $spacing-sm !important; }
+.mb-3 { margin-bottom: $spacing-md !important; }
+.mb-4 { margin-bottom: $spacing-lg !important; }
+.mb-5 { margin-bottom: $spacing-xl !important; }
+
+.ms-0 { margin-left: 0 !important; }
+.ms-1 { margin-left: $spacing-xs !important; }
+.ms-2 { margin-left: $spacing-sm !important; }
+.ms-3 { margin-left: $spacing-md !important; }
+.ms-4 { margin-left: $spacing-lg !important; }
+.ms-5 { margin-left: $spacing-xl !important; }
+
+.me-0 { margin-right: 0 !important; }
+.me-1 { margin-right: $spacing-xs !important; }
+.me-2 { margin-right: $spacing-sm !important; }
+.me-3 { margin-right: $spacing-md !important; }
+.me-4 { margin-right: $spacing-lg !important; }
+.me-5 { margin-right: $spacing-xl !important; }
+
+// Padding utilities
+.p-0 { padding: 0 !important; }
+.p-1 { padding: $spacing-xs !important; }
+.p-2 { padding: $spacing-sm !important; }
+.p-3 { padding: $spacing-md !important; }
+.p-4 { padding: $spacing-lg !important; }
+.p-5 { padding: $spacing-xl !important; }
+
+.pt-0 { padding-top: 0 !important; }
+.pt-1 { padding-top: $spacing-xs !important; }
+.pt-2 { padding-top: $spacing-sm !important; }
+.pt-3 { padding-top: $spacing-md !important; }
+.pt-4 { padding-top: $spacing-lg !important; }
+.pt-5 { padding-top: $spacing-xl !important; }
+
+.pb-0 { padding-bottom: 0 !important; }
+.pb-1 { padding-bottom: $spacing-xs !important; }
+.pb-2 { padding-bottom: $spacing-sm !important; }
+.pb-3 { padding-bottom: $spacing-md !important; }
+.pb-4 { padding-bottom: $spacing-lg !important; }
+.pb-5 { padding-bottom: $spacing-xl !important; }
+
+// Responsive spacing utilities
+@include tablet-up {
+  .mt-md-0 { margin-top: 0 !important; }
+  .mt-md-1 { margin-top: $spacing-xs !important; }
+  .mt-md-2 { margin-top: $spacing-sm !important; }
+  .mt-md-3 { margin-top: $spacing-md !important; }
+  .mt-md-4 { margin-top: $spacing-lg !important; }
+  .mt-md-5 { margin-top: $spacing-xl !important; }
+  
+  .mb-md-0 { margin-bottom: 0 !important; }
+  .mb-md-1 { margin-bottom: $spacing-xs !important; }
+  .mb-md-2 { margin-bottom: $spacing-sm !important; }
+  .mb-md-3 { margin-bottom: $spacing-md !important; }
+  .mb-md-4 { margin-bottom: $spacing-lg !important; }
+  .mb-md-5 { margin-bottom: $spacing-xl !important; }
+}
+
+@include desktop-up {
+  .mt-lg-0 { margin-top: 0 !important; }
+  .mt-lg-1 { margin-top: $spacing-xs !important; }
+  .mt-lg-2 { margin-top: $spacing-sm !important; }
+  .mt-lg-3 { margin-top: $spacing-md !important; }
+  .mt-lg-4 { margin-top: $spacing-lg !important; }
+  .mt-lg-5 { margin-top: $spacing-xl !important; }
+  
+  .mb-lg-0 { margin-bottom: 0 !important; }
+  .mb-lg-1 { margin-bottom: $spacing-xs !important; }
+  .mb-lg-2 { margin-bottom: $spacing-sm !important; }
+  .mb-lg-3 { margin-bottom: $spacing-md !important; }
+  .mb-lg-4 { margin-bottom: $spacing-lg !important; }
+  .mb-lg-5 { margin-bottom: $spacing-xl !important; }
+}
+
+// Manteniendo compatibilidad con clases antiguas
+.mt-sm { margin-top: $spacing-sm !important; }
+.mt-md { margin-top: $spacing-md !important; }
+.mt-lg { margin-top: $spacing-lg !important; }
+.mt-xl { margin-top: $spacing-xl !important; }
+
+.mb-sm { margin-bottom: $spacing-sm !important; }
+.mb-md { margin-bottom: $spacing-md !important; }
+.mb-lg { margin-bottom: $spacing-lg !important; }
+.mb-xl { margin-bottom: $spacing-xl !important; }
+
+.ml-sm { margin-left: $spacing-xs !important; }
+.mr-sm { margin-right: $spacing-xs !important; }
+
+.p-sm { padding: $spacing-sm !important; }
+.p-md { padding: $spacing-md !important; }
+.p-lg { padding: $spacing-lg !important; }
+.p-xl { padding: $spacing-xl !important; }
+
+// Utilidades de texto
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-primary-dark); }
+.text-dark { color: var(--color-text); }
+.text-muted { color: var(--color-text-secondary); }
+.text-white { color: white; }
+
+.text-small { font-size: $font-size-small; }
+.text-large { font-size: $font-size-large; }
+
+.font-bold { font-weight: 600; }
+.font-normal { font-weight: 400; }
+
+// Badges
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: $font-size-small;
+  font-weight: 500;
+  border-radius: $border-radius-small;
+  transition: all 0.2s ease;
+  
+  &.badge-primary {
+    background: $color-dorado;
+    color: $color-negro;
+  }
+  
+  &.badge-secondary {
+    background: $color-gris;
+    color: white;
+  }
+  
+  &.badge-success {
+    background: #4caf50;
+    color: white;
+  }
+  
+  &.badge-error {
+    background: $color-error;
+    color: white;
+  }
+}
+
+// Separadores
+.divider {
+  height: 1px;
+  background: $color-borde;
+  margin: $spacing-lg 0;
+  
+  &.divider-vertical {
+    width: 1px;
+    height: auto;
+    margin: 0 $spacing-md;
+  }
+}
+
+// Tooltips (básico)
+[data-tooltip] {
+  position: relative;
+  
+  &:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: $color-negro;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: $border-radius-small;
+    font-size: $font-size-small;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 0.5rem;
+  }
+}
+
+// Listas
+.list {
+  &.list-scrollable {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+}
+
+.list-item {
+  padding: $spacing-md;
+  border-bottom: 1px solid $color-borde;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+  }
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xs;
+}
+
+// Botones
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: $spacing-xs;
+  font-size: 0.9rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    opacity: 1;
+  }
+}
+
+// Utilidad para alinear items al inicio
+.align-start {
+  align-items: start !important;
+}
+
+// Header global
+.app-header {
+  background: var(--header-bg);
+  color: var(--header-text);
+  padding: $spacing-md $spacing-lg;
+  box-shadow: var(--shadow-medium);
+  
+  .header-content {
+    max-width: $breakpoint-wide;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    @include tablet-down {
+      flex-direction: column;
+      gap: $spacing-sm;
+      text-align: center;
+    }
+  }
+  
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+  }
+  
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    
+    @include tablet-down {
+      flex-direction: column;
+    }
+  }
+  
+  h1, .app-name {
+    color: var(--header-text);
+    margin: 0;
+  }
+}
+
+// Botón de volver
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: $border-radius-medium;
+  color: var(--header-text);
+  cursor: pointer;
+  transition: all $transition-base;
+  font-size: 0.9rem;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateX(-3px);
+    
+    .back-icon {
+      transform: translateX(-2px);
+    }
+  }
+  
+  .back-icon {
+    font-size: 1.2rem;
+    transition: transform 0.2s ease;
+  }
+  
+  .back-label {
+    @include mobile {
+      display: none;
+    }
+  }
+}
+
+// Footer global
+.app-footer {
+  margin-top: 5rem;
+  padding: $spacing-lg;
+  text-align: center;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+// Spinner
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid $color-negro;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}

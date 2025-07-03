@@ -1,0 +1,42 @@
+// src/app/components/login/login.component.scss
+@use '../../../styles/variables' as *;
+@use '../../../styles/mixins' as *;
+
+:host {
+  @include center-flex();
+  min-height: 100vh;
+  @include gradient-negro();
+}
+
+.login-container {
+  background: rgba(255, 255, 255, 0.95);
+  padding: $spacing-xl;
+  border-radius: 20px;
+  box-shadow: $shadow-large;
+  width: 100%;
+  max-width: 420px;
+  transform: translateY(-20px);
+  animation: slideIn 0.5s ease-out forwards;
+  
+  @include mobile {
+    padding: $spacing-lg;
+    margin: $spacing-sm;
+  }
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  
+  .subtitle {
+    color: $color-gris;
+    font-size: 0.95rem;
+  }
+}
+
+.footer-text {
+  text-align: center;
+  margin-top: $spacing-lg;
+  color: $color-gris;
+  font-size: $font-size-small;
+}

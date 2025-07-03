@@ -1,0 +1,59 @@
+.form-buscar-texto {
+    padding: 10px;
+    box-sizing: border-box;
+    box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.3);
+    display: flex;
+    // position: absolute;
+    border-radius: 5px;
+    background-color: #e4e1e17c;
+    font-weight: 500;
+    // margin-top: 20px;
+    // margin-bottom: 20px;
+    // margin-left: 20px;
+    font-family: 'Material Design Icons', sans-serif;
+    width: 100%;
+}
+
+.input-buscar-texto {
+    color: #ff7b73;
+    background-color: #e4e1e17c;
+    // font-family: 'Tektur', sans-serif;
+    font-family: 'Material Design Icons', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    border: 0;
+    outline: 0;
+    // padding: 10px;
+    width: inherit;
+    cursor: text;
+}
+
+.label-buscar-texto {
+    font-size: 20px;
+    font-weight: 500;
+}
+// Agregar al final de buscar.component.scss
+
+// ========================================
+// TEMA OSCURO
+// ========================================
+
+:host-context(.theme-dark) {
+  .form-buscar-texto {
+    background-color: #3a3a3a;
+    box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.5);
+    
+    .input-buscar-texto {
+      background-color: transparent;
+      color: #ffd700;
+      
+      &::placeholder {
+        color: #a0a0a0;
+      }
+      
+      &:focus {
+        color: #ffd700;
+      }
+    }
+  }
+}

@@ -1,0 +1,186 @@
+<app-layout backRoute="/menu" backLabel="Volver al menú">
+  <section class="section mb-5">
+    <div class="container">
+      <h2 class="section-title">Registro Diario</h2>
+      <p class="section-subtitle">Registre sus actividades diarias</p>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="row">
+      <!-- Formulario de Registro - Responsive: Full en móvil, 5 columnas en desktop -->
+      <div class="col-12 col-lg-5">
+        <div class="card mb-4">
+          <h3 class="card-title mb-3">Nuevo Registro</h3>
+          
+          <form [formGroup]="registroForm" (ngSubmit)="onSubmit()" *hasPermission="'registro.crear'">
+            <div class="row mb-3">
+              <div class="col-12 col-md-6">
+                <div class="form-group">
+                  <label for="fecha">Fecha</label>
+                  <input 
+                    type="date" 
+                    id="fecha" 
+                    formControlName="fecha"
+                    [class.error-input]="submitted && f['fecha'].errors">
+                  <div *ngIf="submitted && f['fecha'].errors" class="error-message">
+                    <span *ngIf="f['fecha'].errors['required']">La fecha es requerida</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <div class="form-group">
+                  <label for="hora">Hora</label>
+                  <input 
+                    type="time" 
+                    id="hora" 
+                    formControlName="hora"
+                    [class.error-input]="submitted && f['hora'].errors">
+                  <div *ngIf="submitted && f['hora'].errors" class="error-message">
+                    <span *ngIf="f['hora'].errors['required']">La hora es requerida</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="tipo">Tipo de Registro</label>
+              <select 
+                id="tipo" 
+                formControlName="tipo"
+                [class.error-input]="submitted && f['tipo'].errors">
+                <option *ngFor="let tipo of tiposRegistro" [value]="tipo.value">
+                  {{ tipo.label }}
+                </option>
+              </select>
+              <div *ngIf="submitted && f['tipo'].errors" class="error-message">
+                <span *ngIf="f['tipo'].errors['required']">El tipo es requerido</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="descripcion">Descripción</label>
+              <textarea 
+                id="descripcion" 
+                formControlName="descripcion"
+                rows="4"
+                placeholder="Describa la actividad..."
+                [class.error-input]="submitted && f['descripcion'].errors"></textarea>
+              <div *ngIf="submitted && f['descripcion'].errors" class="error-message">
+                <span *ngIf="f['descripcion'].errors['required']">La descripción es requerida</span>
+                <span *ngIf="f['descripcion'].errors['minlength']">Mínimo 3 caracteres</span>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" [disabled]="loading">
+              <span *ngIf="loading" class="spinner"></span>
+              {{ loading ? 'Guardando...' : 'Guardar Registro' }}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Lista de Registros - Responsive: Full en móvil, 7 columnas en desktop -->
+      <div class="col-12 col-lg-7">
+        <div class="card">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="card-title mb-0">Registros del Día</h3>
+            <span class="badge badge-secondary">{{ registros.length }} registros</span>
+          </div>
+          
+          <!-- Vista en grid para desktop, lista para móvil -->
+          <div class="d-none d-md-grid grid grid-2 gap-md">
+            <div *ngIf="registros.length === 0" class="col-span-2 text-center text-muted p-4">
+              No hay registros para mostrar
+            </div>
+
+            <div *ngFor="let registro of registros" class="card card-hover">
+              <div class="list-header">
+                <div>
+                  <strong>{{ registro.hora }}</strong>
+                  <span class="badge ms-2" [ngClass]="getTipoBadgeClass(registro.tipo)">
+                    {{ registro.tipo }}
+                  </span>
+                </div>
+                <button 
+                  class="btn-icon"
+                  *hasPermission="'registro.eliminar'"
+                  (click)="deleteRegistro(registro.id!)"
+                  data-tooltip="Eliminar">
+                  ❌
+                </button>
+              </div>
+              <p class="mb-2 text-small">{{ registro.descripcion }}</p>
+              <small class="text-muted">Por: {{ registro.usuario }}</small>
+            </div>
+          </div>
+
+          <!-- Vista de lista para móvil -->
+          <div class="d-md-none">
+            <div *ngIf="registros.length === 0" class="text-center text-muted p-4">
+              No hay registros para mostrar
+            </div>
+
+            <div class="list">
+              <div *ngFor="let registro of registros" class="list-item">
+                <div class="list-header">
+                  <div>
+                    <strong>{{ registro.hora }}</strong>
+                    <span class="badge ms-2" [ngClass]="getTipoBadgeClass(registro.tipo)">
+                      {{ registro.tipo }}
+                    </span>
+                  </div>
+                  <button 
+                    class="btn-icon"
+                    *hasPermission="'registro.eliminar'"
+                    (click)="deleteRegistro(registro.id!)"
+                    data-tooltip="Eliminar">
+                    ❌
+                  </button>
+                </div>
+                <p class="mb-2">{{ registro.descripcion }}</p>
+                <small class="text-muted">Por: {{ registro.usuario }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de estadísticas (opcional) -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <h3 class="mb-3">Resumen del día</h3>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card text-center">
+          <div class="card-icon">📝</div>
+          <h4>{{ registros.length }}</h4>
+          <p class="text-muted text-small">Total registros</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card text-center">
+          <div class="card-icon">✅</div>
+          <h4>{{ getRegistrosPorTipo('entrada').length }}</h4>
+          <p class="text-muted text-small">Entradas</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card text-center">
+          <div class="card-icon">🚪</div>
+          <h4>{{ getRegistrosPorTipo('salida').length }}</h4>
+          <p class="text-muted text-small">Salidas</p>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card text-center">
+          <div class="card-icon">📊</div>
+          <h4>{{ getRegistrosPorTipo('reunion').length }}</h4>
+          <p class="text-muted text-small">Reuniones</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-layout>

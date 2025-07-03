@@ -1,0 +1,101 @@
+// src/styles/_variables.scss
+
+// Colores corporativos
+$color-dorado: #FFD700;
+$color-dorado-oscuro: #FFA500;
+$color-negro: #1a1a1a;
+$color-negro-claro: #2d2d2d;
+
+// Colores de UI
+$color-blanco: #ffffff;
+$color-gris-claro: #f5f5f5;
+$color-gris: #666666;
+$color-gris-oscuro: #333333;
+$color-borde: #e0e0e0;
+$color-error: #d32f2f;
+$color-error-fondo: #fee;
+$color-error-borde: #fcc;
+
+// Fuentes
+$font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+$font-size-base: 1rem;
+$font-size-small: 0.85rem;
+$font-size-large: 1.1rem;
+$font-size-h1: 2.5rem;
+$font-size-h2: 2rem;
+$font-size-h3: 1.5rem;
+
+// Espaciados (Sistema de 5 niveles)
+$spacing-xs: 0.5rem;   // 8px
+$spacing-sm: 1rem;     // 16px
+$spacing-md: 1.5rem;   // 24px
+$spacing-lg: 2rem;     // 32px
+$spacing-xl: 3rem;     // 48px
+
+// Bordes
+$border-radius-small: 5px;
+$border-radius-medium: 8px;
+$border-radius-large: 10px;
+$border-radius-xl: 16px;
+$border-radius-round: 50%;
+
+// Sombras
+$shadow-small: 0 2px 10px rgba(0, 0, 0, 0.1);
+$shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.1);
+$shadow-large: 0 20px 60px rgba(0, 0, 0, 0.3);
+$shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.15);
+$shadow-dorado: 0 8px 20px rgba(255, 215, 0, 0.3);
+
+// Transiciones
+$transition-base: all 0.3s ease;
+$transition-fast: all 0.2s ease;
+
+// Breakpoints mejorados
+$breakpoint-mobile: 576px;      // Móviles pequeños
+$breakpoint-tablet: 768px;      // Tablets
+$breakpoint-desktop: 992px;     // Desktop
+$breakpoint-wide: 1200px;       // Pantallas anchas
+$breakpoint-ultra-wide: 1400px; // Pantallas ultra anchas
+
+// Z-index layers
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+// Agregar estas variables a tu archivo styles/_variables.scss si no están definidas
+
+// Colores adicionales
+$color-success: #28a745;
+$color-info: #2196f3;
+$color-warning: #ffc107;
+
+// Sombras
+$shadow-small: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.15);
+$shadow-large: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+// Border radius
+$border-radius-small: 0.25rem;
+$border-radius-medium: 0.5rem;
+$border-radius-large: 0.75rem;
+$border-radius-round: 50%;
+
+// Transiciones
+$transition-fast: all 0.15s ease-in-out;
+$transition-base: all 0.3s ease-in-out;
+$transition-slow: all 0.5s ease-in-out;
+
+
+// Colores adicionales para badges y estados
+$color-info: #17a2b8;
+$color-warning: #ffc107;
+$color-success: #28a745;
+$color-danger: #dc3545;
+
+// Estados y variantes
+$color-fondo: #ffffff;
+$color-fondo-hover: rgba($color-dorado, 0.05);
+$color-dorado-oscuro: #e6a400;

@@ -1,0 +1,129 @@
+@use '../../../styles/variables' as *;
+
+// Agregar estas variables al inicio después de las otras variables
+$color-info: #17a2b8;
+$color-warning: #ffc107;
+$color-success: #28a745;
+
+:host {
+  display: block;
+}
+
+// Personalización del componente de tablas para este módulo
+::ng-deep {
+  app-tablas {
+    // Personalizar colores de la tabla para el tema dorado
+    .form-tablas {
+      table {
+        thead {
+          tr {
+            background-color: $color-dorado !important;
+            
+            th {
+              color: $color-negro !important;
+              font-weight: 600;
+              text-transform: none;
+              letter-spacing: normal;
+            }
+          }
+        }
+      }
+    }
+
+    // Personalizar badges dentro de la tabla
+    .badge {
+      &.badge-primary {
+        background-color: $color-dorado !important;
+        color: $color-negro !important;
+      }
+      
+      &.badge-info {
+        background-color: $color-info !important;
+      }
+      
+      &.badge-warning {
+        background-color: $color-warning !important;
+        color: $color-negro !important;
+      }
+      
+      &.badge-success {
+        background-color: $color-success !important;
+      }
+      
+      &.badge-danger {
+        background-color: $color-error !important;
+      }
+    }
+
+    // Personalizar botones de paginación
+    .btn-warning {
+      background-color: $color-dorado !important;
+      border-color: $color-dorado !important;
+      color: $color-negro !important;
+    }
+
+    // Personalizar dropdown de acciones
+    .acciones-dropdown {
+      .dropdown-toggle {
+        background-color: transparent;
+        border-color: $color-borde;
+        color: $color-gris-oscuro;
+        
+        &:hover {
+          background-color: rgba($color-dorado, 0.05);
+          border-color: $color-dorado;
+        }
+      }
+    }
+
+    // Personalizar filtros
+    .dropdown {
+      .dropdown-menu {
+        .form-check-input:checked {
+          background-color: $color-dorado !important;
+          border-color: $color-dorado !important;
+        }
+        
+        .btn-primary {
+          background-color: $color-dorado !important;
+          border-color: $color-dorado !important;
+          color: $color-negro !important;
+          
+          &:hover {
+            background-color: #e6a400 !important;
+            border-color: #e6a400 !important;
+          }
+        }
+      }
+    }
+
+    // Botón de reset filtros
+    .btn-reset-filters {
+      background-color: #ffffff;
+      border-color: $color-dorado;
+      color: $color-negro;
+      
+      &:hover {
+        background-color: $color-dorado;
+      }
+      
+      .filter-count {
+        background-color: $color-dorado;
+        color: $color-negro;
+      }
+    }
+
+    // Hover en filas
+    table tbody tr:hover {
+      background-color: rgba($color-dorado, 0.1) !important;
+    }
+  }
+}
+
+// Estilos adicionales para el header
+.d-flex {
+  h3 {
+    color: $color-gris-oscuro;
+    font-weight: 600;
+  }
+}

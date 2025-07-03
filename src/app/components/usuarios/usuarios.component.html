@@ -1,0 +1,42 @@
+<app-layout backRoute="/menu" backLabel="Volver al menú">
+  <section class="section mb-5">
+    <div class="container">
+      <h2 class="section-title">Gestión de Usuarios</h2>
+      <p class="section-subtitle">Administre los usuarios del sistema</p>
+    </div>
+  </section>
+
+  <div class="container">
+    <!-- Header con botón crear -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="mb-0">Listado de Usuarios</h3>
+      <button 
+        class="btn btn-primary" 
+        *hasPermission="'usuarios.crear'"
+        (click)="crearUsuario()">
+        <span>➕</span> Crear Usuario
+      </button>
+    </div>
+
+    <!-- Tabla de usuarios usando el componente tablas -->
+    <app-tablas
+      [titulos]="titulos"
+      [datos]="usuarios"
+      [columnasFiltro]="columnasFiltro"
+      [accionVer]="true"
+      [accionEditar]="hasPermission('usuarios.editar')"
+      [accionEliminar]="hasPermission('usuarios.eliminar')"
+      [acciones]="accionesPersonalizadas"
+      [mostrarBuscar]="true"
+      (clicAccion)="ejecutarAccion($event)"
+    ></app-tablas>
+
+    <!-- Mensaje si no tiene permisos para crear -->
+    <div class="alert alert-info mt-3" *ngIf="!hasPermission('usuarios.crear')">
+      <p class="mb-0">
+        <strong>Nota:</strong> No tiene permisos para crear usuarios. 
+        Contacte al administrador si necesita este acceso.
+      </p>
+    </div>
+  </div>
+</app-layout>
