@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { LayoutComponent } from '../layout/layout.component';
-import { AuthService } from '../../services/auth.service';
+import { LayoutComponent } from '../../common/layout/layout.component';
+import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
-import { HasPermissionDirective } from '../../directives/has-permission.directive';
-import { NotificationService } from '../../services/notification.service';
+import { HasPermissionDirective } from '../../../directives/has-permission.directive';
+import { NotificationService } from '../../../services/notification.service';
 
 interface RegistroDiario {
   id?: number;

@@ -2,9 +2,9 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
-import { AuthService, User } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
-import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+import { AuthService, User } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
+import { ThemeToggleComponent } from '../../common/theme-toggle/theme-toggle.component';
 
 @Component({
   selector: 'app-layout',

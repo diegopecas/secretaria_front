@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LayoutComponent } from '../layout/layout.component';
-import { HasPermissionDirective } from '../../directives/has-permission.directive';
-import { AuthService } from '../../services/auth.service';
-import { NotificationService } from '../../services/notification.service';
-import { TablasComponent } from '../tablas/tablas.component';
-import { UsuariosService } from '../../services/usuarios.service';
+import { LayoutComponent } from '../../common/layout/layout.component';
+import { HasPermissionDirective } from '../../../directives/has-permission.directive';
+import { AuthService } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
+import { TablasComponent } from '../../common/tablas/tablas.component';
+import { UsuariosService } from '../../../services/usuarios.service';
 
 interface Usuario {
   id: number;

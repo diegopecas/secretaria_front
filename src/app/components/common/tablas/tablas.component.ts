@@ -1,9 +1,9 @@
 import { CommonModule, NgClass } from '@angular/common';
 import { Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import Swal from 'sweetalert2';
-import { BuscarComponent } from '../buscar/buscar.component';
-import { SearchPipeGeneral } from '../pipes/search';
-import { CustomDecimalFormatPipe } from '../pipes/custom-decimal-format.pipe';
+import { BuscarComponent } from '../../common/buscar/buscar.component';
+import { SearchPipeGeneral } from '../../../pipes/search.pipe';
+import { CustomDecimalFormatPipe } from '../../../pipes/custom-decimal-format.pipe';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 

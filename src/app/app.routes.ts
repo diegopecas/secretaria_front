@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login.component';
-import { MenuComponent } from './components/menu/menu.component';
-import { RegistroDiarioComponent } from './components/registro-diario/registro-diario.component';
+import { LoginComponent } from './components/pages/login/login.component';
+import { MenuComponent } from './components/pages/menu/menu.component';
+import { RegistroDiarioComponent } from './components/pages/registro-diario/registro-diario.component';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
-import { UsuariosComponent } from './components/usuarios/usuarios.component';
+import { UsuariosComponent } from './components/pages/usuarios/usuarios.component';
 
 
 export const routes: Routes = [

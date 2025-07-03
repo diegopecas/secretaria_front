@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NotificationComponent } from './components/notification/notification.component';
+import { NotificationComponent } from './components/common/notification/notification.component';
 import { ThemeService } from './services/theme.service';
 
 @Component({

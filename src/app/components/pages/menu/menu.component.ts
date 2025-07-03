@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService, User } from '../../services/auth.service';
-import { LayoutComponent } from '../layout/layout.component';
+import { AuthService, User } from '../../../services/auth.service';
+import { LayoutComponent } from '../../common/layout/layout.component';
 
 interface MenuItem {
   title: string;

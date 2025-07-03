@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ThemeService, Theme } from '../../services/theme.service';
+import { ThemeService, Theme } from '../../../services/theme.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({

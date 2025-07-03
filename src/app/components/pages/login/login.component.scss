@@ -1,6 +1,6 @@
 // src/app/components/login/login.component.scss
-@use '../../../styles/variables' as *;
-@use '../../../styles/mixins' as *;
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
 
 :host {
   @include center-flex();
