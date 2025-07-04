@@ -1,5 +1,9 @@
 // src/styles.scss
 
+// Importar módulos de Sass necesarios
+@use "sass:color";
+@use "sass:math";
+
 // Importar variables y mixins
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
@@ -1086,6 +1090,502 @@ a {
       .user-name {
         max-width: 120px;
         @include text-truncate();
+      }
+    }
+  }
+}
+
+// =============================================
+// ENCABEZADOS DE PÁGINA ESTÁNDAR
+// =============================================
+
+.page-header {
+  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-alt) 100%);
+  border-bottom: 1px solid var(--color-border);
+  padding: $spacing-xl 0 $spacing-lg;
+  margin-bottom: $spacing-lg;
+  position: relative;
+  overflow: hidden;
+  
+  // Efecto decorativo de fondo
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 40%;
+    height: 200%;
+    background: radial-gradient(circle, rgba($color-dorado, 0.05) 0%, transparent 70%);
+    transform: rotate(45deg);
+    pointer-events: none;
+  }
+  
+  @include mobile-down {
+    padding: $spacing-lg 0 $spacing-md;
+    margin-bottom: $spacing-md;
+  }
+  
+  .page-header-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 $spacing-xs;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    
+    @include mobile-down {
+      font-size: 1.5rem;
+    }
+    
+    // Icono opcional
+    .page-icon {
+      width: 40px;
+      height: 40px;
+      background: $color-dorado;
+      color: $color-negro;
+      border-radius: $border-radius-medium;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 12px rgba($color-dorado, 0.2);
+      
+      @include mobile-down {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+      }
+    }
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+    font-weight: 400;
+    
+    @include mobile-down {
+      font-size: 0.9rem;
+    }
+  }
+  
+  // Breadcrumbs opcionales
+  .page-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-sm;
+    font-size: $font-size-small;
+    color: var(--color-text-secondary);
+    
+    a {
+      color: $color-dorado;
+      text-decoration: none;
+      transition: $transition-fast;
+      
+      &:hover {
+        color: $color-dorado-oscuro;
+        text-decoration: underline;
+      }
+    }
+    
+    .separator {
+      color: var(--color-text-secondary);
+    }
+  }
+}
+
+// Toolbar de acciones
+.page-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+  
+  @include mobile-down {
+    margin-bottom: $spacing-md;
+  }
+  
+  .toolbar-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+    
+    @include mobile-down {
+      font-size: 1.1rem;
+      width: 100%;
+    }
+  }
+  
+  .toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    
+    @include mobile-down {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+}
+
+// Contenedor de contenido de página
+.page-content-wrapper {
+  background: var(--color-surface);
+  border-radius: $border-radius-xl;
+  padding: $spacing-lg;
+  box-shadow: $shadow-small;
+  border: 1px solid var(--color-border);
+  
+  @include mobile-down {
+    padding: $spacing-md;
+    border-radius: $border-radius-large;
+  }
+}
+
+// Alertas informativas estándar
+.page-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  border-radius: $border-radius-medium;
+  margin-top: $spacing-md;
+  
+  .alert-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .alert-content {
+    flex: 1;
+    
+    p {
+      margin: 0;
+      font-size: $font-size-small;
+      line-height: 1.5;
+    }
+    
+    strong {
+      font-weight: 600;
+    }
+  }
+  
+  &.alert-info {
+    background: rgba($color-info, 0.1);
+    border: 1px solid rgba($color-info, 0.2);
+    color: var(--color-text);
+    
+    .alert-icon {
+      color: $color-info;
+    }
+  }
+  
+  &.alert-warning {
+    background: rgba($color-warning, 0.1);
+    border: 1px solid rgba($color-warning, 0.2);
+    color: var(--color-text);
+    
+    .alert-icon {
+      color: $color-warning;
+    }
+  }
+  
+  &.alert-success {
+    background: rgba($color-success, 0.1);
+    border: 1px solid rgba($color-success, 0.2);
+    color: var(--color-text);
+    
+    .alert-icon {
+      color: $color-success;
+    }
+  }
+  
+  &.alert-error {
+    background: rgba($color-error, 0.1);
+    border: 1px solid rgba($color-error, 0.2);
+    color: var(--color-text);
+    
+    .alert-icon {
+      color: $color-error;
+    }
+  }
+}
+
+// Estados vacíos
+.empty-state {
+  text-align: center;
+  padding: $spacing-xl $spacing-md;
+  
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto $spacing-md;
+    background: var(--color-surface-alt);
+    border-radius: $border-radius-round;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-size: 2rem;
+  }
+  
+  .empty-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: $spacing-xs;
+  }
+  
+  .empty-subtitle {
+    color: var(--color-text-secondary);
+    margin-bottom: $spacing-md;
+  }
+}
+
+// Animaciones para elementos de página
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-header {
+  animation: pageSlideIn 0.4s ease-out;
+}
+
+.page-toolbar {
+  animation: pageSlideIn 0.4s ease-out 0.1s both;
+}
+
+.page-content-wrapper {
+  animation: pageSlideIn 0.4s ease-out 0.2s both;
+}
+
+// Modo oscuro
+.theme-dark {
+  .page-header {
+    background: linear-gradient(135deg, #1a1a1a 0%, #222222 100%);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    
+    &::before {
+      background: radial-gradient(circle, rgba($color-dorado, 0.03) 0%, transparent 70%);
+    }
+  }
+  
+  .page-content-wrapper {
+    background: var(--color-surface);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  
+  .page-alert {
+    &.alert-info {
+      background: rgba($color-info, 0.15);
+      border-color: rgba($color-info, 0.3);
+    }
+  }
+}
+
+// =============================================
+// SISTEMA DE BOTONES MEJORADO
+// =============================================
+
+.btn {
+  @include button-base();
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.65rem 1.25rem;
+  position: relative;
+  overflow: hidden;
+  
+  // Icono dentro del botón
+  i {
+    font-size: 0.9em;
+    transition: $transition-fast;
+  }
+  
+  // Texto del botón (para ocultar en móvil si es necesario)
+  .btn-text {
+    @include mobile-down {
+      display: none;
+    }
+  }
+  
+  // Efecto ripple al hacer clic
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  
+  &:active::after {
+    width: 300px;
+    height: 300px;
+  }
+  
+  // Botón primario
+  &.btn-primary {
+    background: linear-gradient(135deg, $color-dorado 0%, color.adjust($color-dorado, $lightness: -8%) 100%);
+    color: $color-negro;
+    border: none;
+    box-shadow: 0 4px 12px rgba($color-dorado, 0.3);
+    
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, color.adjust($color-dorado, $lightness: -5%) 0%, color.adjust($color-dorado, $lightness: -12%) 100%);
+      box-shadow: 0 6px 20px rgba($color-dorado, 0.4);
+      transform: translateY(-2px);
+      
+      i {
+        transform: translateX(2px);
+      }
+    }
+    
+    &:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba($color-dorado, 0.3);
+    }
+  }
+  
+  // Botón secundario
+  &.btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 2px solid var(--color-border);
+    
+    &:hover:not(:disabled) {
+      background: var(--color-surface-alt);
+      border-color: $color-dorado;
+      color: $color-dorado;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  }
+  
+  // Botón de peligro
+  &.btn-danger {
+    background: linear-gradient(135deg, $color-error 0%, color.adjust($color-error, $lightness: -8%) 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba($color-error, 0.3);
+    
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, color.adjust($color-error, $lightness: -5%) 0%, color.adjust($color-error, $lightness: -12%) 100%);
+      box-shadow: 0 6px 20px rgba($color-error, 0.4);
+      transform: translateY(-2px);
+    }
+  }
+  
+  // Tamaños
+  &.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  &.btn-lg {
+    padding: 0.85rem 1.75rem;
+    font-size: 1rem;
+  }
+  
+  // Botón solo icono
+  &.btn-icon-only {
+    padding: 0.65rem;
+    
+    .btn-text {
+      display: none;
+    }
+  }
+  
+  // Botón con icono a la derecha
+  &.btn-icon-right {
+    i {
+      order: 1;
+    }
+  }
+  
+  // Estados
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none !important;
+  }
+  
+  &.loading {
+    color: transparent;
+    pointer-events: none;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      top: 50%;
+      left: 50%;
+      margin-left: -10px;
+      margin-top: -10px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 0.8s linear infinite;
+    }
+  }
+}
+
+// Grupo de botones
+.btn-group {
+  display: inline-flex;
+  gap: 0.5rem;
+  
+  &.btn-group-vertical {
+    flex-direction: column;
+  }
+}
+
+// Modo oscuro
+.theme-dark {
+  .btn {
+    &.btn-primary {
+      box-shadow: 0 4px 12px rgba($color-dorado, 0.2);
+      
+      &:hover:not(:disabled) {
+        box-shadow: 0 6px 20px rgba($color-dorado, 0.3);
+      }
+    }
+    
+    &.btn-secondary {
+      background: var(--color-surface);
+      border-color: rgba(255, 255, 255, 0.2);
+      
+      &:hover:not(:disabled) {
+        border-color: $color-dorado;
+        background: rgba($color-dorado, 0.1);
       }
     }
   }

@@ -289,7 +289,11 @@ export class UsuariosComponent implements OnInit {
       }
     );
   }
-
+  exportarUsuarios() {
+    this.notificationService.info('Funcionalidad de exportar en desarrollo');
+    // Aquí puedes implementar la lógica de exportación
+    // Por ejemplo: generar CSV, Excel, PDF, etc.
+  }
   hasPermission(permission: string): boolean {
     return this.authService.hasPermission(permission);
   }

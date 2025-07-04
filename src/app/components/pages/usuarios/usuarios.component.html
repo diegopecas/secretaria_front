@@ -1,42 +1,95 @@
+<!-- usuarios.component.html -->
 <app-layout backRoute="/menu" backLabel="Volver al menú">
-  <section class="section mb-5">
+  <!-- Header de página estándar -->
+  <div class="page-header">
     <div class="container">
-      <h2 class="section-title">Gestión de Usuarios</h2>
-      <p class="section-subtitle">Administre los usuarios del sistema</p>
+      <div class="page-header-content">
+        <!-- Breadcrumb opcional -->
+        <nav class="page-breadcrumb">
+          <a routerLink="/menu">Menú Principal</a>
+          <span class="separator">/</span>
+          <span>Gestión de Usuarios</span>
+        </nav>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-users"></i>
+          </span>
+          Gestión de Usuarios
+        </h1>
+        <p class="page-subtitle">Administre los usuarios, roles y permisos del sistema</p>
+      </div>
     </div>
-  </section>
+  </div>
 
   <div class="container">
-    <!-- Header con botón crear -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h3 class="mb-0">Listado de Usuarios</h3>
+    <!-- Toolbar con título y acciones -->
+    <div class="page-toolbar">
+      <h2 class="toolbar-title">Listado de Usuarios</h2>
+      <div class="toolbar-actions">
+        <!-- Botón de exportar (ejemplo de acción adicional) -->
+        <button 
+          class="btn btn-secondary" 
+          *hasPermission="'usuarios.exportar'"
+          (click)="exportarUsuarios()">
+          <i class="fas fa-download"></i>
+          <span class="btn-text">Exportar</span>
+        </button>
+        
+        <!-- Botón principal de crear -->
+        <button 
+          class="btn btn-primary" 
+          *hasPermission="'usuarios.crear'"
+          (click)="crearUsuario()">
+          <i class="fas fa-plus"></i>
+          <span class="btn-text">Crear Usuario</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="page-content-wrapper">
+      <!-- Tabla de usuarios -->
+      <app-tablas
+        [titulos]="titulos"
+        [datos]="usuarios"
+        [columnasFiltro]="columnasFiltro"
+        [accionVer]="true"
+        [accionEditar]="hasPermission('usuarios.editar')"
+        [accionEliminar]="hasPermission('usuarios.eliminar')"
+        [acciones]="accionesPersonalizadas"
+        [mostrarBuscar]="true"
+        (clicAccion)="ejecutarAccion($event)"
+      ></app-tablas>
+    </div>
+
+    <!-- Alerta informativa si no tiene permisos -->
+    <div class="page-alert alert-info" *ngIf="!hasPermission('usuarios.crear')">
+      <div class="alert-icon">
+        <i class="fas fa-info-circle"></i>
+      </div>
+      <div class="alert-content">
+        <p>
+          <strong>Permisos limitados:</strong> No tiene permisos para crear o modificar usuarios. 
+          Si necesita estos accesos, contacte al administrador del sistema.
+        </p>
+      </div>
+    </div>
+
+    <!-- Estado vacío (mostrar si no hay usuarios) -->
+    <div class="empty-state" *ngIf="usuarios.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-user-slash"></i>
+      </div>
+      <h3 class="empty-title">No hay usuarios registrados</h3>
+      <p class="empty-subtitle">Comience agregando el primer usuario al sistema</p>
       <button 
         class="btn btn-primary" 
         *hasPermission="'usuarios.crear'"
         (click)="crearUsuario()">
-        <span>➕</span> Crear Usuario
+        <i class="fas fa-plus"></i> Crear primer usuario
       </button>
-    </div>
-
-    <!-- Tabla de usuarios usando el componente tablas -->
-    <app-tablas
-      [titulos]="titulos"
-      [datos]="usuarios"
-      [columnasFiltro]="columnasFiltro"
-      [accionVer]="true"
-      [accionEditar]="hasPermission('usuarios.editar')"
-      [accionEliminar]="hasPermission('usuarios.eliminar')"
-      [acciones]="accionesPersonalizadas"
-      [mostrarBuscar]="true"
-      (clicAccion)="ejecutarAccion($event)"
-    ></app-tablas>
-
-    <!-- Mensaje si no tiene permisos para crear -->
-    <div class="alert alert-info mt-3" *ngIf="!hasPermission('usuarios.crear')">
-      <p class="mb-0">
-        <strong>Nota:</strong> No tiene permisos para crear usuarios. 
-        Contacte al administrador si necesita este acceso.
-      </p>
     </div>
   </div>
 </app-layout>
