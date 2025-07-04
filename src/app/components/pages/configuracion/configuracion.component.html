@@ -1,0 +1,56 @@
+<app-layout backRoute="/menu" backLabel="Volver al menú">
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb -->
+        <nav class="page-breadcrumb">
+          <a routerLink="/menu">Menú Principal</a>
+          <span class="separator">/</span>
+          <span>Configuración</span>
+        </nav>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-cog"></i>
+          </span>
+          Configuración
+        </h1>
+        <p class="page-subtitle">Administre la configuración del sistema</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido -->
+  <div class="container">
+    <div class="row" *ngIf="menuItems.length > 0">
+      <div 
+        class="col-12 col-sm-6 col-lg-4 mb-4" 
+        *ngFor="let item of menuItems; let i = index">
+        <div 
+          class="card card-clickable fade-in-{{i+1}} h-100" 
+          [style.--accent-color]="item.color"
+          (click)="navigateTo(item.route)"
+          [attr.data-tooltip]="'Ir a ' + item.title">
+          <span class="card-icon">{{ item.icon }}</span>
+          <h3 class="card-title">{{ item.title }}</h3>
+          <p class="card-description">{{ item.description }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="menuItems.length === 0">
+      <div class="col-12">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <h3 class="empty-title">Sin permisos de configuración</h3>
+          <p class="empty-subtitle">No tiene permisos para acceder a las opciones de configuración.</p>
+          <p class="empty-subtitle">Contacte al administrador del sistema.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-layout>

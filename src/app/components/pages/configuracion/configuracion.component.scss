@@ -1,0 +1,17 @@
+// configuracion.component.scss
+@use '../../../../styles/variables' as *;
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+// Reutilizamos los estilos del menú principal
+// Los estilos de cards ya están definidos globalmente
+// Solo agregamos estilos específicos si son necesarios
+
+// Para mantener consistencia con el menú principal
+.h-100 {
+  height: 100%;
+}

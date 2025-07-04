@@ -5,6 +5,7 @@ import { RegistroDiarioComponent } from './components/pages/registro-diario/regi
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
 import { UsuariosComponent } from './components/pages/usuarios/usuarios.component';
+import { ConfiguracionComponent } from './components/pages/configuracion/configuracion.component';
 
 
 export const routes: Routes = [
@@ -31,13 +32,32 @@ export const routes: Routes = [
     }
   },
   {
-    path: 'usuarios',
+    path: 'configuracion',
+    component: ConfiguracionComponent,
+    canActivate: [authGuard, roleGuard],
+    data: {
+      permissions: ['config.ver']
+    }
+  },
+  {
+    path: 'configuracion/usuarios',
     component: UsuariosComponent,
     canActivate: [authGuard, roleGuard],
     data: {
       permissions: ['usuarios.ver']
     }
   },
+  // Placeholder para roles - se implementará después
+  /*
+  {
+    path: 'configuracion/roles',
+    loadComponent: () => import('./components/pages/roles/roles.component').then(m => m.RolesComponent),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      permissions: ['roles.ver']
+    }
+  },
+  */
   
   // Comentados hasta que se creen los componentes
   /*
@@ -47,14 +67,6 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: {
       permissions: ['reportes.ver']
-    }
-  },
-  {
-    path: 'configuracion',
-    loadComponent: () => import('./components/configuracion/configuracion.component').then(m => m.ConfiguracionComponent),
-    canActivate: [authGuard, roleGuard],
-    data: {
-      permissions: ['config.ver']
     }
   },
   */

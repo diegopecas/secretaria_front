@@ -1,14 +1,16 @@
 <!-- usuarios.component.html -->
-<app-layout backRoute="/menu" backLabel="Volver al menú">
+<app-layout backRoute="/configuracion" backLabel="Volver a configuración">
   <!-- Header de página estándar -->
   <div class="page-header">
     <div class="container">
       <div class="page-header-content">
         <!-- Breadcrumb opcional -->
         <nav class="page-breadcrumb">
-          <a routerLink="/menu">Menú Principal</a>
+          <a routerLink="/menu">Menú</a>
           <span class="separator">/</span>
-          <span>Gestión de Usuarios</span>
+          <a routerLink="/configuracion">Configuración</a>
+          <span class="separator">/</span>
+          <span>Usuarios</span>
         </nav>
         
         <!-- Título con icono -->
@@ -41,7 +43,9 @@
         <button 
           class="btn btn-primary" 
           *hasPermission="'usuarios.crear'"
-          (click)="crearUsuario()">
+          (click)="crearUsuario()"
+          [attr.aria-label]="'Crear nuevo usuario'"
+          [attr.data-tooltip]="'Crear Usuario'">
           <i class="fas fa-plus"></i>
           <span class="btn-text">Crear Usuario</span>
         </button>
@@ -72,7 +76,7 @@
       <div class="alert-content">
         <p>
           <strong>Permisos limitados:</strong> No tiene permisos para crear o modificar usuarios. 
-          Si necesita estos accesos, contacte al administrador del sistema.
+          Si necesita estos accesos, contacte al administrador.
         </p>
       </div>
     </div>

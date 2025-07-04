@@ -34,14 +34,6 @@ export class MenuComponent implements OnInit {
       permissions: ['registro.ver']
     },
     {
-      title: 'Usuarios',
-      icon: '👥',
-      route: '/usuarios',
-      description: 'Gestión de usuarios del sistema',
-      color: '#FFA500',
-      permissions: ['usuarios.ver']
-    },
-    {
       title: 'Reportes',
       icon: '📊',
       route: '/reportes',
@@ -65,7 +57,7 @@ export class MenuComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Validar sesión al cargar
@@ -102,10 +94,10 @@ export class MenuComponent implements OnInit {
       }
 
       // Verificar permisos
-      const hasPermission = item.requireAll 
+      const hasPermission = item.requireAll
         ? item.permissions.every(p => this.authService.hasPermission(p))
         : this.authService.hasAnyPermission(item.permissions);
-      
+
       console.log(`Item ${item.title} requiere ${item.permissions}, tiene permiso: ${hasPermission}`); // Debug
       return hasPermission;
     });
@@ -119,7 +111,7 @@ export class MenuComponent implements OnInit {
 
   getUserRoleDisplay(): string {
     if (!this.currentUser || !this.currentUser.roles) return '';
-    
+
     // Mostrar el rol más importante
     const rolesPriority = ['admin', 'supervisor', 'secretaria', 'usuario'];
     for (const role of rolesPriority) {
@@ -127,7 +119,7 @@ export class MenuComponent implements OnInit {
         return this.getRoleName(role);
       }
     }
-    
+
     return this.currentUser.roles[0] || '';
   }
 
