@@ -1,0 +1,139 @@
+<!-- gestion-rol.component.html -->
+<app-layout backRoute="/configuracion/roles" backLabel="Volver a roles">
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-shield-alt"></i>
+          </span>
+          {{ titulo }}
+        </h1>
+        <p class="page-subtitle">
+          <span *ngIf="modo === 'crear'">Complete el formulario para crear un nuevo rol</span>
+          <span *ngIf="modo === 'editar'">Modifique los datos del rol</span>
+          <span *ngIf="modo === 'ver'">Información detallada del rol</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Alerta para roles del sistema -->
+    <div class="page-alert alert-info mb-4" *ngIf="esRolSistema && modo === 'editar'">
+      <div class="alert-icon">
+        <i class="fas fa-info-circle"></i>
+      </div>
+      <div class="alert-content">
+        <p>
+          <strong>Rol del sistema:</strong> Este es un rol predefinido del sistema. 
+          Solo puede modificar su descripción.
+        </p>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <div class="page-content-wrapper">
+      <form [formGroup]="rolForm" (ngSubmit)="guardar()">
+        <div class="row">
+          <div class="col-12">
+            <!-- Nombre del rol -->
+            <div class="form-group">
+              <label for="nombre">
+                Nombre del rol <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="nombre"
+                formControlName="nombre"
+                class="form-control"
+                [class.is-invalid]="tieneError('nombre')"
+                placeholder="Ej: Coordinador"
+                [readonly]="esRolSistema && modo === 'editar'">
+              <div class="invalid-feedback" *ngIf="tieneError('nombre')">
+                {{ obtenerMensajeError('nombre') }}
+              </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="form-group">
+              <label for="descripcion">
+                Descripción <span class="text-danger">*</span>
+              </label>
+              <textarea 
+                id="descripcion"
+                formControlName="descripcion"
+                class="form-control"
+                [class.is-invalid]="tieneError('descripcion')"
+                placeholder="Describe las responsabilidades y alcance de este rol"
+                rows="4"></textarea>
+              <div class="invalid-feedback" *ngIf="tieneError('descripcion')">
+                {{ obtenerMensajeError('descripcion') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones del formulario -->
+        <div class="form-actions" *ngIf="modo !== 'ver'">
+          <button 
+            type="button" 
+            class="btn btn-secondary"
+            (click)="cancelar()">
+            <i class="fas fa-times"></i>
+            Cancelar
+          </button>
+          
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="rolForm.invalid || cargando">
+            <i class="fas fa-save"></i>
+            Guardar
+          </button>
+        </div>
+
+        <!-- Acciones en modo ver -->
+        <div class="form-actions" *ngIf="modo === 'ver'">
+          <button 
+            type="button" 
+            class="btn btn-secondary"
+            (click)="cancelar()">
+            <i class="fas fa-arrow-left"></i>
+            Volver
+          </button>
+          
+          <button 
+            type="button" 
+            class="btn btn-primary"
+            *hasPermission="'roles.editar'"
+            [routerLink]="['/configuracion/roles/editar', rolId]">
+            <i class="fas fa-edit"></i>
+            Editar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Información adicional en modo ver -->
+    <div class="page-content-wrapper mt-4" *ngIf="modo === 'ver' && rolId">
+      <h4 class="mb-3">Acciones disponibles</h4>
+      <div class="row">
+        <div class="col-12 col-md-6 mb-3">
+          <button 
+            class="btn btn-secondary btn-block"
+            *hasPermission="'roles.editar'"
+            [routerLink]="['/configuracion/roles/permisos', rolId]">
+            <i class="fas fa-key"></i>
+            Gestionar Permisos
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-layout>

@@ -1,0 +1,8 @@
+@use '../../../../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+// El componente utiliza los estilos globales definidos en styles.scss
+// Solo agregamos estilos específicos si son necesarios

@@ -6,6 +6,9 @@ import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
 import { UsuariosComponent } from './components/pages/usuarios/usuarios.component';
 import { ConfiguracionComponent } from './components/pages/configuracion/configuracion.component';
+import { GestionPermisosComponent } from './components/pages/configuracion/roles/gestion-permisos/gestion-permisos.component';
+import { GestionRolComponent } from './components/pages/configuracion/roles/gestion-rol/gestion-rol.component';
+import { RolesComponent } from './components/pages/configuracion/roles/roles.component';
 
 
 export const routes: Routes = [
@@ -75,31 +78,49 @@ export const routes: Routes = [
       mode: 'view'
     }
   },
-  // Placeholder para roles - se implementará después
-  /*
   {
     path: 'configuracion/roles',
-    loadComponent: () => import('./components/pages/roles/roles.component').then(m => m.RolesComponent),
+    component: RolesComponent,
     canActivate: [authGuard, roleGuard],
     data: {
       permissions: ['roles.ver']
     }
   },
-  */
-  
-  // Comentados hasta que se creen los componentes
-  /*
   {
-    path: 'reportes',
-    loadComponent: () => import('./components/reportes/reportes.component').then(m => m.ReportesComponent),
+    path: 'configuracion/roles/crear',
+    component: GestionRolComponent,
     canActivate: [authGuard, roleGuard],
     data: {
-      permissions: ['reportes.ver']
+      permissions: ['roles.crear']
     }
   },
-  */
+  {
+    path: 'configuracion/roles/editar/:id',
+    component: GestionRolComponent,
+    canActivate: [authGuard, roleGuard],
+    data: {
+      permissions: ['roles.editar']
+    }
+  },
+  {
+    path: 'configuracion/roles/detalle/:id',
+    component: GestionRolComponent,
+    canActivate: [authGuard, roleGuard],
+    data: {
+      permissions: ['roles.ver']
+    }
+  },
+  {
+    path: 'configuracion/roles/permisos/:id',
+    component: GestionPermisosComponent,
+    canActivate: [authGuard, roleGuard],
+    data: {
+      permissions: ['roles.editar']
+    }
+  },
   {
     path: '**',
     redirectTo: '/login'
   }
 ];
+

@@ -1,0 +1,132 @@
+<!-- gestion-permisos.component.html -->
+<app-layout backRoute="/configuracion/roles" backLabel="Volver a roles">
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-key"></i>
+          </span>
+          Gestión de Permisos
+        </h1>
+        <p class="page-subtitle" *ngIf="rol">
+          Administre los permisos del rol: <strong>{{ rol.nombre }}</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Toolbar con buscador y contador -->
+    <div class="page-toolbar">
+      <div class="toolbar-search">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Buscar permisos..."
+            (input)="buscarPermisos($event)">
+        </div>
+      </div>
+      <div class="toolbar-info">
+        <span class="badge badge-primary">
+          {{ contarPermisosSeleccionados() }} permisos seleccionados
+        </span>
+      </div>
+    </div>
+
+    <!-- Lista de permisos agrupados -->
+    <div class="page-content-wrapper">
+      <div class="permisos-container">
+        <!-- Grupo de permisos por módulo -->
+        <div 
+          class="permiso-grupo" 
+          *ngFor="let grupo of permisosAgrupados"
+          [class.d-none]="!grupoVisible(grupo)">
+          
+          <!-- Header del módulo -->
+          <div class="grupo-header">
+            <div class="form-check">
+              <input 
+                type="checkbox" 
+                class="form-check-input" 
+                [id]="'modulo-' + grupo.modulo"
+                [checked]="estaModuloSeleccionado(grupo)"
+                [indeterminate]="estaModuloParcialmenteSeleccionado(grupo)"
+                (change)="toggleModulo(grupo)">
+              <label 
+                class="form-check-label grupo-titulo" 
+                [for]="'modulo-' + grupo.modulo">
+                <i class="fas fa-folder"></i>
+                {{ grupo.modulo }}
+                <span class="badge badge-secondary ms-2">
+                  {{ grupo.permisos.length }}
+                </span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Permisos del módulo -->
+          <div class="grupo-permisos">
+            <div 
+              class="form-check permiso-item" 
+              *ngFor="let permiso of grupo.permisos"
+              [class.d-none]="!permisoVisible(permiso)">
+              <input 
+                type="checkbox" 
+                class="form-check-input" 
+                [id]="'permiso-' + permiso.id"
+                [(ngModel)]="permiso.seleccionado">
+              <label 
+                class="form-check-label" 
+                [for]="'permiso-' + permiso.id">
+                <div class="permiso-info">
+                  <span class="permiso-nombre">{{ permiso.nombre }}</span>
+                  <span class="permiso-descripcion">{{ permiso.descripcion }}</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado vacío si no hay resultados -->
+        <div 
+          class="empty-state" 
+          *ngIf="mostrarEstadoVacio()">
+          <div class="empty-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h3 class="empty-title">Sin resultados</h3>
+          <p class="empty-subtitle">No se encontraron permisos que coincidan con "{{ buscador }}"</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="page-content-wrapper mt-3">
+      <div class="form-actions">
+        <button 
+          type="button" 
+          class="btn btn-secondary"
+          (click)="cancelar()">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn btn-primary"
+          (click)="guardarPermisos()">
+          <i class="fas fa-save"></i>
+          Guardar Permisos
+        </button>
+      </div>
+    </div>
+  </div>
+</app-layout>

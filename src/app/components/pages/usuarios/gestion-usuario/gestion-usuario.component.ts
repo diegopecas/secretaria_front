@@ -122,7 +122,7 @@ export class GestionUsuarioComponent implements OnInit {
   cargarRoles() {
     this.rolesService.obtenerTodos().subscribe({
       next: (roles) => {
-        this.rolesDisponibles = roles;
+        this.rolesDisponibles = roles.body || [];
       },
       error: (error) => {
         console.error('Error cargando roles:', error);

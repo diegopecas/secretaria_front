@@ -1,0 +1,77 @@
+<!-- roles.component.html -->
+<app-layout backRoute="/configuracion" backLabel="Volver a configuración">
+  <!-- Header de página estándar -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-shield-alt"></i>
+          </span>
+          Gestión de Roles
+        </h1>
+        <p class="page-subtitle">Administre los roles y permisos del sistema</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Toolbar con título y acciones -->
+    <div class="page-toolbar">
+      <h2 class="toolbar-title">Listado de Roles</h2>
+      <div class="toolbar-actions">
+        <!-- Botón principal de crear -->
+        <button 
+          class="btn btn-primary" 
+          *hasPermission="'roles.crear'"
+          (click)="crearRol()"
+          [attr.aria-label]="'Crear nuevo rol'">
+          <i class="fas fa-plus-circle"></i>
+          <span class="btn-text">Crear Rol</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="page-content-wrapper">
+      <!-- Tabla de roles -->
+      <app-tablas
+        [titulos]="titulos"
+        [datos]="roles"
+        [columnasFiltro]="columnasFiltro"
+        [accionVer]="true"
+        [accionEditar]="hasPermission('roles.editar')"
+        [accionEliminar]="hasPermission('roles.eliminar')"
+        [acciones]="accionesPersonalizadas"
+        [mostrarBuscar]="true"
+        (clicAccion)="ejecutarAccion($event)"
+      ></app-tablas>
+    </div>
+
+    <!-- Alerta informativa -->
+    <div class="page-alert alert-info">
+      <div class="alert-icon">
+        <i class="fas fa-info-circle"></i>
+      </div>
+      <div class="alert-content">
+        <p>
+          <strong>Nota:</strong> Los roles del sistema (Admin, Secretaria, Supervisor, Usuario) no pueden ser eliminados, 
+          pero sus permisos pueden ser modificados según las necesidades.
+        </p>
+      </div>
+    </div>
+
+    <!-- Estado vacío (mostrar si no hay roles) -->
+    <div class="empty-state" *ngIf="roles.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <h3 class="empty-title">No hay roles registrados</h3>
+      <p class="empty-subtitle">Los roles del sistema se cargarán automáticamente</p>
+    </div>
+  </div>
+</app-layout>
