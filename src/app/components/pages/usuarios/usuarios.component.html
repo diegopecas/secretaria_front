@@ -38,9 +38,8 @@
           class="btn btn-primary" 
           *hasPermission="'usuarios.crear'"
           (click)="crearUsuario()"
-          [attr.aria-label]="'Crear nuevo usuario'"
-          [attr.data-tooltip]="'Crear Usuario'">
-          <i class="fas fa-plus"></i>
+          [attr.aria-label]="'Crear nuevo usuario'">
+          <i class="fas fa-user-plus"></i>
           <span class="btn-text">Crear Usuario</span>
         </button>
       </div>
@@ -86,7 +85,7 @@
         class="btn btn-primary" 
         *hasPermission="'usuarios.crear'"
         (click)="crearUsuario()">
-        <i class="fas fa-plus"></i> Crear primer usuario
+        <i class="fas fa-user-plus"></i> Crear primer usuario
       </button>
     </div>
   </div>
