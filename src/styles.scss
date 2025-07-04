@@ -2137,3 +2137,138 @@ a {
     }
   }
 }
+
+.card {
+  background: var(--card-bg);
+  border-radius: $border-radius-xl;
+  padding: $spacing-lg;
+  box-shadow: var(--shadow-medium);
+  transition: $transition-base;
+  border: 1px solid var(--color-border);
+  
+  .card-body {
+    padding: 0; // Reset padding ya que el card ya tiene
+  }
+  
+  .card-header {
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-md;
+    border-bottom: 1px solid var(--color-border);
+    
+    h4 {
+      margin: 0;
+      color: var(--color-text);
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+  }
+}
+
+// CHIPS MEJORADOS
+.chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  min-height: 60px;
+  padding: $spacing-sm;
+  background: var(--color-surface-alt);
+  border-radius: $border-radius-medium;
+  border: 1px dashed var(--color-border);
+  
+  &.chips-empty {
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  background: $color-dorado;
+  color: $color-negro;
+  padding: 0.5rem 1rem;
+  border-radius: $border-radius-round;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: $shadow-small;
+  transition: $transition-fast;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-medium;
+  }
+  
+  .chip-remove {
+    cursor: pointer;
+    margin-left: 0.25rem;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $border-radius-round;
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 1rem;
+    line-height: 1;
+    transition: $transition-fast;
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Texto vacío mejorado
+.empty-roles-text {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: $spacing-md;
+  
+  i {
+    font-size: 2rem;
+    opacity: 0.3;
+    display: block;
+    margin-bottom: $spacing-sm;
+  }
+}
+// INFO LIST STYLES
+.info-list {
+  margin: 0;
+  
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: $spacing-xs 0;
+    border-bottom: 1px solid var(--color-border);
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    dt {
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    dd {
+      margin: 0;
+      font-weight: 500;
+      color: var(--color-text);
+      text-align: right;
+    }
+  }
+}
+
+// Botón block mejorado
+.btn-block {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+}

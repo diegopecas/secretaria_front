@@ -97,45 +97,80 @@
 
           <!-- Columna lateral -->
           <div class="col-12 col-lg-4">
-            <h3 class="mb-4">Roles Asignados</h3>
-            
-            <!-- Roles actuales -->
             <div class="card">
+              <div class="card-header">
+                <h4>
+                  <i class="fas fa-user-tag me-2"></i>
+                  Roles Asignados
+                </h4>
+              </div>
+              
               <div class="card-body">
-                <div class="chips-container" *ngIf="rolesSeleccionados.length > 0">
-                  <span class="chip" *ngFor="let rol of rolesSeleccionados">
-                    {{ getRolInfo(rol)?.descripcion || rol }}
-                    <span class="chip-remove" *ngIf="!isViewMode" (click)="toggleRol(rol)">×</span>
-                  </span>
+                <!-- Chips de roles -->
+                <div class="chips-container" [class.chips-empty]="rolesSeleccionados.length === 0">
+                  <ng-container *ngIf="rolesSeleccionados.length > 0">
+                    <span class="chip" *ngFor="let rol of rolesSeleccionados">
+                      <i class="fas fa-shield-alt me-1"></i>
+                      {{ getRolInfo(rol)?.descripcion || rol }}
+                      <span class="chip-remove" *ngIf="!isViewMode" (click)="toggleRol(rol)">×</span>
+                    </span>
+                  </ng-container>
+                  
+                  <div class="empty-roles-text" *ngIf="rolesSeleccionados.length === 0">
+                    <i class="fas fa-user-slash"></i>
+                    <p class="mb-0">No hay roles asignados</p>
+                    <small *ngIf="!isViewMode">Haga clic en el botón para agregar roles</small>
+                  </div>
                 </div>
-                
-                <p class="text-muted text-center py-3" *ngIf="rolesSeleccionados.length === 0">
-                  No hay roles asignados
-                </p>
                 
                 <button 
                   type="button"
                   class="btn btn-secondary btn-block mt-3"
                   *ngIf="!isViewMode"
                   (click)="abrirModalRoles()">
-                  <i class="fas fa-user-tag"></i> Gestionar Roles
+                  <i class="fas fa-user-cog me-2"></i>
+                  Gestionar Roles
                 </button>
               </div>
             </div>
 
             <!-- Información adicional en modo vista -->
             <div class="card mt-4" *ngIf="isViewMode && usuario">
+              <div class="card-header">
+                <h4>
+                  <i class="fas fa-info-circle me-2"></i>
+                  Información del Sistema
+                </h4>
+              </div>
               <div class="card-body">
-                <h4>Información del Sistema</h4>
-                <dl class="row">
-                  <dt class="col-6">ID:</dt>
-                  <dd class="col-6">{{ usuario.id }}</dd>
-                  
-                  <dt class="col-6">Creado:</dt>
-                  <dd class="col-6">{{ usuario.fecha_creacion | date:'short' }}</dd>
-                  
-                  <dt class="col-6">Último acceso:</dt>
-                  <dd class="col-6">{{ usuario.ultimo_acceso | date:'short' }}</dd>
+                <dl class="info-list">
+                  <div class="info-row">
+                    <dt>ID:</dt>
+                    <dd>#{{ usuario.id }}</dd>
+                  </div>
+                  <div class="info-row">
+                    <dt>Creado:</dt>
+                    <dd>{{ usuario.fecha_creacion | date:'dd/MM/yyyy HH:mm' }}</dd>
+                  </div>
+                  <div class="info-row">
+                    <dt>Actualizado:</dt>
+                    <dd>{{ usuario.fecha_actualizacion | date:'dd/MM/yyyy HH:mm' }}</dd>
+                  </div>
+                  <div class="info-row">
+                    <dt>Último acceso:</dt>
+                    <dd>
+                      <span *ngIf="usuario.ultimo_acceso">{{ usuario.ultimo_acceso | date:'dd/MM/yyyy HH:mm' }}</span>
+                      <span *ngIf="!usuario.ultimo_acceso" class="text-muted">Nunca</span>
+                    </dd>
+                  </div>
+                  <div class="info-row">
+                    <dt>Estado:</dt>
+                    <dd>
+                      <span class="badge" [ngClass]="usuario.activo ? 'badge-success' : 'badge-danger'">
+                        {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                      </span>
+                    </dd>
+                  </div>
                 </dl>
               </div>
             </div>
