@@ -1,0 +1,205 @@
+<app-layout backRoute="/configuracion/usuarios" backLabel="Volver a usuarios">
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <span style="font-size: 1.5rem;">{{ pageIcon }}</span>
+          </span>
+          {{ pageTitle }}
+        </h1>
+        <p class="page-subtitle">{{ pageSubtitle }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Formulario -->
+    <div class="page-content-wrapper">
+      <form [formGroup]="usuarioForm" (ngSubmit)="onSubmit()">
+        <div class="row">
+          <!-- Columna principal -->
+          <div class="col-12 col-lg-8">
+            <h3 class="mb-4">Información del Usuario</h3>
+            
+            <!-- Nombre -->
+            <div class="form-group">
+              <label for="nombre">Nombre Completo <span class="text-danger" *ngIf="!isViewMode">*</span></label>
+              <input 
+                type="text" 
+                id="nombre" 
+                formControlName="nombre"
+                class="form-control"
+                [class.is-invalid]="f['nombre'].invalid && f['nombre'].touched"
+                placeholder="Ingrese el nombre completo">
+              <div *ngIf="f['nombre'].invalid && f['nombre'].touched" class="invalid-feedback">
+                <span *ngIf="f['nombre'].errors?.['required']">El nombre es requerido</span>
+                <span *ngIf="f['nombre'].errors?.['minlength']">El nombre debe tener al menos 3 caracteres</span>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+              <label for="email">Correo Electrónico <span class="text-danger" *ngIf="!isViewMode">*</span></label>
+              <input 
+                type="email" 
+                id="email" 
+                formControlName="email"
+                class="form-control"
+                [class.is-invalid]="f['email'].invalid && f['email'].touched"
+                placeholder="correo@ejemplo.com">
+              <div *ngIf="f['email'].invalid && f['email'].touched" class="invalid-feedback">
+                <span *ngIf="f['email'].errors?.['required']">El correo es requerido</span>
+                <span *ngIf="f['email'].errors?.['email']">Ingrese un correo válido</span>
+              </div>
+            </div>
+
+            <!-- Password (solo crear/editar) -->
+            <div class="form-group" *ngIf="!isViewMode">
+              <label for="password">
+                Contraseña 
+                <span class="text-danger" *ngIf="isCreateMode">*</span>
+                <small class="text-muted" *ngIf="isEditMode">(dejar en blanco para mantener la actual)</small>
+              </label>
+              <input 
+                type="password" 
+                id="password" 
+                formControlName="password"
+                class="form-control"
+                [class.is-invalid]="f['password'].invalid && f['password'].touched"
+                placeholder="••••••••">
+              <div *ngIf="f['password'].invalid && f['password'].touched" class="invalid-feedback">
+                <span *ngIf="f['password'].errors?.['required']">La contraseña es requerida</span>
+                <span *ngIf="f['password'].errors?.['minlength']">La contraseña debe tener al menos 6 caracteres</span>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="form-group">
+              <label>Estado</label>
+              <div class="form-check">
+                <input 
+                  type="checkbox" 
+                  id="activo" 
+                  formControlName="activo"
+                  class="form-check-input">
+                <label for="activo" class="form-check-label">
+                  Usuario activo
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna lateral -->
+          <div class="col-12 col-lg-4">
+            <h3 class="mb-4">Roles Asignados</h3>
+            
+            <!-- Roles actuales -->
+            <div class="card">
+              <div class="card-body">
+                <div class="chips-container" *ngIf="rolesSeleccionados.length > 0">
+                  <span class="chip" *ngFor="let rol of rolesSeleccionados">
+                    {{ getRolInfo(rol)?.descripcion || rol }}
+                    <span class="chip-remove" *ngIf="!isViewMode" (click)="toggleRol(rol)">×</span>
+                  </span>
+                </div>
+                
+                <p class="text-muted text-center py-3" *ngIf="rolesSeleccionados.length === 0">
+                  No hay roles asignados
+                </p>
+                
+                <button 
+                  type="button"
+                  class="btn btn-secondary btn-block mt-3"
+                  *ngIf="!isViewMode"
+                  (click)="abrirModalRoles()">
+                  <i class="fas fa-user-tag"></i> Gestionar Roles
+                </button>
+              </div>
+            </div>
+
+            <!-- Información adicional en modo vista -->
+            <div class="card mt-4" *ngIf="isViewMode && usuario">
+              <div class="card-body">
+                <h4>Información del Sistema</h4>
+                <dl class="row">
+                  <dt class="col-6">ID:</dt>
+                  <dd class="col-6">{{ usuario.id }}</dd>
+                  
+                  <dt class="col-6">Creado:</dt>
+                  <dd class="col-6">{{ usuario.fecha_creacion | date:'short' }}</dd>
+                  
+                  <dt class="col-6">Último acceso:</dt>
+                  <dd class="col-6">{{ usuario.ultimo_acceso | date:'short' }}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions mt-5" *ngIf="!isViewMode">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="usuarioForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm mr-2"></span>
+            {{ isCreateMode ? 'Crear Usuario' : 'Guardar Cambios' }}
+          </button>
+        </div>
+
+        <!-- Acciones en modo vista -->
+        <div class="form-actions mt-5" *ngIf="isViewMode">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            <i class="fas fa-arrow-left"></i> Volver
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            *hasPermission="'usuarios.editar'"
+            (click)="editarUsuario()">
+            <i class="fas fa-edit"></i> Editar Usuario
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</app-layout>
+
+<!-- Modal de Roles -->
+<app-modal 
+  *ngIf="showRolesModal"
+  title="Gestionar Roles"
+  size="medium"
+  (close)="cerrarModalRoles()">
+  
+  <div modal-body>
+    <p class="mb-4">Seleccione los roles que desea asignar al usuario:</p>
+    
+    <div class="roles-list">
+      <div class="form-check" *ngFor="let rol of rolesDisponibles">
+        <input 
+          type="checkbox" 
+          class="form-check-input" 
+          [id]="'rol-' + rol.id"
+          [checked]="tieneRol(rol.nombre)"
+          (change)="toggleRol(rol.nombre)">
+        <label class="form-check-label" [for]="'rol-' + rol.id">
+          <strong>{{ rol.descripcion }}</strong>
+          <small class="text-muted d-block">{{ rol.nombre }}</small>
+        </label>
+      </div>
+    </div>
+  </div>
+  
+  <div modal-footer>
+    <button type="button" class="btn btn-primary" (click)="cerrarModalRoles()">
+      Aceptar
+    </button>
+  </div>
+</app-modal>

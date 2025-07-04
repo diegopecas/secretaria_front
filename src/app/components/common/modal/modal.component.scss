@@ -1,0 +1,8 @@
+// Solo usar variables globales
+@use '../../../../styles/variables' as *;
+
+// Los estilos del modal deberían ir en styles.scss globales
+// Aquí solo definimos el host
+:host {
+  display: block;
+}

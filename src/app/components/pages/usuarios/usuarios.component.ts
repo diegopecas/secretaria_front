@@ -7,7 +7,9 @@ import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 import { TablasComponent } from '../../common/tablas/tablas.component';
 import { UsuariosService } from '../../../services/usuarios.service';
-import { BreadcrumbComponent } from '../../common/breadcrumb/breadcrumb.component'
+import { BreadcrumbComponent } from '../../common/breadcrumb/breadcrumb.component';
+// import Swal from 'sweetalert2'; // Descomentar si prefieres usar SweetAlert2
+
 interface Usuario {
   id: number;
   nombre: string;
@@ -36,7 +38,7 @@ export class UsuariosComponent implements OnInit {
     private router: Router,
     private notificationService: NotificationService,
     private usuariosService: UsuariosService
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.configurarTitulos();
@@ -92,7 +94,7 @@ export class UsuariosComponent implements OnInit {
 
   configurarAcciones() {
     const acciones = [];
-
+    
     // Solo agregar la acción de gestionar roles si tiene el permiso
     if (this.hasPermission('usuarios.roles')) {
       acciones.push({
@@ -125,7 +127,6 @@ export class UsuariosComponent implements OnInit {
       error: (error) => {
         console.error('Error al cargar usuarios:', error);
         this.notificationService.error('Error al cargar usuarios');
-
       }
     });
   }
@@ -149,12 +150,12 @@ export class UsuariosComponent implements OnInit {
 
   validarFecha(fecha: any): string | null {
     if (!fecha) return null;
-
+    
     // Si ya es una fecha válida, retornarla
     if (typeof fecha === 'string' && /^\d{4}-\d{2}-\d{2}/.test(fecha)) {
       return fecha;
     }
-
+    
     // Si es un timestamp o fecha en otro formato, intentar convertir
     try {
       const date = new Date(fecha);
@@ -164,13 +165,13 @@ export class UsuariosComponent implements OnInit {
     } catch (e) {
       console.warn('Fecha inválida:', fecha);
     }
-
+    
     return null;
   }
 
   generarBadgesRoles(roles: string[]): string {
     if (!roles || roles.length === 0) return '<span class="text-muted">Sin roles</span>';
-
+    
     return roles.map(rol => {
       const nombreRol = this.getRoleName(rol);
       const claseRol = this.getRoleClass(rol);
@@ -200,28 +201,28 @@ export class UsuariosComponent implements OnInit {
 
   ejecutarAccion(event: any) {
     console.log('Acción ejecutada:', event);
-
+    
     switch (event.accion) {
       case 'consultar':
         this.verDetalleUsuario(event.id);
         break;
-
+      
       case 'editar':
         this.editarUsuario(event.id);
         break;
-
+      
       case 'eliminar':
         this.eliminarUsuario(event.id, event.registro);
         break;
-
+      
       case 'roles':
         this.gestionarRoles(event.id, event.registro);
         break;
-
+      
       case 'cambiar-estado':
         this.cambiarEstado(event.id, event.registro);
         break;
-
+      
       default:
         console.warn('Acción no reconocida:', event.accion);
     }
@@ -229,24 +230,19 @@ export class UsuariosComponent implements OnInit {
 
   crearUsuario() {
     // Navegar a la página de creación
-    this.router.navigate(['/usuarios/crear']);
-    // O abrir un modal
-    this.notificationService.info('Funcionalidad de crear usuario en desarrollo');
+    this.router.navigate(['/configuracion/usuarios/crear']);
   }
 
   verDetalleUsuario(id: number) {
-    this.router.navigate(['/usuarios/detalle', id]);
-    // Temporal
-    this.notificationService.info('Ver detalle del usuario ' + id);
+    this.router.navigate(['/configuracion/usuarios/detalle', id]);
   }
 
   editarUsuario(id: number) {
-    this.router.navigate(['/usuarios/editar', id]);
-    // Temporal
-    this.notificationService.info('Editar usuario ' + id);
+    this.router.navigate(['/configuracion/usuarios/editar', id]);
   }
 
   eliminarUsuario(id: number, usuario: any) {
+    // Usando NotificationService con confirmación
     this.notificationService.confirm(
       `¿Está seguro de eliminar al usuario "${usuario.nombre}"?`,
       () => {
@@ -262,6 +258,45 @@ export class UsuariosComponent implements OnInit {
         });
       }
     );
+    
+    // Si prefieres usar SweetAlert2 como en el componente de referencia:
+    /*
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `Se eliminará el usuario: "${usuario.nombre}". Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#FFD700',
+      cancelButtonColor: '#6c757d',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.usuariosService.eliminar(id).subscribe({
+          next: () => {
+            Swal.fire({
+              title: 'Usuario eliminado',
+              text: 'El usuario ha sido eliminado correctamente.',
+              icon: 'success',
+              confirmButtonText: 'Aceptar',
+              confirmButtonColor: '#FFD700'
+            });
+            this.cargarUsuarios();
+          },
+          error: (error) => {
+            console.error('Error al eliminar usuario:', error);
+            Swal.fire({
+              title: 'Error',
+              text: 'No se pudo eliminar el usuario. Intente más tarde.',
+              icon: 'error',
+              confirmButtonText: 'Aceptar'
+            });
+          }
+        });
+      }
+    });
+    */
   }
 
   gestionarRoles(id: number, usuario: any) {
@@ -272,7 +307,7 @@ export class UsuariosComponent implements OnInit {
   cambiarEstado(id: number, usuario: any) {
     const nuevoEstado = !usuario.activo; // Usar el booleano original
     const accion = nuevoEstado ? 'activar' : 'desactivar';
-
+    
     this.notificationService.confirm(
       `¿Está seguro de ${accion} al usuario "${usuario.nombre}"?`,
       () => {
@@ -289,13 +324,14 @@ export class UsuariosComponent implements OnInit {
       }
     );
   }
+
   exportarUsuarios() {
     this.notificationService.info('Funcionalidad de exportar en desarrollo');
     // Aquí puedes implementar la lógica de exportación
     // Por ejemplo: generar CSV, Excel, PDF, etc.
   }
+
   hasPermission(permission: string): boolean {
     return this.authService.hasPermission(permission);
   }
-
 }

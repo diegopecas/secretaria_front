@@ -48,6 +48,33 @@ export const routes: Routes = [
       permissions: ['usuarios.ver']
     }
   },
+  {
+    path: 'configuracion/usuarios/crear',
+    loadComponent: () => import('./components/pages/usuarios/gestion-usuario/gestion-usuario.component').then(m => m.GestionUsuarioComponent),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      permissions: ['usuarios.crear'],
+      mode: 'create'
+    }
+  },
+  {
+    path: 'configuracion/usuarios/editar/:id',
+    loadComponent: () => import('./components/pages/usuarios/gestion-usuario/gestion-usuario.component').then(m => m.GestionUsuarioComponent),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      permissions: ['usuarios.editar'],
+      mode: 'edit'
+    }
+  },
+  {
+    path: 'configuracion/usuarios/detalle/:id',
+    loadComponent: () => import('./components/pages/usuarios/gestion-usuario/gestion-usuario.component').then(m => m.GestionUsuarioComponent),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      permissions: ['usuarios.ver'],
+      mode: 'view'
+    }
+  },
   // Placeholder para roles - se implementará después
   /*
   {

@@ -1,0 +1,18 @@
+<div class="modal-backdrop">
+  <div class="modal-container" [ngClass]="'modal-' + size">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ title }}</h2>
+      <button class="btn-icon modal-close" (click)="closeModal()" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <ng-content select="[modal-body]"></ng-content>
+    </div>
+    
+    <div class="modal-footer" *ngIf="showFooter">
+      <ng-content select="[modal-footer]"></ng-content>
+    </div>
+  </div>
+</div>
