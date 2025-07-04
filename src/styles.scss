@@ -988,3 +988,105 @@ a {
   margin-right: 8px;
   vertical-align: middle;
 }
+
+// Estilos base para el header mejorado
+.app-header {
+  // Variables CSS para personalización fácil
+  --header-height: 65px;
+  --header-padding: 1.5rem;
+  
+  @media (max-width: 576px) {
+    --header-height: 60px;
+    --header-padding: 1rem;
+  }
+}
+
+// Utilidades para iconos
+.fas, .far, .fab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Botones con iconos
+.btn-icon {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+  }
+  
+  &:active::before {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+// Badge mejorado para roles
+.badge-role {
+  display: inline-flex;
+  align-items: center;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
+}
+
+// Responsive: Mostrar info compacta en móviles
+@media (max-width: 576px) {
+  .app-header {
+    .user-info {
+      display: flex !important;
+      
+      .user-details {
+        display: none;
+      }
+      
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+      }
+    }
+    
+    .header-actions {
+      gap: 0.5rem;
+      
+      .btn-icon {
+        width: 36px;
+        height: 36px;
+        
+        i {
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+}
+
+// Tablet: Ajustes intermedios
+@media (min-width: 577px) and (max-width: 768px) {
+  .app-header {
+    .logo-text {
+      display: block !important;
+      font-size: 1.1rem;
+    }
+    
+    .user-details {
+      .user-name {
+        max-width: 120px;
+        @include text-truncate();
+      }
+    }
+  }
+}

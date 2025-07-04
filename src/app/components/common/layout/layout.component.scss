@@ -1,6 +1,342 @@
+// layout.component.scss
+// Corregir la ruta según tu estructura
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
 :host {
   display: block;
 }
 
-// Estilos específicos del layout si los necesitas
-// La mayoría vienen de los estilos globales
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Header mejorado
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: $z-index-sticky;
+  background: var(--header-bg);
+  box-shadow: $shadow-medium;
+  backdrop-filter: blur(10px);
+  
+  .header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 $spacing-md;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    @include mobile-down {
+      padding: 0 $spacing-sm;
+      height: 60px;
+    }
+  }
+}
+
+// Sección izquierda del header
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  
+  .btn-icon {
+    @include button-base();
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: $border-radius-round;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--header-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: $transition-fast;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(-2px);
+    }
+    
+    i {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+// Logo
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  
+  .logo {
+    width: 40px;
+    height: 40px;
+    background: $color-dorado;
+    color: $color-negro;
+    border-radius: $border-radius-medium;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+    
+    @include mobile-down {
+      width: 35px;
+      height: 35px;
+      font-size: 1.3rem;
+    }
+  }
+  
+  .logo-text {
+    color: var(--header-text);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+    
+    @include tablet-down {
+      display: none;
+    }
+  }
+}
+
+// Sección derecha del header
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+// Info del usuario
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  
+  @include mobile-down {
+    display: none;
+  }
+  
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: $border-radius-round;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--header-text);
+    
+    i {
+      font-size: 1rem;
+    }
+  }
+  
+  .user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    
+    .user-name {
+      color: var(--header-text);
+      font-size: 0.9rem;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+    
+    .user-role {
+      .badge-role {
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        background: rgba(255, 215, 0, 0.2);
+        color: $color-dorado;
+        border-radius: $border-radius-small;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Separador
+.header-separator {
+  width: 1px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.2);
+  
+  @include mobile-down {
+    display: none;
+  }
+}
+
+// Acciones del header
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  
+  .btn-icon {
+    @include button-base();
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: $border-radius-round;
+    background: transparent;
+    color: var(--header-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: $transition-fast;
+    position: relative;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    i {
+      font-size: 1.2rem;
+    }
+    
+    &.btn-logout {
+      &:hover {
+        background: rgba(255, 82, 82, 0.2);
+        color: #ff5252;
+        
+        i {
+          transform: translateX(2px);
+        }
+      }
+    }
+  }
+}
+
+// Contenido principal
+.page-content {
+  flex: 1;
+  padding: $spacing-lg 0;
+  
+  @include mobile-down {
+    padding: $spacing-md 0;
+  }
+}
+
+// Footer
+.app-footer {
+  background: var(--header-bg);
+  padding: $spacing-md 0;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  
+  .text-muted {
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    font-size: $font-size-small;
+  }
+}
+
+// Tooltips mejorados
+[data-tooltip] {
+  position: relative;
+  
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 6px 12px;
+    border-radius: $border-radius-small;
+    font-size: $font-size-small;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: $z-index-tooltip;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-3px);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: $z-index-tooltip;
+  }
+  
+  &:hover {
+    &::after,
+    &::before {
+      opacity: 1;
+    }
+  }
+}
+
+// Modo oscuro - ajustes específicos
+:host-context(.theme-dark) {
+  .app-header {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.05);
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+    
+    .user-avatar {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .header-separator {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+  
+  .app-footer {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+    border-top-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+// Animaciones
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Aplicar animaciones en la carga
+.header-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.header-right {
+  animation: fadeIn 0.3s ease-out;
+}

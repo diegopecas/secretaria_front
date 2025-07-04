@@ -1,38 +1,51 @@
+<!-- layout.component.html -->
 <div class="page-container">
   <!-- Header -->
   <header class="app-header">
     <div class="header-content">
+      <!-- Sección izquierda -->
       <div class="header-left">
         <button 
           *ngIf="backRoute"
-          class="btn-back"
+          class="btn-icon"
           (click)="goBack()"
           [attr.data-tooltip]="backLabel">
-          <span class="back-icon">←</span>
-          <span class="back-label">{{ backLabel }}</span>
+          <i class="fas fa-arrow-left"></i>
         </button>
         
         <div class="logo-wrapper">
-          <div class="logo logo-small">S</div>
+          <div class="logo">S</div>
           <h1 class="logo-text">Secretaría</h1>
         </div>
       </div>
       
-      <div class="header-actions">
-        <app-theme-toggle></app-theme-toggle>
-        
-        <div class="user-widget">
-          <div class="user-info" *ngIf="currentUser">
+      <!-- Sección derecha -->
+      <div class="header-right">
+        <!-- Info del usuario -->
+        <div class="user-info" *ngIf="currentUser">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="user-details">
             <div class="user-name">{{ currentUser.nombre }}</div>
-            <div class="user-email">{{ currentUser.email }}</div>
-            <div class="user-roles" *ngIf="currentUser.roles && currentUser.roles.length > 0">
-              <span class="badge badge-secondary me-1" *ngFor="let role of currentUser.roles">
-                {{ getRoleName(role) }}
-              </span>
+            <div class="user-role" *ngIf="currentUser.roles && currentUser.roles.length > 0">
+              <span class="badge badge-role">{{ getRoleName(currentUser.roles[0]) }}</span>
             </div>
           </div>
-          <button class="btn btn-primary" (click)="logout()" data-tooltip="Cerrar sesión">
-            Cerrar Sesión
+        </div>
+
+        <!-- Separador -->
+        <div class="header-separator"></div>
+
+        <!-- Acciones -->
+        <div class="header-actions">
+          <app-theme-toggle></app-theme-toggle>
+          
+          <button 
+            class="btn-icon btn-logout" 
+            (click)="logout()" 
+            data-tooltip="Cerrar sesión">
+            <i class="fas fa-sign-out-alt"></i>
           </button>
         </div>
       </div>
