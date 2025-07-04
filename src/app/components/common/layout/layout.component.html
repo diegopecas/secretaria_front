@@ -9,7 +9,7 @@
           *ngIf="backRoute"
           class="btn-icon"
           (click)="goBack()"
-          [attr.data-tooltip]="backLabel">
+          [attr.aria-label]="backLabel">
           <i class="fas fa-arrow-left"></i>
         </button>
         
@@ -19,8 +19,8 @@
         </div>
       </div>
       
-      <!-- Sección derecha -->
-      <div class="header-right">
+      <!-- Sección derecha - SOLO DESKTOP -->
+      <div class="header-right" *ngIf="!isMobile">
         <!-- Info del usuario -->
         <div class="user-info" *ngIf="currentUser">
           <div class="user-avatar">
@@ -44,13 +44,75 @@
           <button 
             class="btn-icon btn-logout" 
             (click)="logout()" 
-            data-tooltip="Cerrar sesión">
+            [attr.aria-label]="'Cerrar sesión'">
             <i class="fas fa-sign-out-alt"></i>
           </button>
         </div>
       </div>
+
+      <!-- Botón menú móvil - SOLO MÓVIL -->
+      <button 
+        *ngIf="isMobile"
+        class="btn-menu-mobile"
+        (click)="toggleMobileMenu()"
+        [attr.aria-label]="'Menú'">
+        <i class="fas fa-bars"></i>
+      </button>
     </div>
   </header>
+
+  <!-- Menú móvil - Panel lateral -->
+  <div class="mobile-sidebar" [class.active]="showMobileMenu">
+    <div class="mobile-sidebar-header">
+      <h3>Menú</h3>
+      <button 
+        class="btn-close"
+        (click)="closeMobileMenu()"
+        [attr.aria-label]="'Cerrar menú'">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="mobile-sidebar-content" *ngIf="currentUser">
+      <!-- Info del usuario -->
+      <div class="mobile-user-section">
+        <div class="user-avatar-large">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="user-info-mobile">
+          <div class="user-name">{{ currentUser.nombre }}</div>
+          <div class="user-email" *ngIf="currentUser.email">{{ currentUser.email }}</div>
+          <span class="badge badge-role" *ngIf="currentUser.roles && currentUser.roles.length > 0">
+            {{ getRoleName(currentUser.roles[0]) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="mobile-sidebar-divider"></div>
+
+      <!-- Opción de tema -->
+      <div class="mobile-menu-item">
+        <i class="fas fa-palette"></i>
+        <span>Tema</span>
+        <app-theme-toggle></app-theme-toggle>
+      </div>
+
+      <div class="mobile-sidebar-divider"></div>
+
+      <!-- Cerrar sesión -->
+      <button class="mobile-menu-item logout-item" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Cerrar sesión</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Overlay -->
+  <div 
+    class="mobile-overlay" 
+    [class.active]="showMobileMenu"
+    (click)="closeMobileMenu()">
+  </div>
 
   <!-- Content -->
   <main class="container page-content">
@@ -59,6 +121,6 @@
 
   <!-- Footer -->
   <footer class="app-footer">
-    <p class="text-muted">Sistema Secretaría © 2025 - Todos los derechos reservados</p>
+    <p class="text-muted">Sistema Secretaría © 2025</p>
   </footer>
 </div>

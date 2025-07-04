@@ -1,10 +1,12 @@
-import { Component, Input } from '@angular/core';
+// layout.component.ts
+import { Component, Input, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { AuthService, User } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ThemeToggleComponent } from '../../common/theme-toggle/theme-toggle.component';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-layout',
@@ -13,32 +15,87 @@ import { ThemeToggleComponent } from '../../common/theme-toggle/theme-toggle.com
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss']
 })
-export class LayoutComponent {
-  @Input() backRoute?: string; // Ruta para el botón atrás
-  @Input() backLabel?: string = 'Volver'; // Texto personalizable
+export class LayoutComponent implements OnInit, OnDestroy {
+  @Input() backRoute?: string;
+  @Input() backLabel?: string = 'Volver';
   
   currentUser: User | null = null;
+  showMobileMenu = false;
+  isMobile = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private notificationService: NotificationService
   ) {
-    this.authService.currentUser.subscribe(user => {
-      this.currentUser = user;
-    });
+    this.checkScreenSize();
   }
 
-  goBack() {
+  ngOnInit(): void {
+    // Suscribirse a los cambios del usuario actual
+    this.authService.currentUser
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.currentUser = user;
+      });
+
+    // Cerrar menú móvil al cambiar de ruta
+    this.router.events
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.closeMobileMenu();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    // Limpiar el overflow del body
+    document.body.style.overflow = '';
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any): void {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize(): void {
+    this.isMobile = window.innerWidth < 768; // Breakpoint tablet
+    
+    // Si cambiamos a desktop, cerrar el menú móvil
+    if (!this.isMobile && this.showMobileMenu) {
+      this.closeMobileMenu();
+    }
+  }
+
+  goBack(): void {
     if (this.backRoute) {
       this.router.navigate([this.backRoute]);
     } else {
-      // Si no hay ruta específica, usar el historial
       window.history.back();
     }
   }
 
-  logout() {
+  toggleMobileMenu(): void {
+    this.showMobileMenu = !this.showMobileMenu;
+    
+    // Prevenir scroll del body cuando el menú está abierto
+    if (this.showMobileMenu) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
+
+  closeMobileMenu(): void {
+    this.showMobileMenu = false;
+    document.body.style.overflow = '';
+  }
+
+  logout(): void {
+    this.closeMobileMenu();
+    
     this.notificationService.confirm(
       '¿Está seguro que desea cerrar sesión?',
       () => {
