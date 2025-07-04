@@ -2,13 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { LayoutComponent } from '../../../common/layout/layout.component';
-import { BreadcrumbComponent } from '../../../common/breadcrumb/breadcrumb.component';
-import { ModalComponent } from '../../../common/modal/modal.component';
-import { UsuariosService } from '../../../../services/usuarios.service';
-import { RolesService, Rol } from '../../../../services/roles.service';
-import { NotificationService } from '../../../../services/notification.service';
-import { HasPermissionDirective } from '../../../../directives/has-permission.directive';
+import { HasPermissionDirective } from '../../../../../directives/has-permission.directive';
+import { NotificationService } from '../../../../../services/notification.service';
+import { Rol, RolesService } from '../../../../../services/roles.service';
+import { UsuariosService } from '../../../../../services/usuarios.service';
+import { BreadcrumbComponent } from '../../../../common/breadcrumb/breadcrumb.component';
+import { LayoutComponent } from '../../../../common/layout/layout.component';
+import { ModalComponent } from '../../../../common/modal/modal.component';
+
 
 type ViewMode = 'create' | 'edit' | 'view';
 

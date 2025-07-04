@@ -4,11 +4,11 @@ import { MenuComponent } from './components/pages/menu/menu.component';
 import { RegistroDiarioComponent } from './components/pages/registro-diario/registro-diario.component';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
-import { UsuariosComponent } from './components/pages/usuarios/usuarios.component';
 import { ConfiguracionComponent } from './components/pages/configuracion/configuracion.component';
 import { GestionPermisosComponent } from './components/pages/configuracion/roles/gestion-permisos/gestion-permisos.component';
 import { GestionRolComponent } from './components/pages/configuracion/roles/gestion-rol/gestion-rol.component';
 import { RolesComponent } from './components/pages/configuracion/roles/roles.component';
+import { UsuariosComponent } from './components/pages/configuracion/usuarios/usuarios.component';
 
 
 export const routes: Routes = [
@@ -53,7 +53,7 @@ export const routes: Routes = [
   },
   {
     path: 'configuracion/usuarios/crear',
-    loadComponent: () => import('./components/pages/usuarios/gestion-usuario/gestion-usuario.component').then(m => m.GestionUsuarioComponent),
+    loadComponent: () => import('./components/pages/configuracion/usuarios/gestion-usuario/gestion-usuario.component').then(m => m.GestionUsuarioComponent),
     canActivate: [authGuard, roleGuard],
     data: {
       permissions: ['usuarios.crear'],
@@ -62,7 +62,7 @@ export const routes: Routes = [
   },
   {
     path: 'configuracion/usuarios/editar/:id',
-    loadComponent: () => import('./components/pages/usuarios/gestion-usuario/gestion-usuario.component').then(m => m.GestionUsuarioComponent),
+    loadComponent: () => import('./components/pages/configuracion/usuarios/gestion-usuario/gestion-usuario.component').then(m => m.GestionUsuarioComponent),
     canActivate: [authGuard, roleGuard],
     data: {
       permissions: ['usuarios.editar'],
@@ -71,7 +71,7 @@ export const routes: Routes = [
   },
   {
     path: 'configuracion/usuarios/detalle/:id',
-    loadComponent: () => import('./components/pages/usuarios/gestion-usuario/gestion-usuario.component').then(m => m.GestionUsuarioComponent),
+    loadComponent: () => import('./components/pages/configuracion/usuarios/gestion-usuario/gestion-usuario.component').then(m => m.GestionUsuarioComponent),
     canActivate: [authGuard, roleGuard],
     data: {
       permissions: ['usuarios.ver'],
