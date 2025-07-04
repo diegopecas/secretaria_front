@@ -28,7 +28,7 @@ interface Usuario {
 export class UsuariosComponent implements OnInit {
   usuarios: Usuario[] = [];
   titulos: any[] = [];
-  columnasFiltro = ['nombre', 'email', 'activo_text']; // Cambio aquí: usar activo_text para el filtro
+  columnasFiltro = ['Nombre', 'Roles', 'Estado'];
   accionesPersonalizadas: any[] = [];
 
   constructor(
