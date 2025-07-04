@@ -7,7 +7,7 @@ import { AuthService } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 import { TablasComponent } from '../../common/tablas/tablas.component';
 import { UsuariosService } from '../../../services/usuarios.service';
-
+import { BreadcrumbComponent } from '../../common/breadcrumb/breadcrumb.component'
 interface Usuario {
   id: number;
   nombre: string;
@@ -21,7 +21,7 @@ interface Usuario {
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule, LayoutComponent, HasPermissionDirective, TablasComponent],
+  imports: [CommonModule, LayoutComponent, HasPermissionDirective, TablasComponent, BreadcrumbComponent],
   templateUrl: './usuarios.component.html',
   styleUrls: ['./usuarios.component.scss']
 })
@@ -36,7 +36,7 @@ export class UsuariosComponent implements OnInit {
     private router: Router,
     private notificationService: NotificationService,
     private usuariosService: UsuariosService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.configurarTitulos();
@@ -92,7 +92,7 @@ export class UsuariosComponent implements OnInit {
 
   configurarAcciones() {
     const acciones = [];
-    
+
     // Solo agregar la acción de gestionar roles si tiene el permiso
     if (this.hasPermission('usuarios.roles')) {
       acciones.push({
@@ -149,12 +149,12 @@ export class UsuariosComponent implements OnInit {
 
   validarFecha(fecha: any): string | null {
     if (!fecha) return null;
-    
+
     // Si ya es una fecha válida, retornarla
     if (typeof fecha === 'string' && /^\d{4}-\d{2}-\d{2}/.test(fecha)) {
       return fecha;
     }
-    
+
     // Si es un timestamp o fecha en otro formato, intentar convertir
     try {
       const date = new Date(fecha);
@@ -164,13 +164,13 @@ export class UsuariosComponent implements OnInit {
     } catch (e) {
       console.warn('Fecha inválida:', fecha);
     }
-    
+
     return null;
   }
 
   generarBadgesRoles(roles: string[]): string {
     if (!roles || roles.length === 0) return '<span class="text-muted">Sin roles</span>';
-    
+
     return roles.map(rol => {
       const nombreRol = this.getRoleName(rol);
       const claseRol = this.getRoleClass(rol);
@@ -200,28 +200,28 @@ export class UsuariosComponent implements OnInit {
 
   ejecutarAccion(event: any) {
     console.log('Acción ejecutada:', event);
-    
+
     switch (event.accion) {
       case 'consultar':
         this.verDetalleUsuario(event.id);
         break;
-      
+
       case 'editar':
         this.editarUsuario(event.id);
         break;
-      
+
       case 'eliminar':
         this.eliminarUsuario(event.id, event.registro);
         break;
-      
+
       case 'roles':
         this.gestionarRoles(event.id, event.registro);
         break;
-      
+
       case 'cambiar-estado':
         this.cambiarEstado(event.id, event.registro);
         break;
-      
+
       default:
         console.warn('Acción no reconocida:', event.accion);
     }
@@ -272,7 +272,7 @@ export class UsuariosComponent implements OnInit {
   cambiarEstado(id: number, usuario: any) {
     const nuevoEstado = !usuario.activo; // Usar el booleano original
     const accion = nuevoEstado ? 'activar' : 'desactivar';
-    
+
     this.notificationService.confirm(
       `¿Está seguro de ${accion} al usuario "${usuario.nombre}"?`,
       () => {

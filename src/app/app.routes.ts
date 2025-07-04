@@ -21,7 +21,8 @@ export const routes: Routes = [
   {
     path: 'menu',
     component: MenuComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    data: { breadcrumb: 'Menú Principal' }
   },
   {
     path: 'registro-diario',

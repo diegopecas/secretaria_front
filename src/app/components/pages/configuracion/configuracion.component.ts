@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { LayoutComponent } from '../../common/layout/layout.component';
+import { BreadcrumbComponent } from '../../common/breadcrumb/breadcrumb.component';
 
 interface ConfigMenuItem {
   title: string;
@@ -16,7 +17,7 @@ interface ConfigMenuItem {
 @Component({
   selector: 'app-configuracion',
   standalone: true,
-  imports: [CommonModule, LayoutComponent],
+  imports: [CommonModule, LayoutComponent, BreadcrumbComponent],
   templateUrl: './configuracion.component.html',
   styleUrls: ['./configuracion.component.scss']
 })

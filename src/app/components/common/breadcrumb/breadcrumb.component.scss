@@ -1,0 +1,17 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+// Los estilos ya están definidos globalmente en styles.scss
+// Solo agregamos estilos específicos si son necesarios
+
+.page-breadcrumb {
+  // Heredar estilos globales
+  
+  .breadcrumb-link {
+    // Los estilos de 'a' ya están definidos globalmente
+  }
+  
+  .breadcrumb-active {
+    color: var(--color-text-secondary);
+  }
+}

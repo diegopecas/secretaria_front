@@ -3,12 +3,8 @@
   <div class="page-header">
     <div class="container">
       <div class="page-header-content">
-        <!-- Breadcrumb -->
-        <nav class="page-breadcrumb">
-          <a routerLink="/menu">Menú Principal</a>
-          <span class="separator">/</span>
-          <span>Configuración</span>
-        </nav>
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
         
         <!-- Título con icono -->
         <h1 class="page-title">
@@ -24,9 +20,9 @@
 
   <!-- Contenido -->
   <div class="container">
-    <div class="row" *ngIf="menuItems.length > 0">
+    <div class="row justify-content-center" *ngIf="menuItems.length > 0">
       <div 
-        class="col-12 col-sm-6 col-lg-4 mb-4" 
+        class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4" 
         *ngFor="let item of menuItems; let i = index">
         <div 
           class="card card-clickable fade-in-{{i+1}} h-100" 

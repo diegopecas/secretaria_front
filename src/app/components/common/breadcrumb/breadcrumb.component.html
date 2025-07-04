@@ -1,0 +1,16 @@
+<nav class="page-breadcrumb" *ngIf="breadcrumbs.length > 0">
+  <ng-container *ngFor="let breadcrumb of breadcrumbs; let last = last">
+    <a 
+      *ngIf="!breadcrumb.isActive" 
+      [routerLink]="[breadcrumb.url]"
+      class="breadcrumb-link">
+      {{ breadcrumb.label }}
+    </a>
+    <span 
+      *ngIf="breadcrumb.isActive" 
+      class="breadcrumb-active">
+      {{ breadcrumb.label }}
+    </span>
+    <span *ngIf="!last" class="separator">/</span>
+  </ng-container>
+</nav>
