@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { HasPermissionDirective } from '../../../../../directives/has-permission.directive';
 import { NotificationService } from '../../../../../services/notification.service';
 import { Rol, RolesService, Permiso } from '../../../../../services/roles.service';
+import { UsuariosService, Usuario } from '../../../../../services/usuarios.service';
 import { BreadcrumbComponent } from '../../../../common/breadcrumb/breadcrumb.component';
 import { LayoutComponent } from '../../../../common/layout/layout.component';
 import { ModalComponent } from '../../../../common/modal/modal.component';
@@ -37,6 +38,8 @@ export class GestionRolComponent implements OnInit {
   rolId?: number;
   isLoading = false;
   showPermisosModal = false;
+  showUsuariosModal = false;
+  showPermisosVistaModal = false;
   esRolSistema = false;
   cantidadUsuarios = 0;
   
@@ -45,6 +48,7 @@ export class GestionRolComponent implements OnInit {
   permisosDisponibles: Permiso[] = [];
   permisosSeleccionados: string[] = [];
   permisosTemporal: string[] = []; // Para el modal
+  usuariosConRol: Usuario[] = []; // Usuarios con este rol
   
   // Búsqueda
   busquedaPermiso = '';
@@ -52,6 +56,7 @@ export class GestionRolComponent implements OnInit {
   
   // Permisos agrupados por módulo
   modulosConPermisos: ModuloPermisos[] = [];
+  modulosConPermisosAsignados: ModuloPermisos[] = [];
   
   // Títulos dinámicos
   pageTitle = 'Crear Rol';
@@ -66,6 +71,7 @@ export class GestionRolComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private rolesService: RolesService,
+    private usuariosService: UsuariosService,
     private notificationService: NotificationService
   ) {}
 
@@ -143,6 +149,11 @@ export class GestionRolComponent implements OnInit {
           
           // Cargar permisos del rol
           this.cargarPermisosRol();
+          
+          // Cargar usuarios con este rol (tanto en modo vista como edición)
+          if (this.mode === 'view' || this.mode === 'edit') {
+            this.cargarUsuariosConRol();
+          }
         }
         this.isLoading = false;
       },
@@ -187,6 +198,7 @@ export class GestionRolComponent implements OnInit {
           permisos = response.body;
         }
         this.permisosSeleccionados = permisos.map((p: Permiso) => p.nombre);
+        this.agruparPermisosAsignados();
       },
       error: (error) => {
         console.error('Error cargando permisos del rol:', error);
@@ -356,10 +368,13 @@ export class GestionRolComponent implements OnInit {
       this.permisosSeleccionados.push(permisoNombre);
     }
     
-    // Si estamos en el modal, actualizar temporal
+    // Si estamos en el modal de edición, actualizar temporal
     if (this.showPermisosModal) {
       this.permisosTemporal = [...this.permisosSeleccionados];
     }
+    
+    // Actualizar permisos agrupados
+    this.agruparPermisosAsignados();
   }
 
   tienePermiso(permisoNombre: string): boolean {
@@ -382,6 +397,72 @@ export class GestionRolComponent implements OnInit {
 
   editarRol() {
     this.router.navigate(['/configuracion/roles/editar', this.rolId]);
+  }
+
+  // Gestión de modal de usuarios
+  cargarUsuariosConRol() {
+    if (!this.rol) return;
+    
+    this.usuariosService.obtenerTodos().subscribe({
+      next: (response) => {
+        const usuarios = response.body || [];
+        // Filtrar usuarios que tienen este rol
+        this.usuariosConRol = usuarios.filter((usuario: any) => 
+          usuario.roles && usuario.roles.includes(this.rol!.nombre)
+        );
+        this.cantidadUsuarios = this.usuariosConRol.length;
+      },
+      error: (error) => {
+        console.error('Error cargando usuarios:', error);
+        this.cantidadUsuarios = 0;
+      }
+    });
+  }
+
+  abrirModalUsuarios() {
+    if (this.usuariosConRol.length === 0) {
+      // Cargar usuarios si no están cargados
+      this.cargarUsuariosConRol();
+    }
+    this.showUsuariosModal = true;
+  }
+
+  cerrarModalUsuarios() {
+    this.showUsuariosModal = false;
+  }
+
+  // Modal de vista de permisos
+  abrirModalPermisosVista() {
+    this.agruparPermisosAsignados();
+    this.showPermisosVistaModal = true;
+  }
+
+  cerrarModalPermisosVista() {
+    this.showPermisosVistaModal = false;
+  }
+
+  agruparPermisosAsignados() {
+    const grupos: { [key: string]: Permiso[] } = {};
+    
+    // Filtrar solo los permisos seleccionados
+    const permisosAsignados = this.permisosDisponibles.filter(p => 
+      this.permisosSeleccionados.includes(p.nombre)
+    );
+    
+    permisosAsignados.forEach(permiso => {
+      const modulo = permiso.modulo || 'general';
+      if (!grupos[modulo]) {
+        grupos[modulo] = [];
+      }
+      grupos[modulo].push(permiso);
+    });
+    
+    this.modulosConPermisosAsignados = Object.keys(grupos)
+      .sort()
+      .map(modulo => ({
+        nombre: modulo,
+        permisos: grupos[modulo].sort((a, b) => a.nombre.localeCompare(b.nombre))
+      }));
   }
 
   // Getters para el template

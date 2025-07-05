@@ -111,26 +111,20 @@
                     (input)="filtrarPermisos()">
                 </div>
 
-                <!-- Chips de permisos -->
-                <div class="chips-container" [class.chips-empty]="permisosSeleccionados.length === 0">
-                  <ng-container *ngIf="permisosSeleccionados.length > 0">
-                    <span class="chip" *ngFor="let permiso of permisosSeleccionados">
-                      <i class="fas fa-lock me-1"></i>
-                      {{ getPermisoInfo(permiso)?.descripcion || permiso }}
-                      <span class="chip-remove" *ngIf="!isViewMode" (click)="togglePermiso(permiso)">×</span>
-                    </span>
-                  </ng-container>
+                <!-- Resumen de permisos -->
+                <div class="text-center py-4">
+                  <i class="fas fa-key fa-3x text-warning mb-3"></i>
+                  <h3 class="text-primary mb-2">{{ permisosSeleccionados.length }}</h3>
+                  <p class="text-muted mb-3">permiso(s) asignado(s)</p>
                   
-                  <div class="empty-roles-text" *ngIf="permisosSeleccionados.length === 0">
-                    <i class="fas fa-lock-open"></i>
-                    <p class="mb-0">No hay permisos asignados</p>
-                    <small *ngIf="!isViewMode">Haga clic en el botón para agregar permisos</small>
-                  </div>
-                </div>
-
-                <!-- Contador de permisos -->
-                <div class="text-center mt-2 text-muted">
-                  <small>{{ permisosSeleccionados.length }} permiso(s) asignado(s)</small>
+                  <button 
+                    type="button"
+                    class="btn btn-sm btn-secondary mb-2"
+                    (click)="abrirModalPermisosVista()"
+                    *ngIf="permisosSeleccionados.length > 0">
+                    <i class="fas fa-eye me-1"></i>
+                    Ver permisos asignados
+                  </button>
                 </div>
                 
                 <button 
@@ -176,9 +170,35 @@
                   </div>
                   <div class="info-row">
                     <dt>Usuarios con este rol:</dt>
-                    <dd>{{ cantidadUsuarios }}</dd>
+                    <dd>
+                      <a href="javascript:void(0)" (click)="abrirModalUsuarios()" class="text-primary">
+                        {{ cantidadUsuarios }} usuario(s)
+                      </a>
+                    </dd>
                   </div>
                 </dl>
+              </div>
+            </div>
+            
+            <!-- Información adicional cuando NO es modo vista pero existe el rol -->
+            <div class="card mt-4" *ngIf="!isViewMode && rol && rolId">
+              <div class="card-header">
+                <h4>
+                  <i class="fas fa-users me-2"></i>
+                  Usuarios Asignados
+                </h4>
+              </div>
+              <div class="card-body text-center">
+                <p class="mb-3">Este rol está asignado a:</p>
+                <h3 class="text-primary mb-3">{{ cantidadUsuarios }}</h3>
+                <p class="text-muted mb-3">usuario(s)</p>
+                <button 
+                  type="button"
+                  class="btn btn-sm btn-secondary"
+                  (click)="abrirModalUsuarios()">
+                  <i class="fas fa-eye me-1"></i>
+                  Ver usuarios
+                </button>
               </div>
             </div>
           </div>
@@ -233,32 +253,38 @@
     </div>
 
     <!-- Lista de permisos agrupados por módulo -->
-    <div class="permisos-list">
-      <div class="modulo-group" *ngFor="let modulo of modulosConPermisos">
-        <h5 class="modulo-title">
-          <i class="fas fa-folder me-2"></i>
-          {{ capitalize(modulo.nombre) }}
-        </h5>
+    <div class="roles-list">
+      <div class="card mb-3" *ngFor="let modulo of modulosConPermisos">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="fas fa-folder me-2"></i>
+            {{ capitalize(modulo.nombre) }}
+          </h5>
+        </div>
         
-        <div class="permisos-grid">
-          <div class="form-check" *ngFor="let permiso of modulo.permisos">
-            <input 
-              type="checkbox" 
-              class="form-check-input" 
-              [id]="'permiso-' + permiso.id"
-              [checked]="tienePermiso(permiso.nombre)"
-              (change)="togglePermiso(permiso.nombre)">
-            <label class="form-check-label" [for]="'permiso-' + permiso.id">
-              <strong>{{ permiso.descripcion }}</strong>
-              <small class="text-muted d-block">{{ permiso.nombre }}</small>
-            </label>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12 col-md-6" *ngFor="let permiso of modulo.permisos">
+              <div class="form-check mb-2">
+                <input 
+                  type="checkbox" 
+                  class="form-check-input" 
+                  [id]="'permiso-' + permiso.id"
+                  [checked]="tienePermiso(permiso.nombre)"
+                  (change)="togglePermiso(permiso.nombre)">
+                <label class="form-check-label" [for]="'permiso-' + permiso.id">
+                  <strong>{{ permiso.descripcion }}</strong>
+                  <small class="text-muted d-block">{{ permiso.nombre }}</small>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Resumen de selección -->
-    <div class="selection-summary mt-4">
+    <div class="alert alert-info mt-4">
       <strong>Permisos seleccionados:</strong> {{ permisosSeleccionados.length }}
     </div>
   </div>
@@ -269,6 +295,120 @@
     </button>
     <button type="button" class="btn btn-primary" (click)="confirmarPermisos()">
       Aceptar
+    </button>
+  </div>
+</app-modal>
+
+<!-- Modal de Usuarios con este Rol -->
+<app-modal 
+  *ngIf="showUsuariosModal"
+  title="Usuarios con el rol: {{ rol?.nombre }}"
+  size="medium"
+  (close)="cerrarModalUsuarios()">
+  
+  <div modal-body>
+    <div *ngIf="usuariosConRol.length === 0" class="text-center py-4">
+      <i class="fas fa-users fa-3x text-muted mb-3"></i>
+      <p class="text-muted">No hay usuarios asignados a este rol</p>
+    </div>
+    
+    <div *ngIf="usuariosConRol.length > 0">
+      <p class="mb-3">Los siguientes usuarios tienen asignado el rol <strong>{{ rol?.descripcion }}</strong>:</p>
+      
+      <div class="list-group">
+        <div class="list-group-item" *ngFor="let usuario of usuariosConRol">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">
+                <i class="fas fa-user text-primary me-2"></i>
+                {{ usuario.nombre }}
+              </h6>
+              <p class="mb-0 text-muted">
+                <small>
+                  <i class="fas fa-envelope me-1"></i>
+                  {{ usuario.email }}
+                </small>
+              </p>
+            </div>
+            <div>
+              <span class="badge" [ngClass]="usuario.activo ? 'badge-success' : 'badge-danger'">
+                {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-3 text-center text-muted">
+        <small>Total: {{ usuariosConRol.length }} usuario(s)</small>
+      </div>
+    </div>
+  </div>
+  
+  <div modal-footer>
+    <button type="button" class="btn btn-secondary" (click)="cerrarModalUsuarios()">
+      Cerrar
+    </button>
+  </div>
+</app-modal>
+
+<!-- Modal de Permisos Asignados (Solo Vista) -->
+<app-modal 
+  *ngIf="showPermisosVistaModal"
+  title="Permisos del rol: {{ rol?.nombre }}"
+  size="medium"
+  (close)="cerrarModalPermisosVista()">
+  
+  <div modal-body>
+    <div *ngIf="permisosSeleccionados.length === 0" class="text-center py-4">
+      <i class="fas fa-lock-open fa-3x text-muted mb-3"></i>
+      <p class="text-muted">No hay permisos asignados a este rol</p>
+    </div>
+    
+    <div *ngIf="permisosSeleccionados.length > 0">
+      <p class="mb-3">El rol <strong>{{ rol?.descripcion }}</strong> tiene los siguientes permisos:</p>
+      
+      <!-- Agrupar permisos por módulo -->
+      <div class="accordion" id="permisosAccordion">
+        <div class="card mb-2" *ngFor="let modulo of modulosConPermisosAsignados; let i = index">
+          <div class="card-header">
+            <h6 class="mb-0">
+              <i class="fas fa-folder me-2"></i>
+              {{ capitalize(modulo.nombre) }}
+              <span class="badge badge-secondary float-end">{{ modulo.permisos.length }}</span>
+            </h6>
+          </div>
+          <div class="card-body">
+            <div class="list-group list-group-flush">
+              <div class="list-group-item px-0" *ngFor="let permiso of modulo.permisos">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h6 class="mb-1">
+                      <i class="fas fa-check-circle text-success me-2"></i>
+                      {{ permiso.descripcion }}
+                    </h6>
+                    <p class="mb-0 text-muted">
+                      <small>
+                        <code>{{ permiso.nombre }}</code>
+                      </small>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-3 text-center text-muted">
+        <small>Total: {{ permisosSeleccionados.length }} permiso(s)</small>
+      </div>
+    </div>
+  </div>
+  
+  <div modal-footer>
+    <button type="button" class="btn btn-secondary" (click)="cerrarModalPermisosVista()">
+      Cerrar
     </button>
   </div>
 </app-modal>
