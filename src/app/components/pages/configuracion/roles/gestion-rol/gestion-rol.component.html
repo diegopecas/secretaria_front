@@ -1,4 +1,3 @@
-<!-- gestion-rol.component.html -->
 <app-layout backRoute="/configuracion/roles" backLabel="Volver a roles">
   <!-- Header de página -->
   <div class="page-header">
@@ -10,130 +9,266 @@
         <!-- Título con icono -->
         <h1 class="page-title">
           <span class="page-icon">
-            <i class="fas fa-shield-alt"></i>
+            <span style="font-size: 1.5rem;">{{ pageIcon }}</span>
           </span>
-          {{ titulo }}
+          {{ pageTitle }}
         </h1>
-        <p class="page-subtitle">
-          <span *ngIf="modo === 'crear'">Complete el formulario para crear un nuevo rol</span>
-          <span *ngIf="modo === 'editar'">Modifique los datos del rol</span>
-          <span *ngIf="modo === 'ver'">Información detallada del rol</span>
-        </p>
+        <p class="page-subtitle">{{ pageSubtitle }}</p>
       </div>
     </div>
   </div>
 
   <div class="container">
     <!-- Alerta para roles del sistema -->
-    <div class="page-alert alert-info mb-4" *ngIf="esRolSistema && modo === 'editar'">
+    <div class="page-alert alert-info mb-4" *ngIf="esRolSistema && mode === 'edit'">
       <div class="alert-icon">
         <i class="fas fa-info-circle"></i>
       </div>
       <div class="alert-content">
         <p>
           <strong>Rol del sistema:</strong> Este es un rol predefinido del sistema. 
-          Solo puede modificar su descripción.
+          Solo puede modificar su descripción y permisos.
         </p>
       </div>
     </div>
 
     <!-- Formulario -->
     <div class="page-content-wrapper">
-      <form [formGroup]="rolForm" (ngSubmit)="guardar()">
+      <form [formGroup]="rolForm" (ngSubmit)="onSubmit()">
         <div class="row">
-          <div class="col-12">
-            <!-- Nombre del rol -->
+          <!-- Columna principal -->
+          <div class="col-12 col-lg-8">
+            <h3 class="mb-4">Información del Rol</h3>
+            
+            <!-- Nombre -->
             <div class="form-group">
-              <label for="nombre">
-                Nombre del rol <span class="text-danger">*</span>
-              </label>
+              <label for="nombre">Nombre del Rol <span class="text-danger" *ngIf="!isViewMode">*</span></label>
               <input 
                 type="text" 
-                id="nombre"
+                id="nombre" 
                 formControlName="nombre"
                 class="form-control"
-                [class.is-invalid]="tieneError('nombre')"
-                placeholder="Ej: Coordinador"
-                [readonly]="esRolSistema && modo === 'editar'">
-              <div class="invalid-feedback" *ngIf="tieneError('nombre')">
-                {{ obtenerMensajeError('nombre') }}
+                [class.is-invalid]="f['nombre'].invalid && f['nombre'].touched"
+                placeholder="Ingrese el nombre del rol"
+                [readonly]="esRolSistema && mode === 'edit'">
+              <div *ngIf="f['nombre'].invalid && f['nombre'].touched" class="invalid-feedback">
+                <span *ngIf="f['nombre'].errors?.['required']">El nombre es requerido</span>
+                <span *ngIf="f['nombre'].errors?.['minlength']">El nombre debe tener al menos 3 caracteres</span>
               </div>
             </div>
 
             <!-- Descripción -->
             <div class="form-group">
-              <label for="descripcion">
-                Descripción <span class="text-danger">*</span>
-              </label>
+              <label for="descripcion">Descripción <span class="text-danger" *ngIf="!isViewMode">*</span></label>
               <textarea 
-                id="descripcion"
+                id="descripcion" 
                 formControlName="descripcion"
                 class="form-control"
-                [class.is-invalid]="tieneError('descripcion')"
+                [class.is-invalid]="f['descripcion'].invalid && f['descripcion'].touched"
                 placeholder="Describe las responsabilidades y alcance de este rol"
                 rows="4"></textarea>
-              <div class="invalid-feedback" *ngIf="tieneError('descripcion')">
-                {{ obtenerMensajeError('descripcion') }}
+              <div *ngIf="f['descripcion'].invalid && f['descripcion'].touched" class="invalid-feedback">
+                <span *ngIf="f['descripcion'].errors?.['required']">La descripción es requerida</span>
+                <span *ngIf="f['descripcion'].errors?.['minlength']">La descripción debe tener al menos 5 caracteres</span>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="form-group" *ngIf="mode !== 'create'">
+              <label>Estado</label>
+              <div class="form-check">
+                <input 
+                  type="checkbox" 
+                  id="activo" 
+                  formControlName="activo"
+                  class="form-check-input">
+                <label for="activo" class="form-check-label">
+                  Rol activo
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna lateral -->
+          <div class="col-12 col-lg-4">
+            <div class="card">
+              <div class="card-header">
+                <h4>
+                  <i class="fas fa-key me-2"></i>
+                  Permisos Asignados
+                </h4>
+              </div>
+              
+              <div class="card-body">
+                <!-- Búsqueda de permisos -->
+                <div class="form-group mb-3" *ngIf="!isViewMode">
+                  <input 
+                    type="text" 
+                    class="form-control form-control-sm"
+                    [(ngModel)]="busquedaPermiso"
+                    [ngModelOptions]="{standalone: true}"
+                    placeholder="Buscar permisos..."
+                    (input)="filtrarPermisos()">
+                </div>
+
+                <!-- Chips de permisos -->
+                <div class="chips-container" [class.chips-empty]="permisosSeleccionados.length === 0">
+                  <ng-container *ngIf="permisosSeleccionados.length > 0">
+                    <span class="chip" *ngFor="let permiso of permisosSeleccionados">
+                      <i class="fas fa-lock me-1"></i>
+                      {{ getPermisoInfo(permiso)?.descripcion || permiso }}
+                      <span class="chip-remove" *ngIf="!isViewMode" (click)="togglePermiso(permiso)">×</span>
+                    </span>
+                  </ng-container>
+                  
+                  <div class="empty-roles-text" *ngIf="permisosSeleccionados.length === 0">
+                    <i class="fas fa-lock-open"></i>
+                    <p class="mb-0">No hay permisos asignados</p>
+                    <small *ngIf="!isViewMode">Haga clic en el botón para agregar permisos</small>
+                  </div>
+                </div>
+
+                <!-- Contador de permisos -->
+                <div class="text-center mt-2 text-muted">
+                  <small>{{ permisosSeleccionados.length }} permiso(s) asignado(s)</small>
+                </div>
+                
+                <button 
+                  type="button"
+                  class="btn btn-secondary btn-block mt-3"
+                  *ngIf="!isViewMode"
+                  (click)="abrirModalPermisos()">
+                  <i class="fas fa-edit me-2"></i>
+                  Gestionar Permisos
+                </button>
+              </div>
+            </div>
+
+            <!-- Información adicional en modo vista -->
+            <div class="card mt-4" *ngIf="isViewMode && rol">
+              <div class="card-header">
+                <h4>
+                  <i class="fas fa-info-circle me-2"></i>
+                  Información del Sistema
+                </h4>
+              </div>
+              <div class="card-body">
+                <dl class="info-list">
+                  <div class="info-row">
+                    <dt>ID:</dt>
+                    <dd>#{{ rol.id }}</dd>
+                  </div>
+                  <div class="info-row">
+                    <dt>Tipo:</dt>
+                    <dd>
+                      <span class="badge" [ngClass]="esRolSistema ? 'badge-info' : 'badge-secondary'">
+                        {{ esRolSistema ? 'Sistema' : 'Personalizado' }}
+                      </span>
+                    </dd>
+                  </div>
+                  <div class="info-row">
+                    <dt>Estado:</dt>
+                    <dd>
+                      <span class="badge" [ngClass]="rol.activo ? 'badge-success' : 'badge-danger'">
+                        {{ rol.activo ? 'Activo' : 'Inactivo' }}
+                      </span>
+                    </dd>
+                  </div>
+                  <div class="info-row">
+                    <dt>Usuarios con este rol:</dt>
+                    <dd>{{ cantidadUsuarios }}</dd>
+                  </div>
+                </dl>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Acciones del formulario -->
-        <div class="form-actions" *ngIf="modo !== 'ver'">
-          <button 
-            type="button" 
-            class="btn btn-secondary"
-            (click)="cancelar()">
-            <i class="fas fa-times"></i>
+        <!-- Acciones -->
+        <div class="form-actions mt-5" *ngIf="!isViewMode">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
             Cancelar
           </button>
-          
-          <button 
-            type="submit" 
-            class="btn btn-primary"
-            [disabled]="rolForm.invalid || cargando">
-            <i class="fas fa-save"></i>
-            Guardar
+          <button type="submit" class="btn btn-primary" [disabled]="rolForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm mr-2"></span>
+            {{ isCreateMode ? 'Crear Rol' : 'Guardar Cambios' }}
           </button>
         </div>
 
-        <!-- Acciones en modo ver -->
-        <div class="form-actions" *ngIf="modo === 'ver'">
-          <button 
-            type="button" 
-            class="btn btn-secondary"
-            (click)="cancelar()">
-            <i class="fas fa-arrow-left"></i>
-            Volver
+        <!-- Acciones en modo vista -->
+        <div class="form-actions mt-5" *ngIf="isViewMode">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            <i class="fas fa-arrow-left"></i> Volver
           </button>
-          
           <button 
             type="button" 
-            class="btn btn-primary"
+            class="btn btn-primary" 
             *hasPermission="'roles.editar'"
-            [routerLink]="['/configuracion/roles/editar', rolId]">
-            <i class="fas fa-edit"></i>
-            Editar
+            (click)="editarRol()">
+            <i class="fas fa-edit"></i> Editar Rol
           </button>
         </div>
       </form>
     </div>
+  </div>
+</app-layout>
 
-    <!-- Información adicional en modo ver -->
-    <div class="page-content-wrapper mt-4" *ngIf="modo === 'ver' && rolId">
-      <h4 class="mb-3">Acciones disponibles</h4>
-      <div class="row">
-        <div class="col-12 col-md-6 mb-3">
-          <button 
-            class="btn btn-secondary btn-block"
-            *hasPermission="'roles.editar'"
-            [routerLink]="['/configuracion/roles/permisos', rolId]">
-            <i class="fas fa-key"></i>
-            Gestionar Permisos
-          </button>
+<!-- Modal de Permisos -->
+<app-modal 
+  *ngIf="showPermisosModal"
+  title="Gestionar Permisos"
+  size="large"
+  (close)="cerrarModalPermisos()">
+  
+  <div modal-body>
+    <p class="mb-4">Seleccione los permisos que desea asignar al rol:</p>
+    
+    <!-- Búsqueda en el modal -->
+    <div class="form-group mb-3">
+      <input 
+        type="text" 
+        class="form-control"
+        [(ngModel)]="busquedaPermisoModal"
+        placeholder="Buscar permisos por nombre o módulo...">
+    </div>
+
+    <!-- Lista de permisos agrupados por módulo -->
+    <div class="permisos-list">
+      <div class="modulo-group" *ngFor="let modulo of modulosConPermisos">
+        <h5 class="modulo-title">
+          <i class="fas fa-folder me-2"></i>
+          {{ capitalize(modulo.nombre) }}
+        </h5>
+        
+        <div class="permisos-grid">
+          <div class="form-check" *ngFor="let permiso of modulo.permisos">
+            <input 
+              type="checkbox" 
+              class="form-check-input" 
+              [id]="'permiso-' + permiso.id"
+              [checked]="tienePermiso(permiso.nombre)"
+              (change)="togglePermiso(permiso.nombre)">
+            <label class="form-check-label" [for]="'permiso-' + permiso.id">
+              <strong>{{ permiso.descripcion }}</strong>
+              <small class="text-muted d-block">{{ permiso.nombre }}</small>
+            </label>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Resumen de selección -->
+    <div class="selection-summary mt-4">
+      <strong>Permisos seleccionados:</strong> {{ permisosSeleccionados.length }}
+    </div>
   </div>
-</app-layout>
+  
+  <div modal-footer>
+    <button type="button" class="btn btn-secondary" (click)="cerrarModalPermisos()">
+      Cancelar
+    </button>
+    <button type="button" class="btn btn-primary" (click)="confirmarPermisos()">
+      Aceptar
+    </button>
+  </div>
+</app-modal>

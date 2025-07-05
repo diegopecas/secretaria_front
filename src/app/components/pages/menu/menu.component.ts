@@ -25,15 +25,6 @@ interface MenuItem {
 export class MenuComponent implements OnInit {
   allMenuItems: MenuItem[] = [
     {
-      title: 'Registro Diario',
-      icon: '📝',
-      route: '/registro-diario',
-      description: 'Registre sus actividades diarias',
-      color: '#FFD700',
-      new: true,
-      permissions: ['registro.ver']
-    },
-    {
       title: 'Reportes',
       icon: '📊',
       route: '/reportes',
@@ -50,7 +41,6 @@ export class MenuComponent implements OnInit {
       permissions: ['config.ver']
     }
   ];
-
   menuItems: MenuItem[] = [];
   currentUser: User | null = null;
 

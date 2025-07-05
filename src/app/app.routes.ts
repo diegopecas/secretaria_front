@@ -1,11 +1,9 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/pages/login/login.component';
 import { MenuComponent } from './components/pages/menu/menu.component';
-import { RegistroDiarioComponent } from './components/pages/registro-diario/registro-diario.component';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
 import { ConfiguracionComponent } from './components/pages/configuracion/configuracion.component';
-import { GestionPermisosComponent } from './components/pages/configuracion/roles/gestion-permisos/gestion-permisos.component';
 import { GestionRolComponent } from './components/pages/configuracion/roles/gestion-rol/gestion-rol.component';
 import { RolesComponent } from './components/pages/configuracion/roles/roles.component';
 import { UsuariosComponent } from './components/pages/configuracion/usuarios/usuarios.component';
@@ -26,14 +24,6 @@ export const routes: Routes = [
     component: MenuComponent,
     canActivate: [authGuard],
     data: { breadcrumb: 'Menú Principal' }
-  },
-  {
-    path: 'registro-diario',
-    component: RegistroDiarioComponent,
-    canActivate: [authGuard, roleGuard],
-    data: {
-      permissions: ['registro.ver']
-    }
   },
   {
     path: 'configuracion',
@@ -91,7 +81,8 @@ export const routes: Routes = [
     component: GestionRolComponent,
     canActivate: [authGuard, roleGuard],
     data: {
-      permissions: ['roles.crear']
+      permissions: ['roles.crear'],
+      mode: 'create'
     }
   },
   {
@@ -99,7 +90,8 @@ export const routes: Routes = [
     component: GestionRolComponent,
     canActivate: [authGuard, roleGuard],
     data: {
-      permissions: ['roles.editar']
+      permissions: ['roles.editar'],
+      mode: 'edit'
     }
   },
   {
@@ -107,15 +99,8 @@ export const routes: Routes = [
     component: GestionRolComponent,
     canActivate: [authGuard, roleGuard],
     data: {
-      permissions: ['roles.ver']
-    }
-  },
-  {
-    path: 'configuracion/roles/permisos/:id',
-    component: GestionPermisosComponent,
-    canActivate: [authGuard, roleGuard],
-    data: {
-      permissions: ['roles.editar']
+      permissions: ['roles.ver'],
+      mode: 'view'
     }
   },
   {
@@ -123,4 +108,3 @@ export const routes: Routes = [
     redirectTo: '/login'
   }
 ];
-
