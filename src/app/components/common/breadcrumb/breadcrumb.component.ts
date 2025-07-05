@@ -30,7 +30,9 @@ export class BreadcrumbComponent implements OnInit {
     'reportes': 'Reportes',
     'editar': 'Editar',
     'crear': 'Crear',
-    'detalle': 'Detalle'
+    'detalle': 'Detalle',
+    'permisos': 'Permisos',
+    'gestion': 'Gestión'
   };
 
   constructor(
@@ -60,21 +62,42 @@ export class BreadcrumbComponent implements OnInit {
     const breadcrumbs: Breadcrumb[] = [];
     const url = this.router.url;
     
+    // Remover el hash y query params si existen
+    const cleanUrl = url.split('?')[0].split('#')[0];
+    
     // Dividir la URL en segmentos
-    const segments = url.split('/').filter(segment => segment !== '');
+    const segments = cleanUrl.split('/').filter(segment => segment !== '');
     
     let currentUrl = '';
+    const processedSegments: { segment: string, url: string }[] = [];
     
+    // Primero, procesar todos los segmentos para construir las URLs correctas
     segments.forEach((segment, index) => {
+      // Si es un ID numérico, no lo procesamos como segmento individual
+      if (this.isNumeric(segment)) {
+        return;
+      }
+      
       currentUrl += `/${segment}`;
+      processedSegments.push({ segment, url: currentUrl });
+    });
+    
+    // Ahora construir los breadcrumbs
+    processedSegments.forEach((item, index) => {
+      const { segment, url } = item;
+      const isLast = index === processedSegments.length - 1;
       
       // Obtener el label para este segmento
-      const label = this.routeLabels[segment] || this.formatLabel(segment);
+      let label = this.routeLabels[segment] || this.formatLabel(segment);
+      
+      // Si es el último segmento y es una acción (crear, editar, detalle)
+      // no lo hacemos clickeable
+      const isAction = ['crear', 'editar', 'detalle'].includes(segment);
       
       breadcrumbs.push({
         label: label,
-        url: currentUrl,
-        isActive: index === segments.length - 1
+        url: url,
+        isActive: isLast || (isAction && isLast)
       });
     });
     
@@ -87,5 +110,9 @@ export class BreadcrumbComponent implements OnInit {
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
+  }
+
+  private isNumeric(value: string): boolean {
+    return !isNaN(Number(value)) && !isNaN(parseFloat(value));
   }
 }
