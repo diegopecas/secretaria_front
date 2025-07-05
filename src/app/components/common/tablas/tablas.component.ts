@@ -315,7 +315,7 @@ export class TablasComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('TablasComponent - ngOnChanges', changes);
+
 
     if (changes["raiz"]) {
       this.path = changes["raiz"]["currentValue"];
@@ -334,7 +334,6 @@ export class TablasComponent implements OnChanges {
       });
     }
     if (changes["datos"]) {
-      console.log('TablasComponent - Datos cambiados:', changes["datos"]["currentValue"]);
       this.tabla.datos = Array.isArray(changes["datos"]["currentValue"]) ?
         changes["datos"]["currentValue"] : [];
 
@@ -527,24 +526,18 @@ export class TablasComponent implements OnChanges {
 
   // Método mejorado para filtrar datos - SIN COLLECT.JS
   filtrarDatos() {
-    console.log('TablasComponent - filtrarDatos', {
-      datos: this.tabla.datos?.length || 0,
-      busqueda: this.buscarTexto,
-      filtrosActivos: Object.keys(this.filtrosActivos).length
-    });
+
 
     // Si no hay datos en absoluto, inicializar con página vacía y salir
     if (!this.tabla.datos || !Array.isArray(this.tabla.datos) || this.tabla.datos.length === 0) {
       this.tabla.datosFiltrados = [];
       this.tabla.paginas = [[]];
       this.tabla.paginaActual = 0;
-      console.log('TablasComponent - No hay datos para filtrar');
       return;
     }
 
     // Primero aplicar la búsqueda de texto
     let datosFiltrados = this.searchPipe.transform(this.tabla.datos, this.buscarTexto);
-    console.log('TablasComponent - Después de búsqueda:', datosFiltrados.length);
 
     // Luego aplicar los filtros de selección múltiple
     if (Object.keys(this.filtrosActivos).length > 0) {
@@ -558,7 +551,6 @@ export class TablasComponent implements OnChanges {
           return this.filtrosActivos[columna].includes(item[columna]);
         });
       });
-      console.log('TablasComponent - Después de filtros:', datosFiltrados.length);
     }
 
     this.tabla.datosFiltrados = datosFiltrados;
@@ -589,11 +581,6 @@ export class TablasComponent implements OnChanges {
       this.tabla.paginaActual = 0;
     }
 
-    console.log('TablasComponent - Resultados finales:', {
-      datosFiltrados: this.tabla.datosFiltrados.length,
-      paginas: this.tabla.paginas.length,
-      paginaActual: this.tabla.paginaActual
-    });
   }
 
   seleccionar(accion: any, id: any, registro: any) {

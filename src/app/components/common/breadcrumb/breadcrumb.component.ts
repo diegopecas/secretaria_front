@@ -50,12 +50,10 @@ export class BreadcrumbComponent implements OnInit {
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
         this.breadcrumbs = this.buildBreadcrumbs();
-        console.log('Breadcrumbs generados:', this.breadcrumbs); // Debug
       });
     
     // Generar inicial
     this.breadcrumbs = this.buildBreadcrumbs();
-    console.log('Breadcrumbs iniciales:', this.breadcrumbs); // Debug
   }
 
   private buildBreadcrumbs(): Breadcrumb[] {
