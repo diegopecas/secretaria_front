@@ -1,0 +1,156 @@
+<app-layout backRoute="/configuracion" backLabel="Volver a configuración">
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <app-breadcrumb></app-breadcrumb>
+        
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-cogs"></i>
+          </span>
+          Configuración del Sistema
+        </h1>
+        <p class="page-subtitle">Personalice la apariencia y configuración general del sistema</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Formulario -->
+    <div class="page-content-wrapper">
+      <form [formGroup]="configForm" (ngSubmit)="onSubmit()">
+        <div class="row">
+          <div class="col-12 col-lg-8">
+            <h3 class="mb-4">Información de la Aplicación</h3>
+            
+            <!-- Nombre de la aplicación -->
+            <div class="form-group">
+              <label for="name">Nombre de la Aplicación <span class="text-danger">*</span></label>
+              <input 
+                type="text" 
+                id="name" 
+                formControlName="name"
+                class="form-control"
+                [class.is-invalid]="f['name'].invalid && f['name'].touched"
+                placeholder="Ej: Sistema de Gestión">
+              <div *ngIf="f['name'].invalid && f['name'].touched" class="invalid-feedback">
+                <span *ngIf="f['name'].errors?.['required']">El nombre es requerido</span>
+              </div>
+            </div>
+
+            <!-- Nombre corto -->
+            <div class="form-group">
+              <label for="shortName">Nombre Corto / Inicial <span class="text-danger">*</span></label>
+              <input 
+                type="text" 
+                id="shortName" 
+                formControlName="shortName"
+                class="form-control"
+                [class.is-invalid]="f['shortName'].invalid && f['shortName'].touched"
+                placeholder="Ej: S"
+                maxlength="3">
+              <div *ngIf="f['shortName'].invalid && f['shortName'].touched" class="invalid-feedback">
+                <span *ngIf="f['shortName'].errors?.['required']">El nombre corto es requerido</span>
+                <span *ngIf="f['shortName'].errors?.['maxlength']">Máximo 3 caracteres</span>
+              </div>
+            </div>
+
+            <!-- Icono -->
+            <div class="form-group">
+              <label for="icon">Ícono (Emoji o Símbolo)</label>
+              <input 
+                type="text" 
+                id="icon" 
+                formControlName="icon"
+                class="form-control"
+                placeholder="Ej: 📋, 🏢, 📊"
+                maxlength="5">
+              <small class="form-text text-muted">
+                Puede usar un emoji o dejar vacío para usar el nombre corto
+              </small>
+            </div>
+
+            <!-- Descripción -->
+            <div class="form-group">
+              <label for="description">Descripción <span class="text-danger">*</span></label>
+              <textarea 
+                id="description" 
+                formControlName="description"
+                class="form-control"
+                [class.is-invalid]="f['description'].invalid && f['description'].touched"
+                placeholder="Descripción breve del sistema"
+                rows="3"></textarea>
+              <div *ngIf="f['description'].invalid && f['description'].touched" class="invalid-feedback">
+                <span *ngIf="f['description'].errors?.['required']">La descripción es requerida</span>
+              </div>
+            </div>
+
+            <!-- Texto del footer -->
+            <div class="form-group">
+              <label for="footer">Texto del Pie de Página <span class="text-danger">*</span></label>
+              <input 
+                type="text" 
+                id="footer" 
+                formControlName="footer"
+                class="form-control"
+                [class.is-invalid]="f['footer'].invalid && f['footer'].touched"
+                placeholder="Ej: Sistema © 2025">
+              <div *ngIf="f['footer'].invalid && f['footer'].touched" class="invalid-feedback">
+                <span *ngIf="f['footer'].errors?.['required']">El texto del footer es requerido</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna lateral - Vista previa -->
+          <div class="col-12 col-lg-4">
+            <div class="card">
+              <div class="card-header">
+                <h4>
+                  <i class="fas fa-eye me-2"></i>
+                  Vista Previa
+                </h4>
+              </div>
+              
+              <div class="card-body text-center">
+                <div class="preview-container">
+                  <!-- Logo preview -->
+                  <div class="logo mb-3">
+                    {{ previewIcon || previewShortName }}
+                  </div>
+                  
+                  <!-- Nombre preview -->
+                  <h3 class="mb-2">{{ previewName }}</h3>
+                  
+                  <!-- Descripción preview -->
+                  <p class="text-muted mb-3">{{ previewDescription }}</p>
+                  
+                  <!-- Footer preview -->
+                  <hr>
+                  <small class="text-muted">{{ previewFooter }}</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Información -->
+            <div class="alert alert-info mt-3">
+              <i class="fas fa-info-circle me-2"></i>
+              Los cambios se aplicarán inmediatamente en toda la aplicación.
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions mt-5">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="configForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm mr-2"></span>
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</app-layout>

@@ -1,9 +1,9 @@
-// app.component.ts
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { AppConfigService } from './services/app-config.service';
 import { NotificationComponent } from './components/common/notification/notification.component';
-
-import { ThemeService } from './services/theme.service';
 import { SpinnerComponent } from './components/common/spinner/spinner.component';
 
 @Component({
@@ -14,12 +14,18 @@ import { SpinnerComponent } from './components/common/spinner/spinner.component'
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'secretaria';
+  constructor(
+    private titleService: Title,
+    private configService: AppConfigService
+  ) {}
 
-  constructor(private themeService: ThemeService) {}
-
-  ngOnInit(): void {
-    // El servicio de temas se inicializa automáticamente
-    // y aplica el tema guardado o el preferido del sistema
+  ngOnInit() {
+    // Establecer título inicial
+    this.titleService.setTitle(this.configService.appName);
+    
+    // Suscribirse a cambios de configuración
+    this.configService.config$.subscribe(config => {
+      this.titleService.setTitle(config.name);
+    });
   }
 }

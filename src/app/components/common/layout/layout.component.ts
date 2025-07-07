@@ -7,6 +7,7 @@ import { AuthService, User } from '../../../services/auth.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ThemeToggleComponent } from '../../common/theme-toggle/theme-toggle.component';
 import { Subject, takeUntil } from 'rxjs';
+import { AppConfigService } from '../../../services/app-config.service';
 
 @Component({
   selector: 'app-layout',
@@ -27,7 +28,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    public configService: AppConfigService 
   ) {
     this.checkScreenSize();
   }
@@ -95,7 +97,6 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.closeMobileMenu();
-    
     this.notificationService.confirm(
       '¿Está seguro que desea cerrar sesión?',
       () => {

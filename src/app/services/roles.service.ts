@@ -79,7 +79,6 @@ export class RolesService {
           console.log('Error en crear:', respuesta);
           throw respuesta.error;
         }
-        console.log('Rol creado:', respuesta);
         return respuesta;
       }),
       catchError(this.handleError)
@@ -95,7 +94,6 @@ export class RolesService {
           console.log('Error en actualizar:', respuesta);
           throw respuesta.error;
         }
-        console.log('Rol actualizado:', respuesta);
         return respuesta;
       }),
       catchError(this.handleError)
@@ -115,7 +113,6 @@ export class RolesService {
           console.log('Error en eliminar:', respuesta);
           throw respuesta.error;
         }
-        console.log('Rol eliminado:', respuesta);
         return respuesta;
       }),
       catchError(this.handleError)
@@ -157,7 +154,6 @@ export class RolesService {
           console.log('Error en asignar permisos:', respuesta);
           throw respuesta.error;
         }
-        console.log('Permisos asignados:', respuesta);
         return respuesta;
       }),
       catchError(this.handleError)

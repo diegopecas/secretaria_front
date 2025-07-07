@@ -121,7 +121,6 @@ export class UsuariosComponent implements OnInit {
     this.usuariosService.obtenerTodos().subscribe({
       next: (response) => {
         const body = response.body || [];
-        console.log("Consumo servicio usuarios", body);
         this.usuarios = this.procesarUsuarios(body);
       },
       error: (error) => {
@@ -200,8 +199,6 @@ export class UsuariosComponent implements OnInit {
   }
 
   ejecutarAccion(event: any) {
-    console.log('Acción ejecutada:', event);
-    
     switch (event.accion) {
       case 'consultar':
         this.verDetalleUsuario(event.id);

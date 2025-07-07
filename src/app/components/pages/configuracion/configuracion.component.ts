@@ -38,6 +38,14 @@ export class ConfiguracionComponent implements OnInit {
       description: 'Gestión de roles y permisos',
       color: '#FFD700',
       permissions: ['roles.ver']
+    },
+    {
+      title: 'Sistema',
+      icon: '⚙️',
+      route: '/configuracion/sistema',
+      description: 'Configuración general del sistema',
+      color: '#4A90E2',
+      permissions: ['config.editar']
     }
   ];
 

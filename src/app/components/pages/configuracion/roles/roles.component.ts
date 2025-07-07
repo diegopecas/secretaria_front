@@ -94,7 +94,6 @@ export class RolesComponent implements OnInit {
     this.rolesService.obtenerTodos().subscribe({
       next: (response) => {
         const body = response.body || [];
-        console.log("Consumo servicio roles", body);
         
         // Cargar permisos para cada rol
         this.cargarPermisosRoles(body);
@@ -205,8 +204,6 @@ export class RolesComponent implements OnInit {
   }
 
   ejecutarAccion(event: any) {
-    console.log('Acción ejecutada:', event);
-    
     switch (event.accion) {
       case 'consultar':
         this.verDetalleRol(event.id);

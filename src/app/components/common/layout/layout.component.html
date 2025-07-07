@@ -5,20 +5,16 @@
     <div class="header-content">
       <!-- Sección izquierda -->
       <div class="header-left">
-        <button 
-          *ngIf="backRoute"
-          class="btn-icon"
-          (click)="goBack()"
-          [attr.aria-label]="backLabel">
+        <button *ngIf="backRoute" class="btn-icon" (click)="goBack()" [attr.aria-label]="backLabel">
           <i class="fas fa-arrow-left"></i>
         </button>
-        
+
         <div class="logo-wrapper">
-          <div class="logo">S</div>
-          <h1 class="logo-text">Secretaría</h1>
+          <div class="logo">{{ configService.appIcon || configService.appShortName }}</div>
+          <h1 class="logo-text">{{ configService.appName }}</h1>
         </div>
       </div>
-      
+
       <!-- Sección derecha - SOLO DESKTOP -->
       <div class="header-right" *ngIf="!isMobile">
         <!-- Info del usuario -->
@@ -40,22 +36,15 @@
         <!-- Acciones -->
         <div class="header-actions">
           <app-theme-toggle></app-theme-toggle>
-          
-          <button 
-            class="btn-icon btn-logout" 
-            (click)="logout()" 
-            [attr.aria-label]="'Cerrar sesión'">
+
+          <button class="btn-icon btn-logout" (click)="logout()" [attr.aria-label]="'Cerrar sesión'">
             <i class="fas fa-sign-out-alt"></i>
           </button>
         </div>
       </div>
 
       <!-- Botón menú móvil - SOLO MÓVIL -->
-      <button 
-        *ngIf="isMobile"
-        class="btn-menu-mobile"
-        (click)="toggleMobileMenu()"
-        [attr.aria-label]="'Menú'">
+      <button *ngIf="isMobile" class="btn-menu-mobile" (click)="toggleMobileMenu()" [attr.aria-label]="'Menú'">
         <i class="fas fa-bars"></i>
       </button>
     </div>
@@ -65,14 +54,11 @@
   <div class="mobile-sidebar" [class.active]="showMobileMenu">
     <div class="mobile-sidebar-header">
       <h3>Menú</h3>
-      <button 
-        class="btn-close"
-        (click)="closeMobileMenu()"
-        [attr.aria-label]="'Cerrar menú'">
+      <button class="btn-close" (click)="closeMobileMenu()" [attr.aria-label]="'Cerrar menú'">
         <i class="fas fa-times"></i>
       </button>
     </div>
-    
+
     <div class="mobile-sidebar-content" *ngIf="currentUser">
       <!-- Info del usuario -->
       <div class="mobile-user-section">
@@ -108,10 +94,7 @@
   </div>
 
   <!-- Overlay -->
-  <div 
-    class="mobile-overlay" 
-    [class.active]="showMobileMenu"
-    (click)="closeMobileMenu()">
+  <div class="mobile-overlay" [class.active]="showMobileMenu" (click)="closeMobileMenu()">
   </div>
 
   <!-- Content -->

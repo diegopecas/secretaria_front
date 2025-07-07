@@ -61,7 +61,6 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, password })
       .pipe(
         tap(response => {
-          console.log('Login response:', response);
           if (response.success && response.access_token && response.user) {
             this.handleAuthSuccess(response);
           }
@@ -79,10 +78,8 @@ export class AuthService {
 
   logout(): void {
     const token = this.getAccessToken();
-    
     // Cancelar auto-renovación
     this.cancelTokenRefresh();
-    
     if (token) {
       const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
       this.http.post(`${this.apiUrl}/logout`, {}, { headers }).subscribe({

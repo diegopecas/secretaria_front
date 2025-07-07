@@ -15,7 +15,6 @@ export class BuscarComponent {
   public valor = null;
 
   enviar() {
-    console.log("enviar", this.valor);
     this.buscar.emit(this.valor);
   }
 }

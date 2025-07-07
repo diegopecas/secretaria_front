@@ -83,7 +83,6 @@ export class UsuariosService {
           console.log('Error en crear:', respuesta);
           throw respuesta.error;
         }
-        console.log('Usuario creado:', respuesta);
         return respuesta;
       }),
       catchError(this.handleError)
@@ -92,7 +91,6 @@ export class UsuariosService {
 
   actualizar(usuario: Usuario): Observable<any> {
     const body = JSON.stringify(usuario);
-    console.log("Actualizar usuario:", body);
     return this.http.put<any>(this.servicio, body, this.getHttpOptions()).pipe(
       tap((response: HttpResponse<any>) => {
         let respuesta: any = response.body;
@@ -100,7 +98,6 @@ export class UsuariosService {
           console.log('Error en actualizar:', respuesta);
           throw respuesta.error;
         }
-        console.log('Usuario actualizado:', respuesta);
         return respuesta;
       }),
       catchError(this.handleError)
@@ -120,7 +117,6 @@ export class UsuariosService {
           console.log('Error en eliminar:', respuesta);
           throw respuesta.error;
         }
-        console.log('Usuario eliminado:', respuesta);
         return respuesta;
       }),
       catchError(this.handleError)
@@ -152,7 +148,6 @@ export class UsuariosService {
           console.log('Error en asignar roles:', respuesta);
           throw respuesta.error;
         }
-        console.log('Roles asignados:', respuesta);
         return respuesta;
       }),
       catchError(this.handleError)

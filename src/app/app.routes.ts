@@ -104,6 +104,14 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'configuracion/sistema',
+    loadComponent: () => import('./components/pages/configuracion/sistema/configuracion-sistema.component').then(m => m.ConfiguracionSistemaComponent),
+    canActivate: [authGuard, roleGuard],
+    data: {
+      permissions: ['config.editar']
+    }
+  },
+  {
     path: '**',
     redirectTo: '/login'
   }

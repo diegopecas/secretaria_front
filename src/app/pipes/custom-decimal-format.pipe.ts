@@ -43,8 +43,6 @@ export class CustomDecimalFormatPipe implements PipeTransform {
     const formattedValue = value
       .toFixed(decimal)
       .replace(/\d(?=(\d{3})+\.)/g, "$&,");
-
-    console.log("PIPE VALUE", value, decimal, formattedValue);
     // Reemplazar el punto decimal por la coma
     return formattedValue
       .replaceAll(",", ";")

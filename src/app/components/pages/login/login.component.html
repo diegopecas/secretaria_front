@@ -1,8 +1,8 @@
 <div class="login-container">
     <div class="logo-section">
-        <div class="logo">S</div>
-        <h2>Secretaría</h2>
-        <p class="subtitle">Sistema de Gestión Administrativa</p>
+        <div class="logo">{{ configService.appIcon || configService.appShortName }}</div>
+        <h2>{{ configService.appName }}</h2>
+        <p class="subtitle">{{ configService.appDescription }}</p>
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">

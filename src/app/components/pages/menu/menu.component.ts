@@ -74,8 +74,6 @@ export class MenuComponent implements OnInit {
       return;
     }
 
-    console.log('Usuario actual:', this.currentUser); // Debug
-    console.log('Permisos del usuario:', this.currentUser.permisos); // Debug
 
     this.menuItems = this.allMenuItems.filter(item => {
       // Si no tiene restricciones de permisos, mostrar
@@ -87,12 +85,9 @@ export class MenuComponent implements OnInit {
       const hasPermission = item.requireAll
         ? item.permissions.every(p => this.authService.hasPermission(p))
         : this.authService.hasAnyPermission(item.permissions);
-
-      console.log(`Item ${item.title} requiere ${item.permissions}, tiene permiso: ${hasPermission}`); // Debug
       return hasPermission;
     });
 
-    console.log('Items filtrados:', this.menuItems.length); // Debug
   }
 
   navigateTo(route: string) {
