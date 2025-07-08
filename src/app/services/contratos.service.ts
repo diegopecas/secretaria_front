@@ -27,7 +27,7 @@ export interface ValorMensual {
   id?: number;
   contrato_id?: number;
   mes: number;
-  año: number;
+  anio: number;
   valor: number;
   porcentaje_avance_fisico?: number;
   porcentaje_avance_financiero?: number;

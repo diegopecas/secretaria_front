@@ -8,16 +8,14 @@ import { CuentasCobroComponent } from './cuentas-cobro.component';
 // Componentes de contratistas
 import { ListaContratistasComponent } from './contratistas/lista-contratistas/lista-contratistas.component';
 import { GestionContratistaComponent } from './contratistas/gestion-contratista/gestion-contratista.component';
-import { GestionEntidadComponent } from './entidades/gestion-entidad/gestion-entidad.component';
+
+// Componentes de entidades
 import { ListaEntidadesComponent } from './entidades/lista-entidades/lista-entidades.component';
+import { GestionEntidadComponent } from './entidades/gestion-entidad/gestion-entidad.component';
 
-// Componentes de entidades (por crear)
-// import { ListaEntidadesComponent } from './entidades/lista-entidades/lista-entidades.component';
-// import { GestionEntidadComponent } from './entidades/gestion-entidad/gestion-entidad.component';
-
-// Componentes de contratos (por crear)
-// import { ListaContratosComponent } from './contratos/lista-contratos/lista-contratos.component';
-// import { GestionContratoComponent } from './contratos/gestion-contrato/gestion-contrato.component';
+// Componentes de contratos
+import { ListaContratosComponent } from './contratos/lista-contratos/lista-contratos.component';
+import { GestionContratoComponent } from './contratos/gestion-contrato/gestion-contrato.component';
 
 export const CUENTAS_COBRO_ROUTES: Routes = [
   {
@@ -71,7 +69,7 @@ export const CUENTAS_COBRO_ROUTES: Routes = [
     ]
   },
 
-  // Rutas de Entidades (placeholder)
+  // Rutas de Entidades
   {
     path: 'entidades',
     canActivate: [authGuard, roleGuard],
@@ -112,7 +110,7 @@ export const CUENTAS_COBRO_ROUTES: Routes = [
     ]
   },
 
-  // Rutas de Contratos (placeholder)
+  // Rutas de Contratos
   {
     path: 'contratos',
     canActivate: [authGuard, roleGuard],
@@ -123,9 +121,32 @@ export const CUENTAS_COBRO_ROUTES: Routes = [
     children: [
       {
         path: '',
-        redirectTo: '/cuentas-cobro',
-        pathMatch: 'full'
-        // component: ListaContratosComponent,
+        component: ListaContratosComponent,
+        data: { breadcrumb: null }
+      },
+      {
+        path: 'crear',
+        component: GestionContratoComponent,
+        data: {
+          breadcrumb: 'Crear',
+          mode: 'create'
+        }
+      },
+      {
+        path: 'editar/:id',
+        component: GestionContratoComponent,
+        data: {
+          breadcrumb: 'Editar',
+          mode: 'edit'
+        }
+      },
+      {
+        path: 'detalle/:id',
+        component: GestionContratoComponent,
+        data: {
+          breadcrumb: 'Detalle',
+          mode: 'view'
+        }
       }
     ]
   },

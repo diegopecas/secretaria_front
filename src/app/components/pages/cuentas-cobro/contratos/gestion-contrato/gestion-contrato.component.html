@@ -1,0 +1,491 @@
+<app-layout [backRoute]="backRoute" backLabel="Volver a contratos">
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <span style="font-size: 1.5rem;">{{ pageIcon }}</span>
+          </span>
+          {{ pageTitle }}
+        </h1>
+        <p class="page-subtitle">{{ pageSubtitle }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Formulario -->
+    <div class="page-content-wrapper">
+      <form [formGroup]="contratoForm" (ngSubmit)="onSubmit()">
+        <!-- Acordeón -->
+        <div class="accordion-container">
+          
+          <!-- Sección 1: Información Básica -->
+          <div class="accordion-item" [class.active]="isAccordionActive('informacion-basica')">
+            <div class="accordion-header" (click)="toggleAccordion('informacion-basica')">
+              <h3>
+                <i class="fas fa-file-contract me-2"></i>
+                Información Básica del Contrato
+              </h3>
+              <i class="fas" [ngClass]="isAccordionActive('informacion-basica') ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </div>
+            
+            <div class="accordion-content" *ngIf="isAccordionActive('informacion-basica')">
+              <div class="row">
+                <!-- Número de contrato -->
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label for="numero_contrato">
+                      Número de Contrato
+                      <span class="text-danger" *ngIf="!isViewMode">*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      id="numero_contrato" 
+                      formControlName="numero_contrato"
+                      class="form-control"
+                      [class.is-invalid]="f['numero_contrato'].invalid && f['numero_contrato'].touched"
+                      placeholder="Ej: CONT-2024-001">
+                    <div *ngIf="f['numero_contrato'].invalid && f['numero_contrato'].touched" class="invalid-feedback">
+                      <span *ngIf="f['numero_contrato'].errors?.['required']">El número es requerido</span>
+                      <span *ngIf="f['numero_contrato'].errors?.['minlength']">Mínimo 3 caracteres</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Contratista -->
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label for="contratista_id">
+                      Contratista
+                      <span class="text-danger" *ngIf="!isViewMode">*</span>
+                    </label>
+                    <select 
+                      id="contratista_id" 
+                      formControlName="contratista_id"
+                      class="form-control"
+                      [class.is-invalid]="f['contratista_id'].invalid && f['contratista_id'].touched">
+                      <option value="">-- Seleccione --</option>
+                      <option *ngFor="let contratista of contratistas" [value]="contratista.id">
+                        {{ contratista.nombre_completo }} ({{ contratista.identificacion }})
+                      </option>
+                    </select>
+                    <div *ngIf="f['contratista_id'].invalid && f['contratista_id'].touched" class="invalid-feedback">
+                      <span *ngIf="f['contratista_id'].errors?.['required']">El contratista es requerido</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Entidad -->
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label for="entidad_id">
+                      Entidad Contratante
+                      <span class="text-danger" *ngIf="!isViewMode">*</span>
+                    </label>
+                    <select 
+                      id="entidad_id" 
+                      formControlName="entidad_id"
+                      class="form-control"
+                      [class.is-invalid]="f['entidad_id'].invalid && f['entidad_id'].touched">
+                      <option value="">-- Seleccione --</option>
+                      <option *ngFor="let entidad of entidades" [value]="entidad.id">
+                        {{ entidad.nombre }}
+                      </option>
+                    </select>
+                    <div *ngIf="f['entidad_id'].invalid && f['entidad_id'].touched" class="invalid-feedback">
+                      <span *ngIf="f['entidad_id'].errors?.['required']">La entidad es requerida</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Fechas -->
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label for="fecha_suscripcion">
+                      Fecha de Suscripción
+                      <span class="text-danger" *ngIf="!isViewMode">*</span>
+                    </label>
+                    <input 
+                      type="date" 
+                      id="fecha_suscripcion" 
+                      formControlName="fecha_suscripcion"
+                      class="form-control"
+                      [class.is-invalid]="f['fecha_suscripcion'].invalid && f['fecha_suscripcion'].touched">
+                    <div *ngIf="f['fecha_suscripcion'].invalid && f['fecha_suscripcion'].touched" class="invalid-feedback">
+                      <span *ngIf="f['fecha_suscripcion'].errors?.['required']">La fecha es requerida</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label for="fecha_inicio">
+                      Fecha de Inicio
+                      <span class="text-danger" *ngIf="!isViewMode">*</span>
+                    </label>
+                    <input 
+                      type="date" 
+                      id="fecha_inicio" 
+                      formControlName="fecha_inicio"
+                      class="form-control"
+                      [class.is-invalid]="(f['fecha_inicio'].invalid && f['fecha_inicio'].touched) || contratoForm.errors?.['fechasInvalidas']">
+                    <div *ngIf="f['fecha_inicio'].invalid && f['fecha_inicio'].touched" class="invalid-feedback">
+                      <span *ngIf="f['fecha_inicio'].errors?.['required']">La fecha es requerida</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label for="fecha_terminacion">
+                      Fecha de Terminación
+                      <span class="text-danger" *ngIf="!isViewMode">*</span>
+                    </label>
+                    <input 
+                      type="date" 
+                      id="fecha_terminacion" 
+                      formControlName="fecha_terminacion"
+                      class="form-control"
+                      [class.is-invalid]="(f['fecha_terminacion'].invalid && f['fecha_terminacion'].touched) || contratoForm.errors?.['fechasInvalidas']">
+                    <div *ngIf="f['fecha_terminacion'].invalid && f['fecha_terminacion'].touched" class="invalid-feedback">
+                      <span *ngIf="f['fecha_terminacion'].errors?.['required']">La fecha es requerida</span>
+                    </div>
+                    <div *ngIf="contratoForm.errors?.['fechasInvalidas'] && f['fecha_terminacion'].touched" class="invalid-feedback d-block">
+                      La fecha de terminación debe ser posterior a la fecha de inicio
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Objeto del contrato -->
+                <div class="col-12">
+                  <div class="form-group">
+                    <label for="objeto_contrato">
+                      Objeto del Contrato
+                      <span class="text-danger" *ngIf="!isViewMode">*</span>
+                    </label>
+                    <textarea 
+                      id="objeto_contrato" 
+                      formControlName="objeto_contrato"
+                      class="form-control"
+                      [class.is-invalid]="f['objeto_contrato'].invalid && f['objeto_contrato'].touched"
+                      placeholder="Describa el objeto del contrato"
+                      rows="3"></textarea>
+                    <div *ngIf="f['objeto_contrato'].invalid && f['objeto_contrato'].touched" class="invalid-feedback">
+                      <span *ngIf="f['objeto_contrato'].errors?.['required']">El objeto es requerido</span>
+                      <span *ngIf="f['objeto_contrato'].errors?.['minlength']">Mínimo 10 caracteres</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Valor total -->
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label for="valor_total">
+                      Valor Total
+                      <span class="text-danger" *ngIf="!isViewMode">*</span>
+                    </label>
+                    <input 
+                      type="number" 
+                      id="valor_total" 
+                      formControlName="valor_total"
+                      class="form-control"
+                      [class.is-invalid]="f['valor_total'].invalid && f['valor_total'].touched"
+                      placeholder="0"
+                      min="1">
+                    <div *ngIf="f['valor_total'].invalid && f['valor_total'].touched" class="invalid-feedback">
+                      <span *ngIf="f['valor_total'].errors?.['required']">El valor es requerido</span>
+                      <span *ngIf="f['valor_total'].errors?.['min']">El valor debe ser mayor a 0</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Dependencia -->
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label for="dependencia">Dependencia</label>
+                    <input 
+                      type="text" 
+                      id="dependencia" 
+                      formControlName="dependencia"
+                      class="form-control"
+                      placeholder="Ej: Secretaría de Hacienda">
+                  </div>
+                </div>
+
+                <!-- Unidad operativa -->
+                <div class="col-12 col-md-4">
+                  <div class="form-group">
+                    <label for="unidad_operativa">Unidad Operativa</label>
+                    <input 
+                      type="text" 
+                      id="unidad_operativa" 
+                      formControlName="unidad_operativa"
+                      class="form-control"
+                      placeholder="Ej: Área de Contratación">
+                  </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="col-12 col-md-4" *ngIf="mode !== 'create'">
+                  <div class="form-group">
+                    <label for="estado">Estado</label>
+                    <select 
+                      id="estado" 
+                      formControlName="estado"
+                      class="form-control">
+                      <option value="activo">Activo</option>
+                      <option value="suspendido">Suspendido</option>
+                      <option value="finalizado">Finalizado</option>
+                      <option value="liquidado">Liquidado</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección 2: Supervisores -->
+          <div class="accordion-item" [class.active]="isAccordionActive('supervisores')">
+            <div class="accordion-header" (click)="toggleAccordion('supervisores')">
+              <h3>
+                <i class="fas fa-user-tie me-2"></i>
+                Supervisores del Contrato
+                <span class="badge badge-primary ms-2">{{ supervisoresArray.length }}</span>
+              </h3>
+              <i class="fas" [ngClass]="isAccordionActive('supervisores') ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </div>
+            
+            <div class="accordion-content" *ngIf="isAccordionActive('supervisores')">
+              <div class="mb-3" *ngIf="!isViewMode">
+                <button type="button" class="btn btn-sm btn-primary" (click)="agregarSupervisor()">
+                  <i class="fas fa-plus"></i> Agregar Supervisor
+                </button>
+              </div>
+
+              <div formArrayName="supervisores">
+                <div class="supervisor-item" *ngFor="let supervisor of supervisoresArray.controls; let i = index" [formGroupName]="i">
+                  <div class="row align-items-end">
+                    <div class="col-12 col-md-5">
+                      <div class="form-group">
+                        <label>Nombre del Supervisor <span class="text-danger">*</span></label>
+                        <input 
+                          type="text" 
+                          formControlName="nombre"
+                          class="form-control"
+                          [class.is-invalid]="supervisor.get('nombre')?.invalid && supervisor.get('nombre')?.touched"
+                          placeholder="Nombre completo">
+                        <div *ngIf="supervisor.get('nombre')?.invalid && supervisor.get('nombre')?.touched" class="invalid-feedback">
+                          <span *ngIf="supervisor.get('nombre')?.errors?.['required']">El nombre es requerido</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="col-12 col-md-4">
+                      <div class="form-group">
+                        <label>Cargo</label>
+                        <input 
+                          type="text" 
+                          formControlName="cargo"
+                          class="form-control"
+                          placeholder="Cargo del supervisor">
+                      </div>
+                    </div>
+                    
+                    <div class="col-12 col-md-2">
+                      <div class="form-group">
+                        <label>Tipo</label>
+                        <select formControlName="tipo" class="form-control">
+                          <option value="principal">Principal</option>
+                          <option value="apoyo">Apoyo</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div class="col-12 col-md-1" *ngIf="!isViewMode">
+                      <button 
+                        type="button" 
+                        class="btn btn-sm btn-danger mb-3"
+                        (click)="eliminarSupervisor(i)"
+                        [disabled]="supervisoresArray.length === 1">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección 3: Obligaciones Contractuales -->
+          <div class="accordion-item" [class.active]="isAccordionActive('obligaciones')">
+            <div class="accordion-header" (click)="toggleAccordion('obligaciones')">
+              <h3>
+                <i class="fas fa-list-ol me-2"></i>
+                Obligaciones Contractuales
+                <span class="badge badge-primary ms-2">{{ obligacionesArray.length }}</span>
+              </h3>
+              <i class="fas" [ngClass]="isAccordionActive('obligaciones') ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </div>
+            
+            <div class="accordion-content" *ngIf="isAccordionActive('obligaciones')">
+              <div class="mb-3" *ngIf="!isViewMode">
+                <button type="button" class="btn btn-sm btn-primary" (click)="agregarObligacion()">
+                  <i class="fas fa-plus"></i> Agregar Obligación
+                </button>
+              </div>
+
+              <div formArrayName="obligaciones">
+                <div class="obligacion-item" *ngFor="let obligacion of obligacionesArray.controls; let i = index" [formGroupName]="i">
+                  <div class="row align-items-end">
+                    <div class="col-12 col-md-2">
+                      <div class="form-group">
+                        <label>Número <span class="text-danger">*</span></label>
+                        <input 
+                          type="number" 
+                          formControlName="numero_obligacion"
+                          class="form-control"
+                          readonly>
+                      </div>
+                    </div>
+                    
+                    <div class="col-12 col-md-9">
+                      <div class="form-group">
+                        <label>Descripción de la Obligación <span class="text-danger">*</span></label>
+                        <textarea 
+                          formControlName="descripcion"
+                          class="form-control"
+                          [class.is-invalid]="obligacion.get('descripcion')?.invalid && obligacion.get('descripcion')?.touched"
+                          placeholder="Describa la obligación contractual"
+                          rows="2"></textarea>
+                        <div *ngIf="obligacion.get('descripcion')?.invalid && obligacion.get('descripcion')?.touched" class="invalid-feedback">
+                          <span *ngIf="obligacion.get('descripcion')?.errors?.['required']">La descripción es requerida</span>
+                          <span *ngIf="obligacion.get('descripcion')?.errors?.['minlength']">Mínimo 10 caracteres</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="col-12 col-md-1" *ngIf="!isViewMode">
+                      <button 
+                        type="button" 
+                        class="btn btn-sm btn-danger mb-3"
+                        (click)="eliminarObligacion(i)"
+                        [disabled]="obligacionesArray.length === 1">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección 4: Valores Mensuales -->
+          <div class="accordion-item" [class.active]="isAccordionActive('valores')">
+            <div class="accordion-header" (click)="toggleAccordion('valores')">
+              <h3>
+                <i class="fas fa-calendar-alt me-2"></i>
+                Valores Mensuales
+                <span class="badge badge-primary ms-2">{{ valoresMensualesArray.length }}</span>
+              </h3>
+              <i class="fas" [ngClass]="isAccordionActive('valores') ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </div>
+            
+            <div class="accordion-content" *ngIf="isAccordionActive('valores')">
+              <div class="mb-3" *ngIf="!isViewMode">
+                <button type="button" class="btn btn-sm btn-primary me-2" (click)="agregarValorMensual()">
+                  <i class="fas fa-plus"></i> Agregar Mes
+                </button>
+                <button type="button" class="btn btn-sm btn-success" (click)="generarValoresMensuales()">
+                  <i class="fas fa-magic"></i> Generar Automáticamente
+                </button>
+              </div>
+
+              <div formArrayName="valores_mensuales">
+                <div class="table-responsive" *ngIf="valoresMensualesArray.length > 0">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Mes</th>
+                        <th>Año</th>
+                        <th>Valor</th>
+                        <th>% Avance Físico</th>
+                        <th>% Avance Financiero</th>
+                        <th *ngIf="!isViewMode" width="50"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let valor of valoresMensualesArray.controls; let i = index" [formGroupName]="i">
+                        <td>
+                          <select formControlName="mes" class="form-control form-control-sm">
+                            <option value="">-- Mes --</option>
+                            <option *ngFor="let mes of getMeses()" [value]="mes.value">{{ mes.label }}</option>
+                          </select>
+                        </td>
+                        <td>
+                          <input type="number" formControlName="anio" class="form-control form-control-sm" min="2020">
+                        </td>
+                        <td>
+                          <input type="number" formControlName="valor" class="form-control form-control-sm" min="1">
+                        </td>
+                        <td>
+                          <input type="number" formControlName="porcentaje_avance_fisico" class="form-control form-control-sm" min="0" max="100">
+                        </td>
+                        <td>
+                          <input type="number" formControlName="porcentaje_avance_financiero" class="form-control form-control-sm" min="0" max="100">
+                        </td>
+                        <td *ngIf="!isViewMode">
+                          <button 
+                            type="button" 
+                            class="btn btn-sm btn-danger"
+                            (click)="eliminarValorMensual(i)">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div class="alert alert-info" *ngIf="valoresMensualesArray.length === 0">
+                  <i class="fas fa-info-circle me-2"></i>
+                  No hay valores mensuales definidos. Puede agregarlos manualmente o generarlos automáticamente.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions mt-5" *ngIf="!isViewMode">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="contratoForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ isCreateMode ? 'Crear Contrato' : 'Guardar Cambios' }}
+          </button>
+        </div>
+
+        <!-- Acciones en modo vista -->
+        <div class="form-actions mt-5" *ngIf="isViewMode">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            <i class="fas fa-arrow-left"></i> Volver
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            *hasPermission="'contratos.gestionar'"
+            (click)="editarContrato()">
+            <i class="fas fa-edit"></i> Editar Contrato
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</app-layout>

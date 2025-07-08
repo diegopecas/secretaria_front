@@ -1,0 +1,76 @@
+<app-layout>
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-file-contract"></i>
+          </span>
+          Gestión de Contratos
+        </h1>
+        <p class="page-subtitle">Administre los contratos y sus obligaciones</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Toolbar con título y acciones -->
+    <div class="page-toolbar">
+      <h2 class="toolbar-title">Listado de Contratos</h2>
+      <div class="toolbar-actions">
+        <!-- Botón principal de crear -->
+        <button 
+          class="btn btn-primary" 
+          *hasPermission="'contratos.gestionar'"
+          (click)="crear()"
+          [attr.aria-label]="'Crear nuevo contrato'">
+          <i class="fas fa-plus-circle"></i>
+          <span class="btn-text">Nuevo Contrato</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="page-content-wrapper">
+      <!-- Tabla de contratos -->
+      <app-tablas
+        [titulos]="titulos"
+        [datos]="contratos"
+        [columnasFiltro]="columnasFiltro"
+        [accionVer]="true"
+        [accionEditar]="hasPermission('contratos.gestionar')"
+        [accionEliminar]="hasPermission('contratos.gestionar')"
+        [mostrarBuscar]="true"
+        (clicAccion)="ejecutarAccion($event)"
+      ></app-tablas>
+    </div>
+
+    <!-- Estado vacío (mostrar si no hay contratos) -->
+    <div class="empty-state" *ngIf="!isLoading && contratos.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-file-contract"></i>
+      </div>
+      <h3 class="empty-title">No hay contratos registrados</h3>
+      <p class="empty-subtitle">Comience creando el primer contrato</p>
+      <button 
+        class="btn btn-primary mt-3"
+        *hasPermission="'contratos.gestionar'"
+        (click)="crear()">
+        <i class="fas fa-plus-circle"></i>
+        Crear Contrato
+      </button>
+    </div>
+
+    <!-- Indicador de carga -->
+    <div class="text-center py-5" *ngIf="isLoading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  </div>
+</app-layout>

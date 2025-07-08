@@ -1,0 +1,20 @@
+// El componente utiliza los estilos globales definidos en styles.scss
+// Solo agregamos estilos específicos si son necesarios para este componente
+
+:host {
+  display: block;
+}
+
+// Estilos para los items de supervisores y obligaciones
+.supervisor-item,
+.obligacion-item {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-borde);
+  
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
