@@ -1,0 +1,76 @@
+<app-layout>
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-building"></i>
+          </span>
+          Gestión de Entidades
+        </h1>
+        <p class="page-subtitle">Administre las entidades contratantes del sistema</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Toolbar con título y acciones -->
+    <div class="page-toolbar">
+      <h2 class="toolbar-title">Listado de Entidades</h2>
+      <div class="toolbar-actions">
+        <!-- Botón principal de crear -->
+        <button 
+          class="btn btn-primary" 
+          *hasPermission="'contratos.gestionar'"
+          (click)="crear()"
+          [attr.aria-label]="'Crear nueva entidad'">
+          <i class="fas fa-plus-circle"></i>
+          <span class="btn-text">Nueva Entidad</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="page-content-wrapper">
+      <!-- Tabla de entidades -->
+      <app-tablas
+        [titulos]="titulos"
+        [datos]="entidades"
+        [columnasFiltro]="columnasFiltro"
+        [accionVer]="true"
+        [accionEditar]="hasPermission('contratos.gestionar')"
+        [accionEliminar]="hasPermission('contratos.gestionar')"
+        [mostrarBuscar]="true"
+        (clicAccion)="ejecutarAccion($event)"
+      ></app-tablas>
+    </div>
+
+    <!-- Estado vacío (mostrar si no hay entidades) -->
+    <div class="empty-state" *ngIf="!isLoading && entidades.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-building"></i>
+      </div>
+      <h3 class="empty-title">No hay entidades registradas</h3>
+      <p class="empty-subtitle">Comience agregando la primera entidad contratante</p>
+      <button 
+        class="btn btn-primary mt-3"
+        *hasPermission="'contratos.gestionar'"
+        (click)="crear()">
+        <i class="fas fa-plus-circle"></i>
+        Agregar Entidad
+      </button>
+    </div>
+
+    <!-- Indicador de carga -->
+    <div class="text-center py-5" *ngIf="isLoading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  </div>
+</app-layout>

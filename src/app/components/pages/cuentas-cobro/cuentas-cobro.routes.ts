@@ -8,6 +8,8 @@ import { CuentasCobroComponent } from './cuentas-cobro.component';
 // Componentes de contratistas
 import { ListaContratistasComponent } from './contratistas/lista-contratistas/lista-contratistas.component';
 import { GestionContratistaComponent } from './contratistas/gestion-contratista/gestion-contratista.component';
+import { GestionEntidadComponent } from './entidades/gestion-entidad/gestion-entidad.component';
+import { ListaEntidadesComponent } from './entidades/lista-entidades/lista-entidades.component';
 
 // Componentes de entidades (por crear)
 // import { ListaEntidadesComponent } from './entidades/lista-entidades/lista-entidades.component';
@@ -22,17 +24,17 @@ export const CUENTAS_COBRO_ROUTES: Routes = [
     path: '',
     component: CuentasCobroComponent,
     canActivate: [authGuard],
-    data: { 
+    data: {
       breadcrumb: 'Cuentas de Cobro',
       permissions: ['contratos.gestionar', 'cuentas_cobro.ver']
     }
   },
-  
+
   // Rutas de Contratistas
   {
     path: 'contratistas',
     canActivate: [authGuard, roleGuard],
-    data: { 
+    data: {
       breadcrumb: 'Contratistas',
       permissions: ['contratos.gestionar']
     },
@@ -45,7 +47,7 @@ export const CUENTAS_COBRO_ROUTES: Routes = [
       {
         path: 'crear',
         component: GestionContratistaComponent,
-        data: { 
+        data: {
           breadcrumb: 'Crear',
           mode: 'create'
         }
@@ -53,7 +55,7 @@ export const CUENTAS_COBRO_ROUTES: Routes = [
       {
         path: 'editar/:id',
         component: GestionContratistaComponent,
-        data: { 
+        data: {
           breadcrumb: 'Editar',
           mode: 'edit'
         }
@@ -61,37 +63,60 @@ export const CUENTAS_COBRO_ROUTES: Routes = [
       {
         path: 'detalle/:id',
         component: GestionContratistaComponent,
-        data: { 
+        data: {
           breadcrumb: 'Detalle',
           mode: 'view'
         }
       }
     ]
   },
-  
+
   // Rutas de Entidades (placeholder)
   {
     path: 'entidades',
     canActivate: [authGuard, roleGuard],
-    data: { 
+    data: {
       breadcrumb: 'Entidades',
       permissions: ['contratos.gestionar']
     },
     children: [
       {
         path: '',
-        redirectTo: '/cuentas-cobro',
-        pathMatch: 'full'
-        // component: ListaEntidadesComponent,
+        component: ListaEntidadesComponent,
+        data: { breadcrumb: null }
+      },
+      {
+        path: 'crear',
+        component: GestionEntidadComponent,
+        data: {
+          breadcrumb: 'Crear',
+          mode: 'create'
+        }
+      },
+      {
+        path: 'editar/:id',
+        component: GestionEntidadComponent,
+        data: {
+          breadcrumb: 'Editar',
+          mode: 'edit'
+        }
+      },
+      {
+        path: 'detalle/:id',
+        component: GestionEntidadComponent,
+        data: {
+          breadcrumb: 'Detalle',
+          mode: 'view'
+        }
       }
     ]
   },
-  
+
   // Rutas de Contratos (placeholder)
   {
     path: 'contratos',
     canActivate: [authGuard, roleGuard],
-    data: { 
+    data: {
       breadcrumb: 'Contratos',
       permissions: ['contratos.gestionar']
     },
@@ -104,7 +129,7 @@ export const CUENTAS_COBRO_ROUTES: Routes = [
       }
     ]
   },
-  
+
   // Rutas futuras
   {
     path: 'actividades',
