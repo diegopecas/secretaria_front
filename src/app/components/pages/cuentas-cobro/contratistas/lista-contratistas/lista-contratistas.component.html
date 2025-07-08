@@ -1,0 +1,76 @@
+<app-layout>
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-user-tie"></i>
+          </span>
+          Gestión de Contratistas
+        </h1>
+        <p class="page-subtitle">Administre los contratistas del sistema</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Toolbar con título y acciones -->
+    <div class="page-toolbar">
+      <h2 class="toolbar-title">Listado de Contratistas</h2>
+      <div class="toolbar-actions">
+        <!-- Botón principal de crear -->
+        <button 
+          class="btn btn-primary" 
+          *hasPermission="'contratos.gestionar'"
+          (click)="crear()"
+          [attr.aria-label]="'Crear nuevo contratista'">
+          <i class="fas fa-plus-circle"></i>
+          <span class="btn-text">Nuevo Contratista</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="page-content-wrapper">
+      <!-- Tabla de contratistas -->
+      <app-tablas
+        [titulos]="titulos"
+        [datos]="contratistas"
+        [columnasFiltro]="columnasFiltro"
+        [accionVer]="true"
+        [accionEditar]="hasPermission('contratos.gestionar')"
+        [accionEliminar]="hasPermission('contratos.gestionar')"
+        [mostrarBuscar]="true"
+        (clicAccion)="ejecutarAccion($event)"
+      ></app-tablas>
+    </div>
+
+    <!-- Estado vacío (mostrar si no hay contratistas) -->
+    <div class="empty-state" *ngIf="!isLoading && contratistas.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-user-tie"></i>
+      </div>
+      <h3 class="empty-title">No hay contratistas registrados</h3>
+      <p class="empty-subtitle">Comience agregando el primer contratista</p>
+      <button 
+        class="btn btn-primary mt-3"
+        *hasPermission="'contratos.gestionar'"
+        (click)="crear()">
+        <i class="fas fa-plus-circle"></i>
+        Agregar Contratista
+      </button>
+    </div>
+
+    <!-- Indicador de carga -->
+    <div class="text-center py-5" *ngIf="isLoading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  </div>
+</app-layout>

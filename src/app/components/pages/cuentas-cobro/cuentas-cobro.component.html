@@ -1,0 +1,67 @@
+<app-layout backRoute="/menu" backLabel="Volver al menú">
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-file-invoice-dollar"></i>
+          </span>
+          Cuentas de Cobro
+        </h1>
+        <p class="page-subtitle">Gestión de contratos y generación de cuentas de cobro</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido -->
+  <div class="container">
+    <div class="row justify-content-center" *ngIf="menuItems.length > 0">
+      <div 
+        class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-4" 
+        *ngFor="let item of menuItems; let i = index">
+        <div 
+          class="card card-clickable fade-in-{{i+1}} h-100" 
+          [style.--accent-color]="item.color"
+          (click)="navigateTo(item.route)"
+          [attr.data-tooltip]="'Ir a ' + item.title"
+          [class.card-disabled]="item.badge === 'Próximamente'">
+          <span class="card-icon">{{ item.icon }}</span>
+          <h3 class="card-title">{{ item.title }}</h3>
+          <p class="card-description">{{ item.description }}</p>
+          <span class="badge badge-warning mt-2" *ngIf="item.badge">{{ item.badge }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="menuItems.length === 0">
+      <div class="col-12">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <h3 class="empty-title">Sin permisos</h3>
+          <p class="empty-subtitle">No tiene permisos para acceder a las opciones de cuentas de cobro.</p>
+          <p class="empty-subtitle">Contacte al administrador del sistema.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerta informativa -->
+    <div class="page-alert alert-info mt-4">
+      <div class="alert-icon">
+        <i class="fas fa-info-circle"></i>
+      </div>
+      <div class="alert-content">
+        <p>
+          <strong>Módulo en desarrollo:</strong> Este módulo está siendo implementado por fases. 
+          Las opciones marcadas como "Próximamente" estarán disponibles en futuras actualizaciones.
+        </p>
+      </div>
+    </div>
+  </div>
+</app-layout>

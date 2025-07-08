@@ -1,0 +1,343 @@
+<app-layout [backRoute]="backRoute" backLabel="Volver a contratistas">
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <span style="font-size: 1.5rem;">{{ pageIcon }}</span>
+          </span>
+          {{ pageTitle }}
+        </h1>
+        <p class="page-subtitle">{{ pageSubtitle }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Formulario -->
+    <div class="page-content-wrapper">
+      <form [formGroup]="contratistaForm" (ngSubmit)="onSubmit()">
+        <div class="row">
+          <!-- Columna principal -->
+          <div class="col-12 col-lg-8">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-user me-2"></i>
+                  Información Personal
+                </h3>
+              </div>
+              
+              <div class="card-body">
+                <div class="row">
+                  <!-- Tipo de identificación -->
+                  <div class="col-12 col-md-4">
+                    <div class="form-group">
+                      <label for="tipo_identificacion_id">
+                        Tipo de Identificación 
+                        <span class="text-danger" *ngIf="!isViewMode">*</span>
+                      </label>
+                      <select 
+                        id="tipo_identificacion_id" 
+                        formControlName="tipo_identificacion_id"
+                        class="form-control"
+                        [class.is-invalid]="f['tipo_identificacion_id'].invalid && f['tipo_identificacion_id'].touched">
+                        <option value="">-- Seleccione --</option>
+                        <option *ngFor="let tipo of tiposIdentificacion" [value]="tipo.id">
+                          {{ tipo.nombre }}
+                        </option>
+                      </select>
+                      <div *ngIf="f['tipo_identificacion_id'].invalid && f['tipo_identificacion_id'].touched" class="invalid-feedback">
+                        <span *ngIf="f['tipo_identificacion_id'].errors?.['required']">
+                          El tipo de identificación es requerido
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Identificación -->
+                  <div class="col-12 col-md-8">
+                    <div class="form-group">
+                      <label for="identificacion">
+                        Número de Identificación 
+                        <span class="text-danger" *ngIf="!isViewMode">*</span>
+                      </label>
+                      <input 
+                        type="text" 
+                        id="identificacion" 
+                        formControlName="identificacion"
+                        class="form-control"
+                        [class.is-invalid]="f['identificacion'].invalid && f['identificacion'].touched"
+                        placeholder="Ingrese el número de identificación">
+                      <div *ngIf="f['identificacion'].invalid && f['identificacion'].touched" class="invalid-feedback">
+                        <span *ngIf="f['identificacion'].errors?.['required']">
+                          La identificación es requerida
+                        </span>
+                        <span *ngIf="f['identificacion'].errors?.['minlength']">
+                          La identificación debe tener al menos 5 caracteres
+                        </span>
+                        <span *ngIf="f['identificacion'].errors?.['maxlength']">
+                          La identificación no puede exceder 20 caracteres
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Nombre completo -->
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label for="nombre_completo">
+                        Nombre Completo 
+                        <span class="text-danger" *ngIf="!isViewMode">*</span>
+                      </label>
+                      <input 
+                        type="text" 
+                        id="nombre_completo" 
+                        formControlName="nombre_completo"
+                        class="form-control"
+                        [class.is-invalid]="f['nombre_completo'].invalid && f['nombre_completo'].touched"
+                        placeholder="Ingrese el nombre completo del contratista">
+                      <div *ngIf="f['nombre_completo'].invalid && f['nombre_completo'].touched" class="invalid-feedback">
+                        <span *ngIf="f['nombre_completo'].errors?.['required']">
+                          El nombre es requerido
+                        </span>
+                        <span *ngIf="f['nombre_completo'].errors?.['minlength']">
+                          El nombre debe tener al menos 3 caracteres
+                        </span>
+                        <span *ngIf="f['nombre_completo'].errors?.['maxlength']">
+                          El nombre no puede exceder 200 caracteres
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mt-4">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-address-book me-2"></i>
+                  Información de Contacto
+                </h3>
+              </div>
+              
+              <div class="card-body">
+                <div class="row">
+                  <!-- Email -->
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label for="email">Email</label>
+                      <input 
+                        type="email" 
+                        id="email" 
+                        formControlName="email"
+                        class="form-control"
+                        [class.is-invalid]="f['email'].invalid && f['email'].touched"
+                        placeholder="correo@ejemplo.com">
+                      <div *ngIf="f['email'].invalid && f['email'].touched" class="invalid-feedback">
+                        <span *ngIf="f['email'].errors?.['email']">
+                          El email no es válido
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Teléfono -->
+                  <div class="col-12 col-md-6">
+                    <div class="form-group">
+                      <label for="telefono">Teléfono</label>
+                      <input 
+                        type="text" 
+                        id="telefono" 
+                        formControlName="telefono"
+                        class="form-control"
+                        [class.is-invalid]="f['telefono'].invalid && f['telefono'].touched"
+                        placeholder="(+57) 123-456-7890">
+                      <div *ngIf="f['telefono'].invalid && f['telefono'].touched" class="invalid-feedback">
+                        <span *ngIf="f['telefono'].errors?.['pattern']">
+                          El teléfono solo puede contener números, espacios y caracteres: + - ( )
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Dirección -->
+                  <div class="col-12">
+                    <div class="form-group">
+                      <label for="direccion">Dirección</label>
+                      <textarea 
+                        id="direccion" 
+                        formControlName="direccion"
+                        class="form-control"
+                        [class.is-invalid]="f['direccion'].invalid && f['direccion'].touched"
+                        placeholder="Ingrese la dirección completa"
+                        rows="3"></textarea>
+                      <div *ngIf="f['direccion'].invalid && f['direccion'].touched" class="invalid-feedback">
+                        <span *ngIf="f['direccion'].errors?.['maxlength']">
+                          La dirección no puede exceder 255 caracteres
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="card mt-4" *ngIf="mode !== 'create'">
+              <div class="card-body">
+                <div class="form-group">
+                  <label>Estado</label>
+                  <div class="form-check">
+                    <input 
+                      type="checkbox" 
+                      id="activo" 
+                      formControlName="activo"
+                      class="form-check-input">
+                    <label for="activo" class="form-check-label">
+                      Contratista activo
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna lateral -->
+          <div class="col-12 col-lg-4">
+            <!-- Información adicional en modo vista -->
+            <div class="card" *ngIf="isViewMode && contratista">
+              <div class="card-header">
+                <h4>
+                  <i class="fas fa-info-circle me-2"></i>
+                  Información del Sistema
+                </h4>
+              </div>
+              <div class="card-body">
+                <dl class="info-list">
+                  <div class="info-row">
+                    <dt>ID:</dt>
+                    <dd>#{{ contratista.id }}</dd>
+                  </div>
+                  <div class="info-row">
+                    <dt>Estado:</dt>
+                    <dd>
+                      <span class="badge" [ngClass]="contratista.activo ? 'badge-success' : 'badge-danger'">
+                        {{ contratista.activo ? 'Activo' : 'Inactivo' }}
+                      </span>
+                    </dd>
+                  </div>
+                  <div class="info-row">
+                    <dt>Total Contratos:</dt>
+                    <dd>{{ contratista.total_contratos || 0 }}</dd>
+                  </div>
+                  <div class="info-row">
+                    <dt>Contratos Activos:</dt>
+                    <dd>{{ contratista.contratos_activos || 0 }}</dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+
+            <!-- Contratos del contratista -->
+            <div class="card mt-4" *ngIf="isViewMode && contratista && contratista.contratos && contratista.contratos.length > 0">
+              <div class="card-header">
+                <h4>
+                  <i class="fas fa-file-contract me-2"></i>
+                  Contratos Asociados
+                </h4>
+              </div>
+              <div class="card-body">
+                <div class="list-group">
+                  <div class="list-group-item" *ngFor="let contrato of contratista.contratos">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                        <h6 class="mb-1">{{ contrato.numero_contrato }}</h6>
+                        <p class="mb-1 text-muted">
+                          <small>{{ contrato.entidad_nombre }}</small>
+                        </p>
+                        <p class="mb-0">
+                          <small>
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ contrato.fecha_inicio }} - {{ contrato.fecha_terminacion }}
+                          </small>
+                        </p>
+                      </div>
+                      <div class="text-end">
+                        <span class="badge" [ngClass]="{
+                          'badge-success': contrato.estado === 'activo',
+                          'badge-warning': contrato.estado === 'suspendido',
+                          'badge-secondary': contrato.estado === 'finalizado',
+                          'badge-info': contrato.estado === 'liquidado'
+                        }">
+                          {{ contrato.estado }}
+                        </span>
+                        <p class="mb-0 mt-1">
+                          <small class="text-muted">
+                            ${{ contrato.valor_total | number:'1.0-0' }}
+                          </small>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ayuda -->
+            <div class="card mt-4" *ngIf="!isViewMode">
+              <div class="card-header">
+                <h4>
+                  <i class="fas fa-question-circle me-2"></i>
+                  Ayuda
+                </h4>
+              </div>
+              <div class="card-body">
+                <p class="small text-muted mb-2">
+                  <strong>Tipo de Identificación:</strong> Seleccione el tipo de documento del contratista.
+                </p>
+                <p class="small text-muted mb-2">
+                  <strong>Email:</strong> Se utilizará para notificaciones y acceso al sistema.
+                </p>
+                <p class="small text-muted mb-0">
+                  <strong>Estado:</strong> Los contratistas inactivos no pueden tener nuevos contratos.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions mt-5" *ngIf="!isViewMode">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="contratistaForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ isCreateMode ? 'Crear Contratista' : 'Guardar Cambios' }}
+          </button>
+        </div>
+
+        <!-- Acciones en modo vista -->
+        <div class="form-actions mt-5" *ngIf="isViewMode">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            <i class="fas fa-arrow-left"></i> Volver
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            *hasPermission="'contratos.gestionar'"
+            (click)="editarContratista()">
+            <i class="fas fa-edit"></i> Editar Contratista
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</app-layout>

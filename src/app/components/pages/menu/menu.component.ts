@@ -25,6 +25,15 @@ interface MenuItem {
 export class MenuComponent implements OnInit {
   allMenuItems: MenuItem[] = [
     {
+      title: 'Cuentas de Cobro',
+      icon: '💰',
+      route: '/cuentas-cobro',
+      description: 'Gestión de contratos y cuentas de cobro',
+      color: '#4CAF50',
+      permissions: ['contratos.gestionar', 'cuentas_cobro.ver'],
+      new: true
+    },
+    {
       title: 'Reportes',
       icon: '📊',
       route: '/reportes',

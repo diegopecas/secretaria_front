@@ -112,6 +112,11 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'cuentas-cobro',
+    loadChildren: () => import('./components/pages/cuentas-cobro/cuentas-cobro.routes').then(m => m.CUENTAS_COBRO_ROUTES),
+    canActivate: [authGuard]
+  },
+  {
     path: '**',
     redirectTo: '/login'
   }
