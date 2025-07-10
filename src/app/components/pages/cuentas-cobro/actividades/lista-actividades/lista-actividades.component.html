@@ -1,0 +1,147 @@
+<app-layout>
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-clipboard-list"></i>
+          </span>
+          Registro de Actividades
+        </h1>
+        <p class="page-subtitle">Gestione las actividades diarias de sus contratos</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Toolbar con título y acciones -->
+    <div class="page-toolbar">
+      <h2 class="toolbar-title">Listado de Actividades</h2>
+      <div class="toolbar-actions">
+        <!-- Botón principal de crear -->
+        <button 
+          class="btn btn-primary" 
+          *hasPermission="'actividades.registrar'"
+          (click)="crear()"
+          [attr.aria-label]="'Registrar nueva actividad'">
+          <i class="fas fa-plus-circle"></i>
+          <span class="btn-text">Nueva Actividad</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-section mb-4" *ngIf="contratos.length > 0">
+      <div class="row">
+        <div class="col-12 col-md-6">
+          <div class="form-group">
+            <label for="contrato">Contrato</label>
+            <select 
+              id="contrato" 
+              [(ngModel)]="contratoSeleccionado"
+              (change)="onContratoChange()"
+              class="form-control">
+              <option [value]="null">-- Seleccione un contrato --</option>
+              <option *ngFor="let contrato of contratos" [value]="contrato.id">
+                {{ contrato.numero_contrato }} - {{ contrato.entidad_nombre }}
+              </option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="col-12 col-md-3">
+          <div class="form-group">
+            <label for="mes">Mes</label>
+            <select 
+              id="mes" 
+              [(ngModel)]="mesSeleccionado"
+              (change)="onPeriodoChange()"
+              class="form-control"
+              [disabled]="!contratoSeleccionado">
+              <option *ngFor="let mes of getMeses()" [value]="mes.value">
+                {{ mes.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="col-12 col-md-3">
+          <div class="form-group">
+            <label for="anio">Año</label>
+            <select 
+              id="anio" 
+              [(ngModel)]="anioSeleccionado"
+              (change)="onPeriodoChange()"
+              class="form-control"
+              [disabled]="!contratoSeleccionado">
+              <option *ngFor="let anio of getAnios()" [value]="anio">
+                {{ anio }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="page-content-wrapper" *ngIf="contratoSeleccionado">
+      <!-- Tabla de actividades -->
+      <app-tablas
+        [titulos]="titulos"
+        [datos]="actividades"
+        [columnasFiltro]="columnasFiltro"
+        [accionVer]="true"
+        [accionEditar]="hasPermission('actividades.registrar')"
+        [accionEliminar]="hasPermission('actividades.registrar')"
+        [mostrarBuscar]="true"
+        (clicAccion)="ejecutarAccion($event)"
+      ></app-tablas>
+    </div>
+
+    <!-- Estado vacío - Sin contrato seleccionado -->
+    <div class="empty-state" *ngIf="!isLoading && !contratoSeleccionado && contratos.length > 0">
+      <div class="empty-icon">
+        <i class="fas fa-file-contract"></i>
+      </div>
+      <h3 class="empty-title">Seleccione un contrato</h3>
+      <p class="empty-subtitle">Para ver las actividades, primero debe seleccionar un contrato</p>
+    </div>
+
+    <!-- Estado vacío - Sin contratos -->
+    <div class="empty-state" *ngIf="!isLoading && contratos.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3 class="empty-title">No hay contratos disponibles</h3>
+      <p class="empty-subtitle">No tiene contratos activos asignados</p>
+    </div>
+
+    <!-- Estado vacío - Sin actividades -->
+    <div class="empty-state" *ngIf="!isLoading && contratoSeleccionado && actividades.length === 0">
+      <div class="empty-icon">
+        <i class="fas fa-clipboard-list"></i>
+      </div>
+      <h3 class="empty-title">No hay actividades registradas</h3>
+      <p class="empty-subtitle">No se encontraron actividades para el período seleccionado</p>
+      <button 
+        class="btn btn-primary mt-3"
+        *hasPermission="'actividades.registrar'"
+        (click)="crear()">
+        <i class="fas fa-plus-circle"></i>
+        Registrar Actividad
+      </button>
+    </div>
+
+    <!-- Indicador de carga -->
+    <div class="text-center py-5" *ngIf="isLoading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  </div>
+</app-layout>

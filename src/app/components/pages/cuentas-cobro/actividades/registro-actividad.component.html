@@ -1,0 +1,258 @@
+<app-layout backRoute="/cuentas-cobro" backLabel="Volver a cuentas de cobro">
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <i class="fas fa-pencil-alt"></i>
+          </span>
+          Registro de Actividades Diarias
+        </h1>
+        <p class="page-subtitle">Registre las actividades realizadas en sus contratos</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Formulario -->
+    <div class="page-content-wrapper">
+      <form [formGroup]="actividadForm" (ngSubmit)="onSubmit()">
+        <!-- Selector de contrato y fecha -->
+        <div class="contract-selector">
+          <div class="row">
+            <div class="col-12 col-md-6">
+              <div class="form-group">
+                <label for="contrato_id">
+                  Contrato
+                  <span class="text-danger">*</span>
+                </label>
+                <select 
+                  id="contrato_id" 
+                  formControlName="contrato_id"
+                  class="form-control"
+                  (change)="onContratoChange()"
+                  [class.is-invalid]="f['contrato_id'].invalid && f['contrato_id'].touched">
+                  <option value="">-- Seleccione un contrato --</option>
+                  <option *ngFor="let contrato of contratos" [value]="contrato.id">
+                    {{ contrato.numero_contrato }} - {{ contrato.entidad_nombre }}
+                  </option>
+                </select>
+                <div *ngIf="f['contrato_id'].invalid && f['contrato_id'].touched" class="invalid-feedback">
+                  <span *ngIf="f['contrato_id'].errors?.['required']">El contrato es requerido</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-12 col-md-3">
+              <div class="form-group">
+                <label for="fecha_actividad">
+                  Fecha de Actividad
+                  <span class="text-danger">*</span>
+                </label>
+                <input 
+                  type="date" 
+                  id="fecha_actividad" 
+                  formControlName="fecha_actividad"
+                  class="form-control"
+                  [class.is-invalid]="f['fecha_actividad'].invalid && f['fecha_actividad'].touched">
+                <div *ngIf="f['fecha_actividad'].invalid && f['fecha_actividad'].touched" class="invalid-feedback">
+                  <span *ngIf="f['fecha_actividad'].errors?.['required']">La fecha es requerida</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-12 col-md-3">
+              <div class="form-group">
+                <label for="obligacion_id">
+                  Obligación Relacionada
+                  <small class="text-muted">(Opcional)</small>
+                </label>
+                <select 
+                  id="obligacion_id" 
+                  formControlName="obligacion_id"
+                  class="form-control"
+                  [disabled]="!contratoSeleccionado || obligaciones.length === 0">
+                  <option value="">-- Seleccione --</option>
+                  <option *ngFor="let obligacion of obligaciones" [value]="obligacion.id">
+                    {{ obligacion.numero_obligacion }}. {{ obligacion.descripcion | slice:0:50 }}...
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenido principal con dos columnas -->
+        <div class="main-grid" *ngIf="contratoSeleccionado">
+          <!-- Columna izquierda: Input de actividad -->
+          <div class="activity-section">
+            <!-- Tabs de entrada -->
+            <div class="input-tabs">
+              <button 
+                type="button"
+                class="tab-button"
+                [class.active]="activeTab === 'texto'"
+                (click)="setActiveTab('texto')">
+                <i class="fas fa-keyboard"></i>
+                Escribir
+              </button>
+              <button 
+                type="button"
+                class="tab-button"
+                [class.active]="activeTab === 'audio'"
+                (click)="setActiveTab('audio')">
+                <i class="fas fa-microphone"></i>
+                Grabar Audio
+              </button>
+              <button 
+                type="button"
+                class="tab-button"
+                [class.active]="activeTab === 'archivo'"
+                (click)="setActiveTab('archivo')">
+                <i class="fas fa-file-upload"></i>
+                Subir Archivos
+              </button>
+            </div>
+
+            <!-- Tab: Texto -->
+            <div class="text-input-area" *ngIf="activeTab === 'texto'">
+              <textarea 
+                formControlName="descripcion_actividad"
+                class="form-control"
+                [class.is-invalid]="f['descripcion_actividad'].invalid && f['descripcion_actividad'].touched"
+                placeholder="Describe las actividades realizadas hoy...
+
+Ejemplo: Hoy participé en la reunión del comité de cambio climático donde se discutieron las estrategias de mitigación para el segundo semestre. También trabajé en el documento de lineamientos técnicos para la reducción de emisiones en el sector transporte..."
+                rows="8"></textarea>
+              <div *ngIf="f['descripcion_actividad'].invalid && f['descripcion_actividad'].touched" class="invalid-feedback">
+                <span *ngIf="f['descripcion_actividad'].errors?.['required']">La descripción es requerida</span>
+                <span *ngIf="f['descripcion_actividad'].errors?.['minlength']">Mínimo 10 caracteres</span>
+              </div>
+            </div>
+
+            <!-- Tab: Audio -->
+            <div class="voice-recording" *ngIf="activeTab === 'audio'">
+              <div class="voice-icon">
+                <i class="fas fa-microphone"></i>
+              </div>
+              <h4>Graba tu nota de voz</h4>
+              <p class="text-muted mb-3">Presiona el botón para comenzar a grabar y cuéntanos qué actividades realizaste hoy</p>
+              
+              <app-voz-a-texto (textoTranscrito)="onTextoTranscrito($event)"></app-voz-a-texto>
+              
+              <!-- Mostrar transcripción si existe -->
+              <div class="transcription-preview" *ngIf="mostrarTranscripcion && transcripcionTexto">
+                <h5>
+                  <i class="fas fa-robot"></i> 
+                  Transcripción generada
+                </h5>
+                <div class="transcription-text">
+                  {{ transcripcionTexto }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Archivos -->
+            <div class="file-upload-section" *ngIf="activeTab === 'archivo'">
+              <div class="file-upload-area" *ngIf="!archivoSeleccionado">
+                <input 
+                  type="file" 
+                  id="fileInput"
+                  (change)="onFileSelected($event)"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx,.csv,.ppt,.pptx"
+                  class="file-input">
+                <label for="fileInput" class="file-upload-label">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <p>Arrastra archivos aquí o haz clic para seleccionar</p>
+                  <p class="file-types">
+                    Acepta: Documentos, Imágenes, Hojas de cálculo, Presentaciones
+                  </p>
+                </label>
+              </div>
+
+              <!-- Archivo seleccionado -->
+              <div class="files-list" *ngIf="archivoSeleccionado">
+                <div class="file-item">
+                  <i class="fas {{ getIconoArchivo(archivoSeleccionado.name) }}" 
+                     [style.color]="getColorArchivo(archivoSeleccionado.name)"></i>
+                  <div class="file-info">
+                    <div class="file-name">{{ archivoSeleccionado.name }}</div>
+                    <div class="file-size">{{ formatearTamanoArchivo(archivoSeleccionado.size) }}</div>
+                  </div>
+                  <button type="button" class="remove-file" (click)="eliminarArchivo()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Nota sobre descripción -->
+              <div class="alert alert-info mt-3" *ngIf="archivoSeleccionado">
+                <i class="fas fa-info-circle"></i>
+                Recuerda agregar una descripción de la actividad en la pestaña "Escribir"
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna derecha: Información del contrato -->
+          <div class="contract-info-section">
+            <h3>Información del Contrato</h3>
+            
+            <div class="info-item">
+              <label>Número:</label>
+              <span>{{ contratoSeleccionado.numero_contrato }}</span>
+            </div>
+            
+            <div class="info-item">
+              <label>Entidad:</label>
+              <span>{{ contratoSeleccionado.entidad_nombre }}</span>
+            </div>
+            
+            <div class="info-item">
+              <label>Objeto:</label>
+              <p class="objeto-text">{{ contratoSeleccionado.objeto_contrato }}</p>
+            </div>
+            
+            <div class="info-item">
+              <label>Período:</label>
+              <span>{{ contratoSeleccionado.fecha_inicio | date:'dd/MM/yyyy' }} - {{ contratoSeleccionado.fecha_terminacion | date:'dd/MM/yyyy' }}</span>
+            </div>
+            
+            <!-- Lista de obligaciones -->
+            <div class="obligations-list" *ngIf="obligaciones.length > 0">
+              <h4>Obligaciones Contractuales</h4>
+              <div class="obligation-item" *ngFor="let obligacion of obligaciones">
+                <strong>{{ obligacion.numero_obligacion }}.</strong> {{ obligacion.descripcion }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensaje si no hay contrato seleccionado -->
+        <div class="empty-state" *ngIf="!contratoSeleccionado && !isLoading">
+          <div class="empty-icon">
+            <i class="fas fa-file-contract"></i>
+          </div>
+          <h3 class="empty-title">Seleccione un contrato</h3>
+          <p class="empty-subtitle">Para registrar actividades, primero debe seleccionar el contrato correspondiente</p>
+        </div>
+
+        <!-- Acciones -->
+        <div class="form-actions mt-4" *ngIf="contratoSeleccionado">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="actividadForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+            <i class="fas fa-save" *ngIf="!isLoading"></i>
+            Registrar Actividad
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</app-layout>

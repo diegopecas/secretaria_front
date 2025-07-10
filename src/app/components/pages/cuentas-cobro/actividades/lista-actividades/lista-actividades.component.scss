@@ -1,0 +1,14 @@
+// El componente utiliza los estilos globales definidos en styles.scss
+// Solo agregamos estilos específicos si son necesarios para este componente
+
+:host {
+  display: block;
+}
+
+// Sección de filtros
+.filters-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-small);
+}

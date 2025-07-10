@@ -1,0 +1,424 @@
+<app-layout [backRoute]="backRoute" backLabel="Volver a actividades">
+  <!-- Header de página -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-content">
+        <!-- Breadcrumb automático -->
+        <app-breadcrumb></app-breadcrumb>
+        
+        <!-- Título con icono -->
+        <h1 class="page-title">
+          <span class="page-icon">
+            <span style="font-size: 1.5rem;">{{ pageIcon }}</span>
+          </span>
+          {{ pageTitle }}
+        </h1>
+        <p class="page-subtitle">{{ pageSubtitle }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Formulario -->
+    <div class="page-content-wrapper">
+      <form [formGroup]="actividadForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Selector de contrato y fecha -->
+        <div class="contract-selector">
+          <div class="row">
+            <div class="col-12 col-md-6">
+              <div class="form-group">
+                <label for="contrato_id">
+                  Contrato
+                  <span class="text-danger" *ngIf="!isViewMode">*</span>
+                </label>
+                <select 
+                  id="contrato_id" 
+                  formControlName="contrato_id"
+                  class="form-control"
+                  (change)="onContratoChange()"
+                  [class.is-invalid]="f['contrato_id'].invalid && f['contrato_id'].touched">
+                  <option value="">-- Seleccione un contrato --</option>
+                  <option *ngFor="let contrato of contratos" [value]="contrato.id">
+                    {{ contrato.numero_contrato }} - {{ contrato.entidad_nombre }}
+                    <span *ngIf="contrato.estado !== 'activo'"> ({{ contrato.estado }})</span>
+                  </option>
+                </select>
+                <div *ngIf="f['contrato_id'].invalid && f['contrato_id'].touched" class="invalid-feedback">
+                  <span *ngIf="f['contrato_id'].errors?.['required']">El contrato es requerido</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-12 col-md-3">
+              <div class="form-group">
+                <label for="fecha_actividad">
+                  Fecha de Actividad
+                  <span class="text-danger" *ngIf="!isViewMode">*</span>
+                </label>
+                <input 
+                  type="date" 
+                  id="fecha_actividad" 
+                  formControlName="fecha_actividad"
+                  class="form-control"
+                  [class.is-invalid]="f['fecha_actividad'].invalid && f['fecha_actividad'].touched">
+                <div *ngIf="f['fecha_actividad'].invalid && f['fecha_actividad'].touched" class="invalid-feedback">
+                  <span *ngIf="f['fecha_actividad'].errors?.['required']">La fecha es requerida</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-12 col-md-3">
+              <div class="form-group">
+                <label>
+                  Obligaciones Relacionadas
+                  <small class="text-muted">({{ obligacionesSeleccionadas.length }} seleccionadas)</small>
+                </label>
+                <button 
+                  type="button"
+                  class="btn btn-outline-primary btn-sm w-100"
+                  *ngIf="!isViewMode && obligaciones.length > 0"
+                  (click)="abrirModalObligaciones()">
+                  <i class="fas fa-tasks"></i> Seleccionar Obligaciones
+                </button>
+                <div *ngIf="isViewMode && actividad && actividad.obligaciones && actividad.obligaciones.length > 0" class="mt-2">
+                  <span *ngFor="let obl of actividad.obligaciones" class="badge badge-info me-1">
+                    {{ obl.numero_obligacion }}
+                  </span>
+                </div>
+                <div *ngIf="obligaciones.length === 0" class="text-muted small">
+                  Sin obligaciones disponibles
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenido principal con dos columnas -->
+        <div class="main-grid" *ngIf="contratoSeleccionado">
+          <!-- Columna izquierda: Input de actividad -->
+          <div class="activity-section">
+            <!-- Tabs de entrada (ocultar en modo ver) -->
+            <div class="input-tabs" *ngIf="!isViewMode">
+              <button 
+                type="button"
+                class="tab-button"
+                [class.active]="activeTab === 'texto'"
+                (click)="setActiveTab('texto')">
+                <i class="fas fa-keyboard"></i>
+                Escribir
+              </button>
+              <button 
+                type="button"
+                class="tab-button"
+                [class.active]="activeTab === 'audio'"
+                (click)="setActiveTab('audio')">
+                <i class="fas fa-microphone"></i>
+                Grabar Audio
+              </button>
+              <button 
+                type="button"
+                class="tab-button"
+                [class.active]="activeTab === 'archivo'"
+                (click)="setActiveTab('archivo')">
+                <i class="fas fa-file-upload"></i>
+                Subir Archivos
+              </button>
+            </div>
+
+            <!-- En modo ver, mostrar solo la descripción -->
+            <div *ngIf="isViewMode">
+              <h4>Descripción de la Actividad</h4>
+              <div class="descripcion-view">
+                {{ actividadForm.get('descripcion_actividad')?.value }}
+              </div>
+              
+              <!-- Si tiene transcripción original -->
+              <div class="transcription-view" *ngIf="transcripcionOriginal">
+                <h5 class="mt-3">
+                  <i class="fas fa-microphone"></i> 
+                  Transcripción Original
+                </h5>
+                <div class="transcription-text">
+                  {{ transcripcionOriginal }}
+                </div>
+                <small class="text-muted">
+                  Proveedor: {{ actividad?.transcripcion_proveedor || 'N/A' }} | 
+                  Modelo: {{ actividad?.transcripcion_modelo || 'N/A' }} | 
+                  Confianza: {{ (actividad?.transcripcion_confianza || 0) * 100 }}%
+                </small>
+              </div>
+              
+              <!-- Archivos adjuntos en modo ver -->
+              <div class="archivo-view" *ngIf="actividad && actividad.archivos && actividad.archivos.length > 0">
+                <h5 class="mt-3">
+                  <i class="fas fa-paperclip"></i> 
+                  Archivos Adjuntos ({{ actividad.archivos.length }})
+                </h5>
+                <div class="files-list">
+                  <div class="file-item" *ngFor="let archivo of actividad.archivos">
+                    <i class="fas {{ getIconoArchivo(archivo.nombre_archivo) }}" 
+                       [style.color]="getColorArchivo(archivo.nombre_archivo)"></i>
+                    <div class="file-info">
+                      <div class="file-name">{{ archivo.nombre_archivo }}</div>
+                      <div class="file-size">
+                        {{ formatearTamanoArchivo(archivo.tamanio_bytes) }} • 
+                        {{ archivo.tipo_archivo_nombre || 'N/A' }}
+                      </div>
+                    </div>
+                    <a 
+                      *ngIf="archivo.archivo_url"
+                      [href]="archivo.archivo_url" 
+                      target="_blank"
+                      class="btn btn-sm btn-primary">
+                      <i class="fas fa-download"></i> Descargar
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Texto (modo crear/editar) -->
+            <div class="text-input-area" *ngIf="!isViewMode && activeTab === 'texto'">
+              <textarea 
+                formControlName="descripcion_actividad"
+                class="form-control"
+                [class.is-invalid]="f['descripcion_actividad'].invalid && f['descripcion_actividad'].touched"
+                placeholder="Describe las actividades realizadas...
+
+Ejemplo: Hoy participé en la reunión del comité de cambio climático donde se discutieron las estrategias de mitigación para el segundo semestre. También trabajé en el documento de lineamientos técnicos para la reducción de emisiones en el sector transporte..."
+                rows="8"></textarea>
+              <div *ngIf="f['descripcion_actividad'].invalid && f['descripcion_actividad'].touched" class="invalid-feedback">
+                <span *ngIf="f['descripcion_actividad'].errors?.['required']">La descripción es requerida</span>
+                <span *ngIf="f['descripcion_actividad'].errors?.['minlength']">Mínimo 10 caracteres</span>
+              </div>
+            </div>
+
+            <!-- Tab: Audio (modo crear/editar) -->
+            <div class="voice-recording" *ngIf="!isViewMode && activeTab === 'audio'">
+              <div class="voice-icon">
+                <i class="fas fa-microphone"></i>
+              </div>
+              <h4>Graba tu nota de voz</h4>
+              <p class="text-muted mb-3">Presiona el botón para comenzar a grabar y cuéntanos qué actividades realizaste</p>
+              
+              <app-grabador-audio (textoTranscrito)="onTextoTranscrito($event)"></app-grabador-audio>
+              
+              <!-- Mostrar transcripción si existe -->
+              <div class="transcription-preview" *ngIf="mostrarTranscripcion && transcripcionTexto">
+                <h5>
+                  <i class="fas fa-robot"></i> 
+                  Transcripción generada
+                </h5>
+                <div class="transcription-text">
+                  {{ transcripcionTexto }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Archivos (modo crear/editar) -->
+            <div class="file-upload-section" *ngIf="!isViewMode && activeTab === 'archivo'">
+              <div class="file-upload-area" *ngIf="totalArchivos < 10">
+                <input 
+                  type="file" 
+                  id="fileInput"
+                  (change)="onFileSelected($event)"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx,.csv,.ppt,.pptx"
+                  multiple
+                  class="file-input">
+                <label for="fileInput" class="file-upload-label">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <p>Arrastra archivos aquí o haz clic para seleccionar</p>
+                  <p class="file-types">
+                    Acepta: Documentos, Imágenes, Hojas de cálculo, Presentaciones
+                  </p>
+                  <p class="file-types">
+                    <small>Máximo 10 archivos • 10MB por archivo</small>
+                  </p>
+                </label>
+              </div>
+
+              <!-- Archivos seleccionados/actuales -->
+              <div class="files-list" *ngIf="totalArchivos > 0">
+                <h5 class="mb-3">Archivos ({{ totalArchivos }}/10)</h5>
+                
+                <!-- Archivos existentes (modo editar) -->
+                <div class="file-item" *ngFor="let archivo of archivosActuales">
+                  <i class="fas {{ getIconoArchivo(archivo.nombre_archivo) }}" 
+                     [style.color]="getColorArchivo(archivo.nombre_archivo)"></i>
+                  <div class="file-info">
+                    <div class="file-name">{{ archivo.nombre_archivo }}</div>
+                    <div class="file-size">
+                      {{ formatearTamanoArchivo(archivo.tamanio_bytes) }} • 
+                      <span class="badge badge-secondary">Guardado</span>
+                    </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    class="remove-file" 
+                    (click)="eliminarArchivoExistente(archivo)"
+                    title="Eliminar archivo">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                
+                <!-- Archivos nuevos -->
+                <div class="file-item" *ngFor="let archivo of archivosSeleccionados; let i = index">
+                  <i class="fas {{ getIconoArchivo(archivo.name) }}" 
+                     [style.color]="getColorArchivo(archivo.name)"></i>
+                  <div class="file-info">
+                    <div class="file-name">{{ archivo.name }}</div>
+                    <div class="file-size">
+                      {{ formatearTamanoArchivo(archivo.size) }} • 
+                      <span class="badge badge-info">Nuevo</span>
+                    </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    class="remove-file" 
+                    (click)="eliminarArchivoNuevo(i)"
+                    title="Quitar archivo">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Nota sobre descripción -->
+              <div class="alert alert-info mt-3" *ngIf="archivosSeleccionados.length > 0 && isCreateMode">
+                <i class="fas fa-info-circle"></i>
+                Recuerda agregar una descripción de la actividad en la pestaña "Escribir"
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna derecha: Información del contrato -->
+          <div class="contract-info-section">
+            <h3>Información del Contrato</h3>
+            
+            <div class="info-item">
+              <label>Número:</label>
+              <span>{{ contratoSeleccionado.numero_contrato }}</span>
+            </div>
+            
+            <div class="info-item">
+              <label>Entidad:</label>
+              <span>{{ contratoSeleccionado.entidad_nombre }}</span>
+            </div>
+            
+            <div class="info-item">
+              <label>Objeto:</label>
+              <p class="objeto-text">{{ contratoSeleccionado.objeto_contrato }}</p>
+            </div>
+            
+            <div class="info-item">
+              <label>Período:</label>
+              <span>{{ contratoSeleccionado.fecha_inicio | date:'dd/MM/yyyy' }} - {{ contratoSeleccionado.fecha_terminacion | date:'dd/MM/yyyy' }}</span>
+            </div>
+            
+            <div class="info-item" *ngIf="contratoSeleccionado.estado !== 'activo'">
+              <label>Estado:</label>
+              <span class="badge" [ngClass]="{
+                'badge-warning': contratoSeleccionado.estado === 'suspendido',
+                'badge-secondary': contratoSeleccionado.estado === 'finalizado',
+                'badge-info': contratoSeleccionado.estado === 'liquidado'
+              }">{{ contratoSeleccionado.estado }}</span>
+            </div>
+            
+            <!-- Lista de obligaciones seleccionadas -->
+            <div class="selected-obligations" *ngIf="obligacionesSeleccionadas.length > 0">
+              <h4>Obligaciones Seleccionadas ({{ obligacionesSeleccionadas.length }})</h4>
+              <div class="obligation-item selected" *ngFor="let oblId of obligacionesSeleccionadas">
+                <ng-container *ngFor="let obl of obligaciones">
+                  <span *ngIf="obl.id === oblId">
+                    <strong>{{ obl.numero_obligacion }}.</strong> 
+                    {{ obl.descripcion | slice:0:50 }}{{ obl.descripcion.length > 50 ? '...' : '' }}
+                  </span>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensaje si no hay contrato seleccionado -->
+        <div class="empty-state" *ngIf="!contratoSeleccionado && !isLoading">
+          <div class="empty-icon">
+            <i class="fas fa-file-contract"></i>
+          </div>
+          <h3 class="empty-title">Seleccione un contrato</h3>
+          <p class="empty-subtitle">Para registrar actividades, primero debe seleccionar el contrato correspondiente</p>
+        </div>
+
+        <!-- Indicador de carga -->
+        <div class="text-center py-5" *ngIf="isLoading">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+
+        <!-- Acciones (modo crear/editar) -->
+        <div class="form-actions mt-4" *ngIf="contratoSeleccionado && !isViewMode">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="actividadForm.invalid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+            <i class="fas fa-save" *ngIf="!isLoading"></i>
+            {{ isCreateMode ? 'Registrar Actividad' : 'Guardar Cambios' }}
+          </button>
+        </div>
+
+        <!-- Acciones en modo vista -->
+        <div class="form-actions mt-4" *ngIf="isViewMode && contratoSeleccionado">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
+            <i class="fas fa-arrow-left"></i> Volver
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            *hasPermission="'actividades.registrar'"
+            (click)="editarActividad()">
+            <i class="fas fa-edit"></i> Editar Actividad
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</app-layout>
+
+<!-- Modal de selección de obligaciones usando el componente modal -->
+<app-modal 
+  *ngIf="mostrarModalObligaciones"
+  title="Seleccionar Obligaciones Relacionadas"
+  size="large"
+  (close)="cerrarModalObligaciones()">
+  
+  <div modal-body>
+    <div class="obligations-list">
+      <div 
+        class="obligation-checkbox" 
+        *ngFor="let obligacion of obligaciones"
+        (click)="obligacion.id && toggleObligacion(obligacion.id)">
+        <input 
+          type="checkbox" 
+          [checked]="isObligacionSeleccionada(obligacion.id)"
+          (click)="$event.stopPropagation()">
+        <div class="obligation-content">
+          <strong>{{ obligacion.numero_obligacion }}.</strong> 
+          {{ obligacion.descripcion }}
+        </div>
+      </div>
+    </div>
+    <div *ngIf="obligaciones.length === 0" class="text-center py-4 text-muted">
+      No hay obligaciones disponibles para este contrato
+    </div>
+  </div>
+  
+  <div modal-footer>
+    <button type="button" class="btn btn-secondary" (click)="cerrarModalObligaciones()">
+      Cancelar
+    </button>
+    <button type="button" class="btn btn-primary" (click)="cerrarModalObligaciones()">
+      Confirmar Selección ({{ obligacionesSeleccionadas.length }})
+    </button>
+  </div>
+</app-modal>

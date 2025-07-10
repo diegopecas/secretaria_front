@@ -17,6 +17,11 @@ import { GestionEntidadComponent } from './entidades/gestion-entidad/gestion-ent
 import { ListaContratosComponent } from './contratos/lista-contratos/lista-contratos.component';
 import { GestionContratoComponent } from './contratos/gestion-contrato/gestion-contrato.component';
 
+// Componentes de actividades
+import { ListaActividadesComponent } from './actividades/lista-actividades/lista-actividades.component';
+import { GestionActividadComponent } from './actividades/gestion-actividad/gestion-actividad.component';
+
+
 export const CUENTAS_COBRO_ROUTES: Routes = [
   {
     path: '',
@@ -24,7 +29,7 @@ export const CUENTAS_COBRO_ROUTES: Routes = [
     canActivate: [authGuard],
     data: {
       breadcrumb: 'Cuentas de Cobro',
-      permissions: ['contratos.gestionar', 'cuentas_cobro.ver']
+      permissions: ['contratos.gestionar', 'cuentas_cobro.ver', 'actividades.registrar']
     }
   },
 
@@ -151,12 +156,48 @@ export const CUENTAS_COBRO_ROUTES: Routes = [
     ]
   },
 
-  // Rutas futuras
+  // Rutas de Actividades
   {
     path: 'actividades',
-    redirectTo: '/cuentas-cobro',
-    pathMatch: 'full'
+    canActivate: [authGuard, roleGuard],
+    data: {
+      breadcrumb: 'Actividades',
+      permissions: ['actividades.registrar']
+    },
+    children: [
+      {
+        path: '',
+        component: ListaActividadesComponent,
+        data: { breadcrumb: null }
+      },
+      {
+        path: 'crear',
+        component: GestionActividadComponent,
+        data: {
+          breadcrumb: 'Registrar',
+          mode: 'create'
+        }
+      },
+      {
+        path: 'editar/:id',
+        component: GestionActividadComponent,
+        data: {
+          breadcrumb: 'Editar',
+          mode: 'edit'
+        }
+      },
+      {
+        path: 'detalle/:id',
+        component: GestionActividadComponent,
+        data: {
+          breadcrumb: 'Detalle',
+          mode: 'view'
+        }
+      }
+    ]
   },
+
+  // Rutas futuras (mantenidas como redirects)
   {
     path: 'generar',
     redirectTo: '/cuentas-cobro',

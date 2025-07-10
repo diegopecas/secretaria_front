@@ -55,8 +55,7 @@ export class CuentasCobroComponent implements OnInit {
       route: '/cuentas-cobro/actividades',
       description: 'Registrar actividades diarias',
       color: '#4CAF50',
-      permissions: ['actividades.registrar'],
-      badge: 'Próximamente'
+      permissions: ['actividades.registrar']
     },
     {
       title: 'Generar Cuenta',
@@ -73,7 +72,8 @@ export class CuentasCobroComponent implements OnInit {
       route: '/cuentas-cobro/mis-cuentas',
       description: 'Ver mis cuentas de cobro',
       color: '#00BCD4',
-      permissions: ['cuentas_cobro.ver']
+      permissions: ['cuentas_cobro.ver'],
+      badge: 'Próximamente'
     }
   ];
 
