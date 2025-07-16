@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -67,7 +67,7 @@ export class ContratosService {
   constructor(
     private http: HttpClient,
     private authService: AuthService
-  ) {}
+  ) { }
 
   private getHttpOptions() {
     const token = this.authService.getAccessToken();
@@ -109,8 +109,8 @@ export class ContratosService {
 
   cambiarEstado(id: number, estado: string): Observable<any> {
     return this.http.patch<any>(
-      `${this.apiUrl}/estado`, 
-      { id, estado }, 
+      `${this.apiUrl}/estado`,
+      { id, estado },
       this.getHttpOptions()
     ).pipe(
       catchError(this.handleError)
@@ -155,30 +155,36 @@ export class ContratosService {
   }): Observable<Contrato[]> {
     let url = `${this.apiUrl}/buscar?`;
     const queryParams: string[] = [];
-    
+
     if (params.q) queryParams.push(`q=${encodeURIComponent(params.q)}`);
     if (params.estado) queryParams.push(`estado=${params.estado}`);
     if (params.contratista_id) queryParams.push(`contratista_id=${params.contratista_id}`);
     if (params.entidad_id) queryParams.push(`entidad_id=${params.entidad_id}`);
-    
+
     url += queryParams.join('&');
-    
+
     return this.http.get<Contrato[]>(url, this.getHttpOptions())
       .pipe(
         catchError(this.handleError)
       );
   }
-
+  obtenerPorContratista(contratista_id: number): Observable<Contrato[]> {
+    return this.http.get<any>(`${this.apiUrl}/por-contratista/${contratista_id}`, this.getHttpOptions())
+      .pipe(
+        map(response => response.contratos || []),
+        catchError(this.handleError)
+      );
+  }
   private handleError(error: any): Observable<never> {
     console.error('Error en ContratosService:', error);
     let errorMessage = 'Ocurrió un error al procesar la solicitud';
-    
+
     if (error.error?.error) {
       errorMessage = error.error.error;
     } else if (error.message) {
       errorMessage = error.message;
     }
-    
+
     return throwError(() => new Error(errorMessage));
   }
 }

@@ -228,6 +228,37 @@ export class ActividadesService {
       );
   }
 
+
+  obtenerTodas(filtros?: {
+    contratista_id?: number;
+    contrato_id?: number;
+    mes?: number;
+    anio?: number;
+  }): Observable<Actividad[]> {
+    let params = '';
+    if (filtros) {
+      const queryParams = new URLSearchParams();
+      if (filtros.contratista_id) queryParams.append('contratista_id', filtros.contratista_id.toString());
+      if (filtros.contrato_id) queryParams.append('contrato_id', filtros.contrato_id.toString());
+      if (filtros.mes) queryParams.append('mes', filtros.mes.toString());
+      if (filtros.anio) queryParams.append('anio', filtros.anio.toString());
+      params = queryParams.toString() ? '?' + queryParams.toString() : '';
+    }
+    
+    return this.http.get<any>(`${this.apiUrl}${params}`, this.getHttpOptions())
+      .pipe(
+        map(response => response.actividades || []),
+        catchError(this.handleError)
+      );
+  }
+
+  obtenerPorContratista(contratista_id: number): Observable<Actividad[]> {
+    return this.http.get<any>(`${this.apiUrl}/por-contratista?contratista_id=${contratista_id}`, this.getHttpOptions())
+      .pipe(
+        map(response => response.actividades || []),
+        catchError(this.handleError)
+      );
+  }
   private handleError(error: any): Observable<never> {
     console.error('Error en ActividadesService:', error);
     let errorMessage = 'Ocurrió un error al procesar la solicitud';

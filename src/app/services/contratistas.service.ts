@@ -5,20 +5,28 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
+export interface Contrato {
+  numero_contrato: string;
+  entidad_nombre: string;
+  fecha_inicio: string;
+  fecha_terminacion: string;
+  estado: string;
+  valor_total: number;
+}
+
 export interface Contratista {
-  id?: number;
+  id: number;
   tipo_identificacion_id: number;
-  tipo_identificacion_codigo?: string;
-  tipo_identificacion_nombre?: string;
   identificacion: string;
   nombre_completo: string;
   email?: string;
   telefono?: string;
   direccion?: string;
-  activo?: boolean;
+  activo: boolean;
   total_contratos?: number;
   contratos_activos?: number;
-  contratos?: any[];
+  contratos?: Contrato[];
+  es_principal?: boolean;
 }
 
 @Injectable({
@@ -47,7 +55,7 @@ export class ContratistasService {
   obtenerTodos(): Observable<Contratista[]> {
     console.log('Llamando a:', this.apiUrl);
     console.log('Headers:', this.getHttpOptions());
-    
+
     return this.http.get<any>(this.apiUrl, this.getHttpOptions())
       .pipe(
         tap(response => {
@@ -92,7 +100,7 @@ export class ContratistasService {
       ...this.getHttpOptions(),
       body: { id }
     };
-    
+
     return this.http.request<any>('DELETE', this.apiUrl, options)
       .pipe(
         catchError(this.handleError)
@@ -104,7 +112,7 @@ export class ContratistasService {
     if (activo !== undefined) {
       url += `&activo=${activo}`;
     }
-    
+
     return this.http.get<Contratista[]>(url, this.getHttpOptions())
       .pipe(
         catchError(this.handleError)
@@ -118,9 +126,9 @@ export class ContratistasService {
     console.error('URL:', error.url);
     console.error('Message:', error.message);
     console.error('Error completo:', error);
-    
+
     let errorMessage = 'Ocurrió un error al procesar la solicitud';
-    
+
     if (error.status === 0) {
       errorMessage = 'No se pudo conectar con el servidor. Verifique que el backend esté ejecutándose.';
     } else if (error.status === 401) {
@@ -134,7 +142,7 @@ export class ContratistasService {
     } else if (error.message) {
       errorMessage = error.message;
     }
-    
+
     return throwError(() => new Error(errorMessage));
   }
 }

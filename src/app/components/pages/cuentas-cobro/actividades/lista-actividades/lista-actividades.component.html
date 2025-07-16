@@ -13,7 +13,7 @@
           </span>
           Registro de Actividades
         </h1>
-        <p class="page-subtitle">Gestione las actividades diarias de sus contratos</p>
+        <p class="page-subtitle">Gestione las actividades diarias de los contratos</p>
       </div>
     </div>
   </div>
@@ -23,6 +23,15 @@
     <div class="page-toolbar">
       <h2 class="toolbar-title">Listado de Actividades</h2>
       <div class="toolbar-actions">
+        <!-- Botón para mostrar/ocultar filtros -->
+        <button 
+          class="btn btn-secondary me-2" 
+          (click)="mostrarFiltros = !mostrarFiltros"
+          [attr.aria-label]="mostrarFiltros ? 'Ocultar filtros' : 'Mostrar filtros'">
+          <i class="fas" [ngClass]="mostrarFiltros ? 'fa-filter-slash' : 'fa-filter'"></i>
+          <span class="btn-text">{{ mostrarFiltros ? 'Ocultar' : 'Mostrar' }} Filtros</span>
+        </button>
+        
         <!-- Botón principal de crear -->
         <button 
           class="btn btn-primary" 
@@ -35,34 +44,54 @@
       </div>
     </div>
 
-    <!-- Filtros -->
-    <div class="filters-section mb-4" *ngIf="contratos.length > 0">
+    <!-- Filtros en cascada -->
+    <div class="filters-section mb-4" *ngIf="mostrarFiltros">
       <div class="row">
-        <div class="col-12 col-md-6">
+        <!-- Contratista -->
+        <div class="col-12 col-md-6 col-lg-3">
           <div class="form-group">
-            <label for="contrato">Contrato</label>
+            <label for="contratista">Contratista <span class="text-danger">*</span></label>
             <select 
-              id="contrato" 
-              [(ngModel)]="contratoSeleccionado"
-              (change)="onContratoChange()"
-              class="form-control">
-              <option [value]="null">-- Seleccione un contrato --</option>
-              <option *ngFor="let contrato of contratos" [value]="contrato.id">
-                {{ contrato.numero_contrato }} - {{ contrato.entidad_nombre }}
+              id="contratista" 
+              [(ngModel)]="contratistaSeleccionado"
+              (change)="onContratistaChange()"
+              class="form-control"
+              [disabled]="contratistas.length === 0">
+              <option [value]="null">-- Seleccione --</option>
+              <option *ngFor="let contratista of contratistas" [value]="contratista.id">
+                {{ contratista.nombre_completo }}
+                <span *ngIf="contratista.es_principal === true" class="text-muted">(Principal)</span>
               </option>
             </select>
           </div>
         </div>
         
-        <div class="col-12 col-md-3">
+        <!-- Contrato -->
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="form-group">
+            <label for="contrato">Contrato (Opcional)</label>
+            <select 
+              id="contrato" 
+              [(ngModel)]="contratoSeleccionado"
+              class="form-control"
+              [disabled]="!contratistaSeleccionado || contratos.length === 0">
+              <option [value]="null">-- Todos los contratos --</option>
+              <option *ngFor="let contrato of contratos" [value]="contrato.id">
+                {{ contrato.numero_contrato }}
+                <span class="text-muted">({{ contrato.estado }})</span>
+              </option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Mes -->
+        <div class="col-12 col-md-6 col-lg-2">
           <div class="form-group">
             <label for="mes">Mes</label>
             <select 
               id="mes" 
               [(ngModel)]="mesSeleccionado"
-              (change)="onPeriodoChange()"
-              class="form-control"
-              [disabled]="!contratoSeleccionado">
+              class="form-control">
               <option *ngFor="let mes of getMeses()" [value]="mes.value">
                 {{ mes.label }}
               </option>
@@ -70,26 +99,47 @@
           </div>
         </div>
         
-        <div class="col-12 col-md-3">
+        <!-- Año -->
+        <div class="col-12 col-md-6 col-lg-2">
           <div class="form-group">
             <label for="anio">Año</label>
             <select 
               id="anio" 
               [(ngModel)]="anioSeleccionado"
-              (change)="onPeriodoChange()"
-              class="form-control"
-              [disabled]="!contratoSeleccionado">
+              class="form-control">
               <option *ngFor="let anio of getAnios()" [value]="anio">
                 {{ anio }}
               </option>
             </select>
           </div>
         </div>
+        
+        <!-- Botones de acción -->
+        <div class="col-12 col-lg-2">
+          <div class="form-group">
+            <label class="d-none d-lg-block">&nbsp;</label>
+            <div class="d-flex gap-2">
+              <button 
+                class="btn btn-primary flex-fill" 
+                (click)="aplicarFiltros()"
+                [disabled]="!contratistaSeleccionado">
+                <i class="fas fa-search"></i>
+                Buscar
+              </button>
+              <button 
+                class="btn btn-secondary" 
+                (click)="limpiarFiltros()"
+                title="Limpiar filtros">
+                <i class="fas fa-eraser"></i>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Contenedor principal -->
-    <div class="page-content-wrapper" *ngIf="contratoSeleccionado">
+    <div class="page-content-wrapper" *ngIf="filtrosAplicados && actividades.length > 0">
       <!-- Tabla de actividades -->
       <app-tablas
         [titulos]="titulos"
@@ -103,31 +153,31 @@
       ></app-tablas>
     </div>
 
-    <!-- Estado vacío - Sin contrato seleccionado -->
-    <div class="empty-state" *ngIf="!isLoading && !contratoSeleccionado && contratos.length > 0">
+    <!-- Estado vacío - Sin filtros aplicados -->
+    <div class="empty-state" *ngIf="!isLoading && !filtrosAplicados && contratistas.length > 0">
       <div class="empty-icon">
-        <i class="fas fa-file-contract"></i>
+        <i class="fas fa-filter"></i>
       </div>
-      <h3 class="empty-title">Seleccione un contrato</h3>
-      <p class="empty-subtitle">Para ver las actividades, primero debe seleccionar un contrato</p>
+      <h3 class="empty-title">Seleccione los filtros</h3>
+      <p class="empty-subtitle">Para ver las actividades, seleccione un contratista y aplique los filtros</p>
     </div>
 
-    <!-- Estado vacío - Sin contratos -->
-    <div class="empty-state" *ngIf="!isLoading && contratos.length === 0">
+    <!-- Estado vacío - Sin contratistas -->
+    <div class="empty-state" *ngIf="!isLoading && contratistas.length === 0">
       <div class="empty-icon">
-        <i class="fas fa-exclamation-triangle"></i>
+        <i class="fas fa-user-slash"></i>
       </div>
-      <h3 class="empty-title">No hay contratos disponibles</h3>
-      <p class="empty-subtitle">No tiene contratos activos asignados</p>
+      <h3 class="empty-title">Sin contratistas asignados</h3>
+      <p class="empty-subtitle">No tiene contratistas asignados. Contacte al administrador del sistema.</p>
     </div>
 
-    <!-- Estado vacío - Sin actividades -->
-    <div class="empty-state" *ngIf="!isLoading && contratoSeleccionado && actividades.length === 0">
+    <!-- Estado vacío - Sin actividades después de buscar -->
+    <div class="empty-state" *ngIf="!isLoading && filtrosAplicados && actividades.length === 0">
       <div class="empty-icon">
         <i class="fas fa-clipboard-list"></i>
       </div>
       <h3 class="empty-title">No hay actividades registradas</h3>
-      <p class="empty-subtitle">No se encontraron actividades para el período seleccionado</p>
+      <p class="empty-subtitle">No se encontraron actividades para los filtros seleccionados</p>
       <button 
         class="btn btn-primary mt-3"
         *hasPermission="'actividades.registrar'"
