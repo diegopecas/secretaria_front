@@ -6,7 +6,23 @@ import { HasPermissionDirective } from '../../../../../directives/has-permission
 import { AuthService } from '../../../../../services/auth.service';
 import { NotificationService } from '../../../../../services/notification.service';
 import { ActividadesService, Actividad } from '../../../../../services/actividades.service';
-import { ContratosService, Contrato } from '../../../../../services/contratos.service';
+import { ContratosService } from '../../../../../services/contratos.service';
+
+// Interfaz extendida para incluir el campo que viene del backend
+interface ContratoConNombreCorto {
+  id?: number;
+  numero_contrato: string;
+  contratista_id: number;
+  contratista_nombre?: string;
+  entidad_id: number;
+  entidad_nombre?: string;
+  entidad_nombre_corto?: string;
+  fecha_inicio: string;
+  fecha_terminacion: string;
+  valor_total: number;
+  estado?: 'activo' | 'suspendido' | 'finalizado' | 'liquidado';
+  [key: string]: any; // Para otros campos que puedan venir del backend
+}
 import { ContratistasService, Contratista } from '../../../../../services/contratistas.service';
 import { UsuariosContratistasService } from '../../../../../services/usuarios-contratistas.service';
 import { BreadcrumbComponent } from '../../../../common/breadcrumb/breadcrumb.component';
@@ -30,9 +46,9 @@ import { TablasComponent } from '../../../../common/tablas/tablas.component';
 export class ListaActividadesComponent implements OnInit {
   actividades: any[] = [];
   contratistas: Contratista[] = [];
-  contratos: Contrato[] = [];
+  contratos: ContratoConNombreCorto[] = [];
   titulos: any[] = [];
-  columnasFiltro = ['Fecha', 'Contratista', 'Contrato', 'Descripción', 'Obligaciones'];
+  columnasFiltro = ['fecha_actividad', 'descripcion_actividad'];
   isLoading = false;
   
   // Filtros en cascada
@@ -42,7 +58,7 @@ export class ListaActividadesComponent implements OnInit {
   anioSeleccionado: number = new Date().getFullYear();
   
   // Control de filtros
-  mostrarFiltros = true;
+  mostrarFiltros = true; // Siempre visible
   filtrosAplicados = false;
 
   constructor(
@@ -75,37 +91,9 @@ export class ListaActividadesComponent implements OnInit {
         tipo: 'fecha'
       },
       {
-        clave: 'contratista_nombre',
-        alias: 'Contratista',
-        alinear: 'izquierda'
-      },
-      {
-        clave: 'numero_contrato',
-        alias: 'Contrato',
-        alinear: 'izquierda'
-      },
-      {
-        clave: 'entidad_nombre',
-        alias: 'Entidad',
-        alinear: 'izquierda'
-      },
-      {
-        clave: 'descripcion_corta',
+        clave: 'descripcion_actividad',
         alias: 'Descripción',
-        alinear: 'izquierda',
-        tipo: 'html'
-      },
-      {
-        clave: 'obligaciones_badge',
-        alias: 'Obligaciones',
-        alinear: 'centrado',
-        tipo: 'html'
-      },
-      {
-        clave: 'adjuntos_badge',
-        alias: 'Archivos',
-        alinear: 'centrado',
-        tipo: 'html'
+        alinear: 'izquierda'
       },
       {
         clave: 'procesado_badge',
@@ -157,7 +145,7 @@ export class ListaActividadesComponent implements OnInit {
     this.isLoading = true;
     
     this.contratosService.obtenerPorContratista(this.contratistaSeleccionado).subscribe({
-      next: (contratos) => {
+      next: (contratos: any[]) => {
         this.contratos = contratos;
         
         // Si había un contrato seleccionado que ya no existe, limpiarlo
@@ -183,8 +171,8 @@ export class ListaActividadesComponent implements OnInit {
   }
 
   aplicarFiltros() {
-    if (!this.contratistaSeleccionado) {
-      this.notificationService.warning('Debe seleccionar un contratista');
+    if (!this.contratistaSeleccionado || !this.contratoSeleccionado) {
+      this.notificationService.warning('Debe seleccionar contratista y contrato');
       return;
     }
     
@@ -192,8 +180,7 @@ export class ListaActividadesComponent implements OnInit {
     this.filtrosAplicados = true;
     
     const filtros = {
-      contratista_id: this.contratistaSeleccionado,
-      contrato_id: this.contratoSeleccionado || undefined,
+      contrato_id: this.contratoSeleccionado,
       mes: this.mesSeleccionado,
       anio: this.anioSeleccionado
     };
@@ -202,9 +189,6 @@ export class ListaActividadesComponent implements OnInit {
       next: (actividades) => {
         this.actividades = actividades.map(actividad => ({
           ...actividad,
-          descripcion_corta: this.generarDescripcionCorta(actividad),
-          obligaciones_badge: this.generarObligacionesBadge(actividad),
-          adjuntos_badge: this.generarAdjuntosBadge(actividad),
           procesado_badge: this.generarProcesadoBadge(actividad)
         }));
         
@@ -245,40 +229,9 @@ export class ListaActividadesComponent implements OnInit {
     }
   }
 
-  generarDescripcionCorta(actividad: Actividad): string {
-    const descripcion = actividad.descripcion_actividad || '';
-    const corta = descripcion.length > 80 ? descripcion.substring(0, 80) + '...' : descripcion;
-    
-    let html = `<div>${corta}</div>`;
-    
-    // Indicar si tiene transcripción
-    if (actividad.transcripcion_texto) {
-      html += '<small class="text-muted d-block mt-1"><i class="fas fa-microphone"></i> Con transcripción</small>';
-    }
-    
-    return html;
-  }
-
-  generarObligacionesBadge(actividad: Actividad): string {
-    if (!actividad.obligaciones || actividad.obligaciones.length === 0) {
-      return '<span class="badge badge-secondary">Sin obligaciones</span>';
-    }
-    
-    const total = actividad.obligaciones.length;
-    const numeros = actividad.obligaciones
-      .map(o => o.numero_obligacion)
-      .sort((a, b) => a - b)
-      .join(', ');
-    
-    return `<span class="badge badge-info" title="Obligaciones: ${numeros}">${total} obligación${total !== 1 ? 'es' : ''}</span>`;
-  }
-
-  generarAdjuntosBadge(actividad: any): string {
-    if (!actividad.total_archivos || actividad.total_archivos === 0) {
-      return '<span class="badge badge-secondary">Sin archivos</span>';
-    }
-    
-    return `<span class="badge badge-primary">${actividad.total_archivos} archivo${actividad.total_archivos !== 1 ? 's' : ''}</span>`;
+  onContratoChange() {
+    this.actividades = [];
+    this.filtrosAplicados = false;
   }
 
   generarProcesadoBadge(actividad: Actividad): string {

@@ -23,15 +23,6 @@
     <div class="page-toolbar">
       <h2 class="toolbar-title">Listado de Actividades</h2>
       <div class="toolbar-actions">
-        <!-- Botón para mostrar/ocultar filtros -->
-        <button 
-          class="btn btn-secondary me-2" 
-          (click)="mostrarFiltros = !mostrarFiltros"
-          [attr.aria-label]="mostrarFiltros ? 'Ocultar filtros' : 'Mostrar filtros'">
-          <i class="fas" [ngClass]="mostrarFiltros ? 'fa-filter-slash' : 'fa-filter'"></i>
-          <span class="btn-text">{{ mostrarFiltros ? 'Ocultar' : 'Mostrar' }} Filtros</span>
-        </button>
-        
         <!-- Botón principal de crear -->
         <button 
           class="btn btn-primary" 
@@ -44,8 +35,8 @@
       </div>
     </div>
 
-    <!-- Filtros en cascada -->
-    <div class="filters-section mb-4" *ngIf="mostrarFiltros">
+    <!-- Filtros en cascada (siempre visibles) -->
+    <div class="filters-section mb-4">
       <div class="row">
         <!-- Contratista -->
         <div class="col-12 col-md-6 col-lg-3">
@@ -69,16 +60,16 @@
         <!-- Contrato -->
         <div class="col-12 col-md-6 col-lg-3">
           <div class="form-group">
-            <label for="contrato">Contrato (Opcional)</label>
+            <label for="contrato">Contrato <span class="text-danger">*</span></label>
             <select 
               id="contrato" 
               [(ngModel)]="contratoSeleccionado"
+              (change)="onContratoChange()"
               class="form-control"
               [disabled]="!contratistaSeleccionado || contratos.length === 0">
-              <option [value]="null">-- Todos los contratos --</option>
+              <option [value]="null">-- Seleccione --</option>
               <option *ngFor="let contrato of contratos" [value]="contrato.id">
-                {{ contrato.numero_contrato }}
-                <span class="text-muted">({{ contrato.estado }})</span>
+                {{ contrato.entidad_nombre_corto || contrato.entidad_nombre }} - {{ contrato.numero_contrato }}
               </option>
             </select>
           </div>
@@ -87,7 +78,7 @@
         <!-- Mes -->
         <div class="col-12 col-md-6 col-lg-2">
           <div class="form-group">
-            <label for="mes">Mes</label>
+            <label for="mes">Mes <span class="text-danger">*</span></label>
             <select 
               id="mes" 
               [(ngModel)]="mesSeleccionado"
@@ -102,7 +93,7 @@
         <!-- Año -->
         <div class="col-12 col-md-6 col-lg-2">
           <div class="form-group">
-            <label for="anio">Año</label>
+            <label for="anio">Año <span class="text-danger">*</span></label>
             <select 
               id="anio" 
               [(ngModel)]="anioSeleccionado"
@@ -114,25 +105,17 @@
           </div>
         </div>
         
-        <!-- Botones de acción -->
+        <!-- Botón de búsqueda -->
         <div class="col-12 col-lg-2">
           <div class="form-group">
             <label class="d-none d-lg-block">&nbsp;</label>
-            <div class="d-flex gap-2">
-              <button 
-                class="btn btn-primary flex-fill" 
-                (click)="aplicarFiltros()"
-                [disabled]="!contratistaSeleccionado">
-                <i class="fas fa-search"></i>
-                Buscar
-              </button>
-              <button 
-                class="btn btn-secondary" 
-                (click)="limpiarFiltros()"
-                title="Limpiar filtros">
-                <i class="fas fa-eraser"></i>
-              </button>
-            </div>
+            <button 
+              class="btn btn-primary w-100" 
+              (click)="aplicarFiltros()"
+              [disabled]="!contratistaSeleccionado || !contratoSeleccionado">
+              <i class="fas fa-search"></i>
+              Buscar
+            </button>
           </div>
         </div>
       </div>
@@ -159,7 +142,7 @@
         <i class="fas fa-filter"></i>
       </div>
       <h3 class="empty-title">Seleccione los filtros</h3>
-      <p class="empty-subtitle">Para ver las actividades, seleccione un contratista y aplique los filtros</p>
+      <p class="empty-subtitle">Para ver las actividades, seleccione un contratista, contrato, mes y año</p>
     </div>
 
     <!-- Estado vacío - Sin contratistas -->
