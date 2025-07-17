@@ -62,9 +62,6 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
   archivosNuevos: ArchivoConfig[] = [];
   archivosExistentes: any[] = [];
   
-  // Transcripción
-  datosTranscripcion: any = null;
-  
   // UI
   mostrarModalObligaciones = false;
   tabActiva: 'texto' | 'audio' | 'archivos' = 'texto';
@@ -162,8 +159,6 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
         // Cargar contratos
         await this.cargarContratos();
       }
-      
-      // Si tiene múltiples contratistas o es admin, puede seleccionar cualquiera
       
     } catch (error) {
       console.error('Error cargando datos del usuario:', error);
@@ -298,16 +293,6 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
         if (actividad.archivos) {
           this.archivosExistentes = actividad.archivos;
         }
-        
-        // Cargar datos de transcripción si existen
-        if (actividad.transcripcion_texto) {
-          this.datosTranscripcion = {
-            texto: actividad.transcripcion_texto,
-            proveedor: actividad.transcripcion_proveedor,
-            modelo: actividad.transcripcion_modelo,
-            confianza: actividad.transcripcion_confianza
-          };
-        }
       }
       
     } catch (error) {
@@ -319,19 +304,15 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Manejo de transcripción
+  // Manejo de transcripción - Solo actualiza la descripción
   onTranscripcionCompleta(resultado: any): void {
     if (resultado?.texto) {
-      this.datosTranscripcion = resultado;
-      
-      // Actualizar descripción si está vacía
       const descripcionActual = this.actividadForm.get('descripcion_actividad')?.value;
       if (!descripcionActual?.trim()) {
         this.actividadForm.patchValue({
           descripcion_actividad: resultado.texto
         });
       } else {
-        // Preguntar si desea reemplazar
         this.notificationService.confirm(
           '¿Desea reemplazar la descripción actual con el texto transcrito?',
           () => {
@@ -350,14 +331,11 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
   }
 
   onArchivoExistenteEliminado(archivoId: number): void {
-    // Implementar eliminación de archivo existente
     this.notificationService.confirm(
       '¿Está seguro de eliminar este archivo?',
       async () => {
         try {
-          // Aquí deberías llamar a un servicio para eliminar el archivo
-          // await this.actividadesArchivosService.eliminar(archivoId).toPromise();
-          
+          // TODO: Implementar servicio para eliminar archivo
           this.archivosExistentes = this.archivosExistentes.filter(a => a.id !== archivoId);
           this.notificationService.success('Archivo eliminado correctamente');
         } catch (error) {
@@ -415,19 +393,9 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
       formData.append('obligaciones', JSON.stringify(this.obligacionesSeleccionadas));
     }
     
-    // Datos de transcripción
-    if (this.datosTranscripcion) {
-      formData.append('transcripcion_texto', this.datosTranscripcion.texto || '');
-      formData.append('transcripcion_proveedor', this.datosTranscripcion.proveedor || '');
-      formData.append('transcripcion_modelo', this.datosTranscripcion.modelo || '');
-      formData.append('transcripcion_confianza', this.datosTranscripcion.confianza?.toString() || '0');
-    }
-    
-    // Archivos nuevos
+    // Archivos nuevos (sin las opciones que no existen en la BD)
     this.archivosNuevos.forEach((archivo, index) => {
       formData.append(`archivos[${index}]`, archivo.archivo);
-      formData.append(`archivos_config[${index}][almacenar]`, archivo.almacenar.toString());
-      formData.append(`archivos_config[${index}][extraer_texto]`, archivo.extraerTexto.toString());
     });
     
     this.isLoading = true;

@@ -191,18 +191,6 @@
                 <div class="descripcion-view" *ngIf="isViewMode">
                   <h4>Descripción de la Actividad</h4>
                   <p>{{ actividadForm.get('descripcion_actividad')?.value || 'Sin descripción' }}</p>
-                  
-                  <!-- Info de transcripción si existe -->
-                  <div class="transcripcion-info" *ngIf="datosTranscripcion">
-                    <hr>
-                    <small class="text-muted">
-                      <i class="fas fa-microphone"></i>
-                      Transcrito con: {{ datosTranscripcion.proveedor }} - {{ datosTranscripcion.modelo }}
-                      <span *ngIf="datosTranscripcion.confianza">
-                        ({{ (datosTranscripcion.confianza * 100).toFixed(0) }}% confianza)
-                      </span>
-                    </small>
-                  </div>
                 </div>
               </div>
             </div>
