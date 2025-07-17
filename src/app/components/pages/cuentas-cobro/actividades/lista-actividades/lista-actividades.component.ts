@@ -33,11 +33,11 @@ import { TablasComponent } from '../../../../common/tablas/tablas.component';
   selector: 'app-lista-actividades',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     FormsModule,
-    LayoutComponent, 
-    HasPermissionDirective, 
-    TablasComponent, 
+    LayoutComponent,
+    HasPermissionDirective,
+    TablasComponent,
     BreadcrumbComponent
   ],
   templateUrl: './lista-actividades.component.html',
@@ -50,13 +50,13 @@ export class ListaActividadesComponent implements OnInit {
   titulos: any[] = [];
   columnasFiltro = ['fecha_actividad', 'descripcion_actividad'];
   isLoading = false;
-  
+
   // Filtros en cascada
   contratistaSeleccionado: number | null = null;
   contratoSeleccionado: number | null = null;
   mesSeleccionado: number = new Date().getMonth() + 1;
   anioSeleccionado: number = new Date().getFullYear();
-  
+
   // Control de filtros
   mostrarFiltros = true; // Siempre visible
   filtrosAplicados = false;
@@ -69,7 +69,7 @@ export class ListaActividadesComponent implements OnInit {
     private contratosService: ContratosService,
     private contratistasService: ContratistasService,
     private usuariosContratistasService: UsuariosContratistasService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.configurarTitulos();
@@ -106,12 +106,12 @@ export class ListaActividadesComponent implements OnInit {
 
   cargarContratistas() {
     this.isLoading = true;
-    
+
     // Obtener contratistas según permisos
     this.usuariosContratistasService.obtenerMisContratistas().subscribe({
       next: (contratistas) => {
         this.contratistas = contratistas.filter(c => c.activo);
-        
+
         // Si solo hay un contratista, seleccionarlo automáticamente
         if (this.contratistas.length === 1) {
           this.contratistaSeleccionado = this.contratistas[0].id!;
@@ -124,7 +124,7 @@ export class ListaActividadesComponent implements OnInit {
             this.cargarContratos();
           }
         }
-        
+
         this.isLoading = false;
       },
       error: (error) => {
@@ -141,24 +141,24 @@ export class ListaActividadesComponent implements OnInit {
       this.contratoSeleccionado = null;
       return;
     }
-    
+
     this.isLoading = true;
-    
+
     this.contratosService.obtenerPorContratista(this.contratistaSeleccionado).subscribe({
       next: (contratos: any[]) => {
         this.contratos = contratos;
-        
+
         // Si había un contrato seleccionado que ya no existe, limpiarlo
         if (this.contratoSeleccionado && !contratos.find(c => c.id === this.contratoSeleccionado)) {
           this.contratoSeleccionado = null;
         }
-        
+
         // Si solo hay un contrato activo, seleccionarlo
         const activos = contratos.filter(c => c.estado === 'activo');
         if (activos.length === 1) {
           this.contratoSeleccionado = activos[0].id!;
         }
-        
+
         this.isLoading = false;
       },
       error: (error) => {
@@ -175,25 +175,26 @@ export class ListaActividadesComponent implements OnInit {
       this.notificationService.warning('Debe seleccionar contratista y contrato');
       return;
     }
-    
+
     this.isLoading = true;
     this.filtrosAplicados = true;
-    
+
     const filtros = {
       contrato_id: this.contratoSeleccionado,
       mes: this.mesSeleccionado,
       anio: this.anioSeleccionado
     };
-    
+
     this.actividadesService.obtenerTodas(filtros).subscribe({
-      next: (actividades) => {
-        this.actividades = actividades.map(actividad => ({
+      next: (response: any) => {
+        const actividades = response.actividades || response || [];
+        this.actividades = actividades.map((actividad: any) => ({
           ...actividad,
           procesado_badge: this.generarProcesadoBadge(actividad)
         }));
-        
+
         this.isLoading = false;
-        
+
         if (this.actividades.length === 0) {
           this.notificationService.info('No se encontraron actividades para los filtros seleccionados');
         }
@@ -221,7 +222,7 @@ export class ListaActividadesComponent implements OnInit {
     this.contratoSeleccionado = null;
     this.actividades = [];
     this.filtrosAplicados = false;
-    
+
     if (this.contratistaSeleccionado) {
       this.cargarContratos();
     } else {
@@ -238,7 +239,7 @@ export class ListaActividadesComponent implements OnInit {
     if (actividad.procesado_ia) {
       return '<span class="badge badge-success"><i class="fas fa-robot"></i> Procesado</span>';
     }
-    
+
     return '<span class="badge badge-warning"><i class="fas fa-clock"></i> Pendiente</span>';
   }
 
@@ -247,15 +248,15 @@ export class ListaActividadesComponent implements OnInit {
       case 'consultar':
         this.verDetalle(event.id);
         break;
-      
+
       case 'editar':
         this.editar(event.id);
         break;
-      
+
       case 'eliminar':
         this.eliminar(event.id, event.registro);
         break;
-      
+
       default:
         console.warn('Acción no reconocida:', event.accion);
     }
@@ -269,7 +270,7 @@ export class ListaActividadesComponent implements OnInit {
     if (this.contratoSeleccionado) {
       localStorage.setItem('ultimoContratoSeleccionado', this.contratoSeleccionado.toString());
     }
-    
+
     this.router.navigate(['/cuentas-cobro/actividades/crear']);
   }
 
@@ -305,10 +306,10 @@ export class ListaActividadesComponent implements OnInit {
   formatearFecha(fecha: string): string {
     if (!fecha) return 'N/A';
     const date = new Date(fecha);
-    return date.toLocaleDateString('es-CO', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('es-CO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   }
 

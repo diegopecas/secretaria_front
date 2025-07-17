@@ -1,19 +1,24 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+
+// Directivas y componentes
 import { HasPermissionDirective } from '../../../../../directives/has-permission.directive';
-import { NotificationService } from '../../../../../services/notification.service';
 import { LayoutComponent } from '../../../../common/layout/layout.component';
 import { BreadcrumbComponent } from '../../../../common/breadcrumb/breadcrumb.component';
-import { ActividadesService, Actividad, Obligacion } from '../../../../../services/actividades.service';
-import { ContratosService, Contrato } from '../../../../../services/contratos.service';
+import { ModalComponent } from '../../../../common/modal/modal.component';
+import { TranscripcionAudioComponent } from '../../../../common/transcripcion-audio/transcripcion-audio.component';
+import { CargarArchivoComponent, ArchivoConfig } from '../../../../common/cargar-archivo/cargar-archivo.component';
+
+// Servicios
+import { NotificationService } from '../../../../../services/notification.service';
+import { ActividadesService } from '../../../../../services/actividades.service';
+import { ContratosService, Contrato, Obligacion } from '../../../../../services/contratos.service';
 import { ContratistasService, Contratista } from '../../../../../services/contratistas.service';
 import { UsuariosContratistasService } from '../../../../../services/usuarios-contratistas.service';
-import { ThemeService } from '../../../../../services/theme.service';
-import { ModalComponent } from '../../../../common/modal/modal.component';
-import { GrabadorAudioComponent } from '../../../../common/grabador-audio/grabador-audio.component';
+import { AuthService } from '../../../../../services/auth.service';
 
 type ViewMode = 'create' | 'edit' | 'view';
 
@@ -23,272 +28,279 @@ type ViewMode = 'create' | 'edit' | 'view';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule,
     LayoutComponent,
     BreadcrumbComponent,
     HasPermissionDirective,
     ModalComponent,
-    GrabadorAudioComponent
+    TranscripcionAudioComponent,
+    CargarArchivoComponent
   ],
   templateUrl: './gestion-actividad.component.html',
   styleUrls: ['./gestion-actividad.component.scss']
 })
-export class GestionActividadComponent implements OnInit {
-  actividadForm!: FormGroup;
+export class GestionActividadComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
+  // Modo y datos básicos
   mode: ViewMode = 'create';
   actividadId?: number;
-  contratoId?: number;
+  actividadForm!: FormGroup;
   isLoading = false;
-
-  // Datos
-  actividad: Actividad | null = null;
-  contrato: Contrato | null = null;
-  contratistaNombre: string = '';
+  
+  // Datos de usuario
+  esUsuarioContratista = false;
+  contratistaUsuario: Contratista | null = null;
+  
+  // Datos de selección
+  contratistas: Contratista[] = [];
+  contratos: Contrato[] = [];
+  contratoSeleccionado: Contrato | null = null;
   obligaciones: Obligacion[] = [];
   obligacionesSeleccionadas: number[] = [];
-
-  // Selectores en cascada
-  contratistas: Contratista[] = [];
-  contratistaSeleccionado: number | null = null;
-  contratos: Contrato[] = [];
-
+  
   // Archivos
-  archivosSeleccionados: File[] = [];
-  archivosActuales: any[] = [];
-
+  archivosNuevos: ArchivoConfig[] = [];
+  archivosExistentes: any[] = [];
+  
   // Transcripción
-  mostrarTranscripcion: boolean = false;
-  transcripcionTexto: string = '';
-  transcripcionOriginal: string = '';
   datosTranscripcion: any = null;
-
+  
   // UI
-  activeTab: string = 'texto';
-  mostrarModalObligaciones: boolean = false;
-
-  // Títulos dinámicos
+  mostrarModalObligaciones = false;
+  tabActiva: 'texto' | 'audio' | 'archivos' = 'texto';
+  
+  // Configuración de página
   pageTitle = 'Registrar Actividad';
   pageSubtitle = 'Ingrese los detalles de la actividad realizada';
-  pageIcon = '➕';
+  pageIcon = '📝';
   backRoute = '/cuentas-cobro/actividades';
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
+    private authService: AuthService,
+    private notificationService: NotificationService,
     private actividadesService: ActividadesService,
     private contratosService: ContratosService,
     private contratistasService: ContratistasService,
-    private usuariosContratistasService: UsuariosContratistasService,
-    private notificationService: NotificationService,
-    public themeService: ThemeService
-  ) { }
+    private usuariosContratistasService: UsuariosContratistasService
+  ) {}
 
-  ngOnInit() {
-    // Obtener modo de la ruta
+  ngOnInit(): void {
+    this.initializeComponent();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private async initializeComponent(): Promise<void> {
+    // Determinar modo de operación
     this.mode = this.route.snapshot.data['mode'] || 'create';
     this.actividadId = this.route.snapshot.params['id'];
-    this.contratoId = this.route.snapshot.params['contratoId'] || null;
-
+    
+    // Inicializar formulario
     this.initForm();
-
-    // Cargar contratistas primero
-    this.cargarContratistas();
-
-    // Si es editar o ver, cargar datos de la actividad
+    
+    // Cargar datos del usuario y contratistas
+    await this.cargarDatosUsuario();
+    
+    // Si es editar o ver, cargar la actividad
     if (this.actividadId && (this.mode === 'edit' || this.mode === 'view')) {
-      this.cargarActividad();
+      await this.cargarActividad();
     }
+    
+    this.actualizarTituloPagina();
   }
 
-  setPageInfo() {
-    const contratoInfo = this.contrato ? ` - Contrato ${this.contrato.numero_contrato}` : '';
-    const contratistaInfo = this.contratistaNombre ? ` - ${this.contratistaNombre}` : '';
-
-    switch (this.mode) {
-      case 'create':
-        this.pageTitle = `Registrar Actividad${contratoInfo}`;
-        this.pageSubtitle = `Ingrese los detalles de la actividad realizada${contratistaInfo}`;
-        this.pageIcon = '➕';
-        break;
-      case 'edit':
-        this.pageTitle = `Editar Actividad${contratoInfo}`;
-        this.pageSubtitle = `Modifique los detalles de la actividad${contratistaInfo}`;
-        this.pageIcon = '✏️';
-        break;
-      case 'view':
-        this.pageTitle = `Detalle de Actividad${contratoInfo}`;
-        this.pageSubtitle = `Información de la actividad realizada${contratistaInfo}`;
-        this.pageIcon = '👁️';
-        break;
-    }
-  }
-
-  initForm() {
+  private initForm(): void {
     const isDisabled = this.mode === 'view';
-
+    
     this.actividadForm = this.fb.group({
-      contrato_id: [
-        { value: this.contratoId || '', disabled: isDisabled },
-        [Validators.required]
-      ],
+      contratista_id: [{ value: null, disabled: isDisabled }, [Validators.required]],
+      contrato_id: [{ value: null, disabled: isDisabled }, [Validators.required]],
       fecha_actividad: [
-        { value: this.obtenerFechaActual(), disabled: isDisabled },
+        { value: this.getFechaActual(), disabled: isDisabled }, 
         [Validators.required]
       ],
       descripcion_actividad: [
-        { value: '', disabled: isDisabled },
+        { value: '', disabled: isDisabled }, 
         [Validators.required, Validators.minLength(10)]
       ]
     });
   }
 
-  cargarContratistas() {
+  private async cargarDatosUsuario(): Promise<void> {
     this.isLoading = true;
-
-    // Obtener contratistas según permisos
-    this.usuariosContratistasService.obtenerMisContratistas().subscribe({
-      next: (contratistas) => {
-        this.contratistas = contratistas.filter(c => c.activo);
-
-        // Si solo hay un contratista, seleccionarlo automáticamente
-        if (this.contratistas.length === 1) {
-          this.contratistaSeleccionado = this.contratistas[0].id!;
-          this.contratistaNombre = this.contratistas[0].nombre_completo;
-          this.onContratistaChange();
-        } else if (this.contratistas.length > 1) {
-          // Buscar si hay uno principal
-          const principal = this.contratistas.find(c => c.es_principal === true);
-          if (principal) {
-            this.contratistaSeleccionado = principal.id!;
-            this.contratistaNombre = principal.nombre_completo;
-            this.onContratistaChange();
-          }
+    
+    try {
+      // Obtener contratistas del usuario
+      const contratistas = await this.usuariosContratistasService
+        .obtenerMisContratistas()
+        .toPromise();
+      
+      this.contratistas = contratistas || [];
+      
+      // Determinar si el usuario es contratista
+      // Si solo tiene un contratista asignado, es un usuario contratista
+      if (this.contratistas.length === 1) {
+        this.esUsuarioContratista = true;
+        this.contratistaUsuario = this.contratistas[0];
+        
+        // Preseleccionar y bloquear el contratista
+        this.actividadForm.patchValue({
+          contratista_id: this.contratistaUsuario.id
+        });
+        
+        // Deshabilitar el selector si es modo crear/editar
+        if (this.mode !== 'view') {
+          this.actividadForm.get('contratista_id')?.disable();
         }
-
-        this.isLoading = false;
-        this.setPageInfo();
-      },
-      error: (error) => {
-        console.error('Error al cargar contratistas:', error);
-        this.notificationService.error('Error al cargar contratistas');
-        this.isLoading = false;
+        
+        // Cargar contratos
+        await this.cargarContratos();
       }
-    });
+      
+      // Si tiene múltiples contratistas o es admin, puede seleccionar cualquiera
+      
+    } catch (error) {
+      console.error('Error cargando datos del usuario:', error);
+      this.notificationService.error('Error al cargar información del usuario');
+    } finally {
+      this.isLoading = false;
+    }
   }
 
-  onContratistaChange() {
-    // Limpiar contratos y selección cuando cambia el contratista
+  async onContratistaChange(): Promise<void> {
+    const contratistaId = this.actividadForm.get('contratista_id')?.value;
+    
+    // Limpiar selecciones dependientes
     this.contratos = [];
-    this.contrato = null;
-    this.actividadForm.get('contrato_id')?.setValue('');
+    this.contratoSeleccionado = null;
     this.obligaciones = [];
-
-    if (this.contratistaSeleccionado) {
-      // Actualizar nombre del contratista para el título
-      const contratista = this.contratistas.find(c => c.id === this.contratistaSeleccionado);
-      if (contratista) {
-        this.contratistaNombre = contratista.nombre_completo;
-        this.setPageInfo();
-      }
-
-      this.cargarContratos();
+    this.obligacionesSeleccionadas = [];
+    this.actividadForm.patchValue({ contrato_id: null });
+    
+    if (contratistaId) {
+      await this.cargarContratos();
     }
   }
 
-  cargarContratos() {
-    if (!this.contratistaSeleccionado) {
-      return;
-    }
-
+  private async cargarContratos(): Promise<void> {
+    const contratistaId = this.actividadForm.get('contratista_id')?.value;
+    if (!contratistaId) return;
+    
     this.isLoading = true;
-
-    this.contratosService.obtenerPorContratista(this.contratistaSeleccionado).subscribe({
-      next: (contratos) => {
-        this.contratos = contratos;
-
-        // Si hay un contrato preseleccionado (modo editar/ver)
-        if (this.contratoId) {
-          this.actividadForm.get('contrato_id')?.setValue(this.contratoId);
-          this.onContratoChange();
-        }
-
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error al cargar contratos:', error);
-        this.notificationService.error('Error al cargar contratos');
-        this.isLoading = false;
+    
+    try {
+      const contratos = await this.contratosService
+        .obtenerPorContratista(contratistaId)
+        .toPromise();
+      
+      this.contratos = contratos || [];
+      
+      // Si solo hay un contrato activo, preseleccionarlo
+      const contratosActivos = this.contratos.filter(c => c.estado === 'activo');
+      if (contratosActivos.length === 1) {
+        this.actividadForm.patchValue({ contrato_id: contratosActivos[0].id });
+        await this.onContratoChange();
       }
-    });
+      
+    } catch (error) {
+      console.error('Error cargando contratos:', error);
+      this.notificationService.error('Error al cargar contratos');
+    } finally {
+      this.isLoading = false;
+    }
   }
 
-  cargarDatosContrato() {
+  async onContratoChange(): Promise<void> {
     const contratoId = this.actividadForm.get('contrato_id')?.value;
-    if (!contratoId) {
-      this.contrato = null;
-      this.obligaciones = [];
-      this.setPageInfo();
-      return;
+    
+    // Limpiar obligaciones
+    this.obligaciones = [];
+    this.obligacionesSeleccionadas = [];
+    this.contratoSeleccionado = null;
+    
+    if (contratoId) {
+      await this.cargarContrato(contratoId);
     }
-
-    this.isLoading = true;
-    this.contratosService.obtenerPorId(contratoId).subscribe({
-      next: (contrato) => {
-        this.contrato = contrato;
-
-        // Cargar obligaciones
-        if (contrato.obligaciones && contrato.obligaciones.length > 0) {
-          this.obligaciones = contrato.obligaciones;
-        } else {
-          this.obligaciones = [];
-        }
-
-        this.setPageInfo();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error cargando contrato:', error);
-        this.notificationService.error('Error al cargar el contrato');
-        this.isLoading = false;
-      }
-    });
   }
-  cargarActividad() {
+
+  private async cargarContrato(contratoId: number): Promise<void> {
     this.isLoading = true;
-    this.actividadesService.obtenerPorId(this.actividadId!).subscribe({
-      next: (actividad) => {
-        this.actividad = actividad;
-        this.contratoId = actividad.contrato_id;
+    
+    try {
+      const contrato = await this.contratosService
+        .obtenerPorId(contratoId)
+        .toPromise();
+      
+      if (contrato) {
+        this.contratoSeleccionado = contrato;
+        this.obligaciones = contrato.obligaciones || [];
+      }
+      
+    } catch (error) {
+      console.error('Error cargando contrato:', error);
+      this.notificationService.error('Error al cargar información del contrato');
+    } finally {
+      this.isLoading = false;
+    }
+  }
 
-        // Intentar determinar el contratista a partir de los datos del contrato
-        // Si el objeto contrato no existe en la actividad, solo usaremos el contrato_id
-        if (actividad.contrato_id) {
-          // Primero cargar el contratista correspondiente al contratoId
-          this.cargarContratistaDelContrato(actividad.contrato_id);
-        }
-
-        // Cargar datos del formulario
+  private async cargarActividad(): Promise<void> {
+    if (!this.actividadId) return;
+    
+    this.isLoading = true;
+    
+    try {
+      const response = await this.actividadesService
+        .obtenerPorId(this.actividadId)
+        .toPromise();
+      
+      if (response?.actividad) {
+        const actividad = response.actividad;
+        
+        // Cargar datos básicos
         this.actividadForm.patchValue({
           contrato_id: actividad.contrato_id,
           fecha_actividad: actividad.fecha_actividad,
           descripcion_actividad: actividad.descripcion_actividad
         });
-
-        // Cargar obligaciones
-        if (actividad.obligaciones && actividad.obligaciones.length > 0) {
-          this.obligacionesSeleccionadas = actividad.obligaciones.map(o => o.id!);
+        
+        // Cargar contratista del contrato
+        if (actividad.contrato_id) {
+          const contrato = await this.contratosService
+            .obtenerPorId(actividad.contrato_id)
+            .toPromise();
+          
+          if (contrato) {
+            this.actividadForm.patchValue({
+              contratista_id: contrato.contratista_id
+            });
+            
+            // Cargar contratos y seleccionar el actual
+            await this.cargarContratos();
+            await this.cargarContrato(actividad.contrato_id);
+          }
         }
-
-        // Cargar archivos
-        if (actividad.archivos && actividad.archivos.length > 0) {
-          this.archivosActuales = actividad.archivos;
+        
+        // Cargar obligaciones seleccionadas
+        if (actividad.obligaciones) {
+          this.obligacionesSeleccionadas = actividad.obligaciones
+            .map((o: any) => o.id)
+            .filter((id: any) => id);
         }
-
-        // Cargar datos de transcripción
+        
+        // Cargar archivos existentes
+        if (actividad.archivos) {
+          this.archivosExistentes = actividad.archivos;
+        }
+        
+        // Cargar datos de transcripción si existen
         if (actividad.transcripcion_texto) {
-          this.transcripcionTexto = actividad.transcripcion_texto;
-          this.transcripcionOriginal = actividad.transcripcion_texto;
           this.datosTranscripcion = {
             texto: actividad.transcripcion_texto,
             proveedor: actividad.transcripcion_proveedor,
@@ -296,133 +308,80 @@ export class GestionActividadComponent implements OnInit {
             confianza: actividad.transcripcion_confianza
           };
         }
-
-        this.setPageInfo();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error cargando actividad:', error);
-        this.notificationService.error('Error al cargar la actividad');
-        this.router.navigate([this.backRoute]);
       }
-    });
+      
+    } catch (error) {
+      console.error('Error cargando actividad:', error);
+      this.notificationService.error('Error al cargar la actividad');
+      this.router.navigate([this.backRoute]);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
-  // Método auxiliar para cargar el contratista a partir del ID del contrato
-  cargarContratistaDelContrato(contratoId: number) {
-    this.contratosService.obtenerPorId(contratoId).subscribe({
-      next: (contrato) => {
-        if (contrato && contrato.contratista_id) {
-          this.contratistaSeleccionado = contrato.contratista_id;
-          this.contratistaNombre = contrato.contratista_nombre || '';
-          this.onContratistaChange();
+  // Manejo de transcripción
+  onTranscripcionCompleta(resultado: any): void {
+    if (resultado?.texto) {
+      this.datosTranscripcion = resultado;
+      
+      // Actualizar descripción si está vacía
+      const descripcionActual = this.actividadForm.get('descripcion_actividad')?.value;
+      if (!descripcionActual?.trim()) {
+        this.actividadForm.patchValue({
+          descripcion_actividad: resultado.texto
+        });
+      } else {
+        // Preguntar si desea reemplazar
+        this.notificationService.confirm(
+          '¿Desea reemplazar la descripción actual con el texto transcrito?',
+          () => {
+            this.actividadForm.patchValue({
+              descripcion_actividad: resultado.texto
+            });
+          }
+        );
+      }
+    }
+  }
+
+  // Manejo de archivos
+  onArchivosConfigurados(archivos: ArchivoConfig[]): void {
+    this.archivosNuevos = archivos;
+  }
+
+  onArchivoExistenteEliminado(archivoId: number): void {
+    // Implementar eliminación de archivo existente
+    this.notificationService.confirm(
+      '¿Está seguro de eliminar este archivo?',
+      async () => {
+        try {
+          // Aquí deberías llamar a un servicio para eliminar el archivo
+          // await this.actividadesArchivosService.eliminar(archivoId).toPromise();
+          
+          this.archivosExistentes = this.archivosExistentes.filter(a => a.id !== archivoId);
+          this.notificationService.success('Archivo eliminado correctamente');
+        } catch (error) {
+          this.notificationService.error('Error al eliminar archivo');
         }
-      },
-      error: (error) => {
-        console.error('Error obteniendo información del contratista:', error);
-        // No mostramos error al usuario, continuamos con la carga de la actividad
       }
-    });
+    );
   }
 
-  onContratoChange() {
-    this.cargarDatosContrato();
-  }
-
-  obtenerFechaActual(): string {
-    const hoy = new Date();
-    return hoy.toISOString().substring(0, 10);
-  }
-
-  onSubmit() {
-    if (this.actividadForm.invalid) {
-      this.notificationService.warning('Por favor complete todos los campos requeridos');
-      Object.keys(this.actividadForm.controls).forEach(key => {
-        this.actividadForm.get(key)?.markAsTouched();
-      });
+  // Modal de obligaciones
+  abrirModalObligaciones(): void {
+    if (this.obligaciones.length === 0) {
+      this.notificationService.warning('No hay obligaciones disponibles para este contrato');
       return;
     }
-
-    const formData = this.actividadForm.getRawValue();
-
-    // Preparar los datos de la actividad
-    const actividad: Actividad = {
-      contrato_id: formData.contrato_id,
-      fecha_actividad: formData.fecha_actividad,
-      descripcion_actividad: formData.descripcion_actividad
-    };
-
-    // Agregar datos de transcripción si los hay
-    if (this.datosTranscripcion) {
-      actividad.transcripcion_texto = this.datosTranscripcion.texto;
-      actividad.transcripcion_proveedor = this.datosTranscripcion.proveedor;
-      actividad.transcripcion_modelo = this.datosTranscripcion.modelo;
-      actividad.transcripcion_confianza = this.datosTranscripcion.confianza;
-    }
-
-    this.isLoading = true;
-
-    if (this.mode === 'create') {
-      this.crear(actividad);
-    } else if (this.mode === 'edit') {
-      actividad.id = this.actividadId;
-      this.actualizar(actividad);
-    }
-  }
-
-  crear(actividad: Actividad) {
-    this.actividadesService.crear(
-      actividad,
-      this.obligacionesSeleccionadas,
-      this.archivosSeleccionados
-    ).subscribe({
-      next: (response) => {
-        this.notificationService.success('Actividad registrada correctamente');
-        if (this.contratoId) {
-          this.router.navigate(['/cuentas-cobro/actividades/lista', this.contratoId]);
-        } else {
-          this.router.navigate([this.backRoute]);
-        }
-      },
-      error: (error) => {
-        this.isLoading = false;
-        const mensaje = error.message || 'Error al registrar actividad';
-        this.notificationService.error(mensaje);
-      }
-    });
-  }
-
-  actualizar(actividad: Actividad) {
-    this.actividadesService.actualizar(
-      actividad,
-      this.obligacionesSeleccionadas,
-      this.archivosSeleccionados
-    ).subscribe({
-      next: (response) => {
-        this.notificationService.success('Actividad actualizada correctamente');
-        if (this.contratoId) {
-          this.router.navigate(['/cuentas-cobro/actividades/lista', this.contratoId]);
-        } else {
-          this.router.navigate([this.backRoute]);
-        }
-      },
-      error: (error) => {
-        this.isLoading = false;
-        const mensaje = error.message || 'Error al actualizar actividad';
-        this.notificationService.error(mensaje);
-      }
-    });
-  }
-
-  abrirModalObligaciones() {
+    
     this.mostrarModalObligaciones = true;
   }
 
-  cerrarModalObligaciones() {
+  cerrarModalObligaciones(): void {
     this.mostrarModalObligaciones = false;
   }
 
-  toggleObligacion(obligacionId: number) {
+  toggleObligacion(obligacionId: number): void {
     const index = this.obligacionesSeleccionadas.indexOf(obligacionId);
     if (index > -1) {
       this.obligacionesSeleccionadas.splice(index, 1);
@@ -431,134 +390,110 @@ export class GestionActividadComponent implements OnInit {
     }
   }
 
-  isObligacionSeleccionada(obligacionId?: number): boolean {
-    return obligacionId ? this.obligacionesSeleccionadas.includes(obligacionId) : false;
+  isObligacionSeleccionada(obligacionId: number): boolean {
+    return this.obligacionesSeleccionadas.includes(obligacionId);
   }
 
-  onFileSelected(event: any) {
-    const files = event.target.files;
-    if (files && files.length > 0) {
-      for (let i = 0; i < files.length; i++) {
-        this.archivosSeleccionados.push(files[i]);
+  // Guardar actividad
+  async onSubmit(): Promise<void> {
+    if (this.actividadForm.invalid) {
+      this.marcarCamposComoTocados();
+      this.notificationService.warning('Por favor complete todos los campos requeridos');
+      return;
+    }
+    
+    const formData = new FormData();
+    const valores = this.actividadForm.getRawValue();
+    
+    // Datos básicos
+    formData.append('contrato_id', valores.contrato_id);
+    formData.append('fecha_actividad', valores.fecha_actividad);
+    formData.append('descripcion_actividad', valores.descripcion_actividad);
+    
+    // Obligaciones
+    if (this.obligacionesSeleccionadas.length > 0) {
+      formData.append('obligaciones', JSON.stringify(this.obligacionesSeleccionadas));
+    }
+    
+    // Datos de transcripción
+    if (this.datosTranscripcion) {
+      formData.append('transcripcion_texto', this.datosTranscripcion.texto || '');
+      formData.append('transcripcion_proveedor', this.datosTranscripcion.proveedor || '');
+      formData.append('transcripcion_modelo', this.datosTranscripcion.modelo || '');
+      formData.append('transcripcion_confianza', this.datosTranscripcion.confianza?.toString() || '0');
+    }
+    
+    // Archivos nuevos
+    this.archivosNuevos.forEach((archivo, index) => {
+      formData.append(`archivos[${index}]`, archivo.archivo);
+      formData.append(`archivos_config[${index}][almacenar]`, archivo.almacenar.toString());
+      formData.append(`archivos_config[${index}][extraer_texto]`, archivo.extraerTexto.toString());
+    });
+    
+    this.isLoading = true;
+    
+    try {
+      if (this.mode === 'create') {
+        await this.actividadesService.crear(formData).toPromise();
+        this.notificationService.success('Actividad registrada correctamente');
+      } else if (this.mode === 'edit') {
+        formData.append('id', this.actividadId!.toString());
+        await this.actividadesService.actualizar(formData).toPromise();
+        this.notificationService.success('Actividad actualizada correctamente');
       }
+      
+      this.router.navigate([this.backRoute]);
+    } catch (error: any) {
+      const mensaje = error?.message || 'Error al guardar la actividad';
+      this.notificationService.error(mensaje);
+    } finally {
+      this.isLoading = false;
     }
   }
 
-  eliminarArchivoNuevo(index: number) {
-    this.archivosSeleccionados.splice(index, 1);
+  // Utilidades
+  private getFechaActual(): string {
+    const fecha = new Date();
+    return fecha.toISOString().split('T')[0];
   }
 
-  eliminarArchivoExistente(archivo: any) {
-    if (this.isViewMode) return;
-
-    this.isLoading = true;
-    this.actividadesService.eliminarArchivo(archivo.id).subscribe({
-      next: (response) => {
-        this.archivosActuales = this.archivosActuales.filter(a => a.id !== archivo.id);
-        this.notificationService.success('Archivo eliminado correctamente');
-        this.isLoading = false;
-      },
-      error: (error) => {
-        const mensaje = error.message || 'Error al eliminar archivo';
-        this.notificationService.error(mensaje);
-        this.isLoading = false;
-      }
+  private marcarCamposComoTocados(): void {
+    Object.keys(this.actividadForm.controls).forEach(key => {
+      this.actividadForm.get(key)?.markAsTouched();
     });
   }
 
-  setActiveTab(tab: string) {
-    this.activeTab = tab;
-  }
-
-  onTextoTranscrito(resultado: any) {
-    if (resultado && resultado.texto) {
-      this.transcripcionTexto = resultado.texto;
-      this.mostrarTranscripcion = true;
-      this.datosTranscripcion = resultado;
-
-      // Si no hay descripción o está vacía, utilizamos la transcripción
-      const descripcionActual = this.actividadForm.get('descripcion_actividad')?.value;
-      if (!descripcionActual || descripcionActual.trim() === '') {
-        this.actividadForm.patchValue({
-          descripcion_actividad: resultado.texto
-        });
-      }
+  private actualizarTituloPagina(): void {
+    const modoTexto = {
+      create: { titulo: 'Registrar', icono: '➕' },
+      edit: { titulo: 'Editar', icono: '✏️' },
+      view: { titulo: 'Ver', icono: '👁️' }
+    };
+    
+    const config = modoTexto[this.mode];
+    this.pageTitle = `${config.titulo} Actividad`;
+    this.pageIcon = config.icono;
+    
+    if (this.contratoSeleccionado) {
+      this.pageSubtitle = `Contrato ${this.contratoSeleccionado.numero_contrato}`;
     }
   }
 
-  getIconoArchivo(nombreArchivo: string): string {
-    const extension = nombreArchivo.split('.').pop()?.toLowerCase() || '';
-
-    const iconos: { [key: string]: string } = {
-      pdf: 'fa-file-pdf',
-      doc: 'fa-file-word',
-      docx: 'fa-file-word',
-      xls: 'fa-file-excel',
-      xlsx: 'fa-file-excel',
-      ppt: 'fa-file-powerpoint',
-      pptx: 'fa-file-powerpoint',
-      jpg: 'fa-file-image',
-      jpeg: 'fa-file-image',
-      png: 'fa-file-image',
-      gif: 'fa-file-image',
-      mp3: 'fa-file-audio',
-      wav: 'fa-file-audio',
-      mp4: 'fa-file-video',
-      zip: 'fa-file-archive',
-      rar: 'fa-file-archive'
-    };
-
-    return iconos[extension] || 'fa-file';
+  cancelar(): void {
+    this.router.navigate([this.backRoute]);
   }
 
-  getColorArchivo(nombreArchivo: string): string {
-    const extension = nombreArchivo.split('.').pop()?.toLowerCase() || '';
-
-    const colores: { [key: string]: string } = {
-      pdf: '#e74c3c',
-      doc: '#3498db',
-      docx: '#3498db',
-      xls: '#2ecc71',
-      xlsx: '#2ecc71',
-      ppt: '#e67e22',
-      pptx: '#e67e22',
-      jpg: '#9b59b6',
-      jpeg: '#9b59b6',
-      png: '#9b59b6',
-      gif: '#9b59b6',
-      mp3: '#1abc9c',
-      wav: '#1abc9c',
-      mp4: '#e74c3c',
-      zip: '#95a5a6',
-      rar: '#95a5a6'
-    };
-
-    return colores[extension] || '#7f8c8d';
-  }
-
-  formatearTamanoArchivo(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-  cancelar() {
-    if (this.contratoId) {
-      this.router.navigate(['/cuentas-cobro/actividades/lista', this.contratoId]);
-    } else {
-      this.router.navigate([this.backRoute]);
+  editarActividad(): void {
+    if (this.actividadId) {
+      this.router.navigate(['/cuentas-cobro/actividades/editar', this.actividadId]);
     }
   }
 
-  editarActividad() {
-    this.router.navigate(['/cuentas-cobro/actividades/editar', this.actividadId]);
+  // Getters para template
+  get f() {
+    return this.actividadForm.controls;
   }
 
-  // Getters para el template
   get isViewMode(): boolean {
     return this.mode === 'view';
   }
@@ -571,15 +506,7 @@ export class GestionActividadComponent implements OnInit {
     return this.mode === 'create';
   }
 
-  get f() {
-    return this.actividadForm.controls;
-  }
-
-  get contratoSeleccionado(): Contrato | null {
-    return this.contrato;
-  }
-
-  get totalArchivos(): number {
-    return this.archivosSeleccionados.length + this.archivosActuales.length;
+  get puedeEditarContratista(): boolean {
+    return !this.esUsuarioContratista && this.mode !== 'view';
   }
 }

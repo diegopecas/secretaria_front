@@ -1,0 +1,149 @@
+<div class="cargar-archivo-container">
+  <!-- Área de carga -->
+  <div 
+    class="cargar-area"
+    *ngIf="puedeAgregarArchivos"
+    [class.drag-over]="dragOver"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)">
+    
+    <input 
+      type="file" 
+      id="fileInput" 
+      class="file-input"
+      [accept]="acceptString"
+      multiple
+      (change)="onFileSelected($event)">
+    
+    <label for="fileInput" class="cargar-label">
+      <i class="fas fa-cloud-cargar-alt cargar-icon"></i>
+      <p class="cargar-text">Arrastra archivos aquí o haz clic para seleccionar</p>
+      <p class="cargar-info">
+        Formatos: {{ tiposPermitidosString }}<br>
+        Máximo {{ tamanioMaximoMB }}MB por archivo • {{ maximoArchivos - totalArchivos }} espacios disponibles
+      </p>
+    </label>
+  </div>
+
+  <!-- Lista de archivos -->
+  <div class="files-list" *ngIf="totalArchivos > 0">
+    
+    <!-- Archivos existentes (modo edición) -->
+    <div class="files-section" *ngIf="archivosExistentes.length > 0">
+      <h5 class="section-title">Archivos guardados</h5>
+      
+      <div class="file-item" *ngFor="let archivo of archivosExistentes">
+        <div class="file-icon">
+          <i class="fas {{ getIconoArchivo(archivo.nombre_archivo) }}" 
+             [style.color]="getColorArchivo(archivo.nombre_archivo)"></i>
+        </div>
+        
+        <div class="file-info">
+          <div class="file-name">{{ archivo.nombre_archivo }}</div>
+          <div class="file-size">{{ formatearTamanio(archivo.tamanio_bytes) }}</div>
+        </div>
+        
+        <div class="file-options" *ngIf="!soloLectura">
+          <div class="option-checkbox">
+            <input type="checkbox" 
+                   [id]="'almacenar-existente-' + archivo.id"
+                   [(ngModel)]="archivo.almacenar_archivo" 
+                   disabled>
+            <label [for]="'almacenar-existente-' + archivo.id">Almacenado</label>
+          </div>
+          
+          <div class="option-checkbox">
+            <input type="checkbox" 
+                   [id]="'extraer-existente-' + archivo.id"
+                   [(ngModel)]="archivo.extraer_texto" 
+                   disabled>
+            <label [for]="'extraer-existente-' + archivo.id">Texto extraído</label>
+          </div>
+        </div>
+        
+        <div class="file-actions">
+          <span class="badge badge-secondary">Guardado</span>
+          <button 
+            type="button" 
+            class="btn-remove"
+            *ngIf="!soloLectura"
+            (click)="eliminarArchivoExistente(archivo)"
+            title="Eliminar archivo">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Archivos nuevos -->
+    <div class="files-section" *ngIf="archivos.length > 0">
+      <h5 class="section-title" *ngIf="archivosExistentes.length > 0">Archivos nuevos</h5>
+      
+      <div class="file-item" 
+           *ngFor="let archivo of archivos; let i = index"
+           [class.error]="archivo.estado === 'error'">
+        
+        <div class="file-icon">
+          <i class="fas {{ getIconoArchivo(archivo.archivo.name) }}" 
+             [style.color]="getColorArchivo(archivo.archivo.name)"></i>
+        </div>
+        
+        <div class="file-info">
+          <div class="file-name">{{ archivo.archivo.name }}</div>
+          <div class="file-size">{{ formatearTamanio(archivo.archivo.size) }}</div>
+          <div class="file-error" *ngIf="archivo.mensaje">
+            <i class="fas fa-exclamation-circle"></i> {{ archivo.mensaje }}
+          </div>
+        </div>
+        
+        <div class="file-options" *ngIf="archivo.estado !== 'error'">
+          <div class="option-checkbox">
+            <input type="checkbox" 
+                   [id]="'almacenar-' + i"
+                   [(ngModel)]="archivo.almacenar"
+                   (ngModelChange)="emitirArchivos()">
+            <label [for]="'almacenar-' + i">Almacenar archivo</label>
+          </div>
+          
+          <div class="option-checkbox">
+            <input type="checkbox" 
+                   [id]="'extraer-' + i"
+                   [(ngModel)]="archivo.extraerTexto"
+                   (ngModelChange)="emitirArchivos()">
+            <label [for]="'extraer-' + i">Extraer texto</label>
+          </div>
+        </div>
+        
+        <div class="file-actions">
+          <span class="badge badge-info" *ngIf="archivo.estado === 'nuevo'">Nuevo</span>
+          <span class="badge badge-danger" *ngIf="archivo.estado === 'error'">Error</span>
+          <button 
+            type="button" 
+            class="btn-remove"
+            (click)="eliminarArchivo(i)"
+            title="Quitar archivo">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado vacío -->
+  <div class="empty-state" *ngIf="totalArchivos === 0 && !puedeAgregarArchivos">
+    <i class="fas fa-folder-open"></i>
+    <p>No hay archivos adjuntos</p>
+  </div>
+
+  <!-- Información adicional -->
+  <div class="cargar-footer" *ngIf="!soloLectura && totalArchivos > 0">
+    <div class="info-icon">
+      <i class="fas fa-info-circle"></i>
+    </div>
+    <div class="info-text">
+      <strong>Almacenar archivo:</strong> Guarda el archivo físicamente en el servidor<br>
+      <strong>Extraer texto:</strong> Procesa el archivo para permitir búsquedas por contenido
+    </div>
+  </div>
+</div>

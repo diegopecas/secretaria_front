@@ -1,0 +1,177 @@
+<div class="transcripcion-audio-container">
+  <!-- Selector de modelo -->
+  <div class="modelo-selector">
+    <label for="modelo">Modelo de transcripción:</label>
+    <div class="modelo-input-group">
+      <select 
+        id="modelo" 
+        [(ngModel)]="modeloSeleccionado"
+        [disabled]="estaGrabando || estaProcesando || cargandoModelos"
+        class="form-control">
+        <option [ngValue]="null" disabled>Seleccione un modelo</option>
+        <option *ngFor="let modelo of modelosDisponibles" [ngValue]="modelo">
+          {{ modelo.proveedor }} - {{ modelo.modelo }}
+          <span *ngIf="modelo.es_predeterminado">(Predeterminado)</span>
+        </option>
+      </select>
+      <div class="costo-estimado" *ngIf="modeloSeleccionado">
+        <i class="fas fa-coins"></i>
+        {{ obtenerCostoEstimado() }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Área de grabación -->
+  <div class="grabacion-area">
+    <!-- Estado inicial -->
+    <div class="estado-inicial" *ngIf="estado === 'inicial' || estado === 'error'">
+      <button 
+        class="btn-grabar"
+        [disabled]="!puedeGrabar"
+        (click)="iniciarGrabacion()">
+        <i class="fas fa-microphone"></i>
+        <span>Iniciar grabación</span>
+      </button>
+      
+      <div class="mensaje-error" *ngIf="mensajeError">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ mensajeError }}
+      </div>
+    </div>
+
+    <!-- Grabando -->
+    <div class="estado-grabando" *ngIf="estaGrabando">
+      <div class="indicador-grabacion">
+        <div class="pulso-grabacion"></div>
+        <i class="fas fa-circle"></i>
+      </div>
+      
+      <div class="info-grabacion">
+        <h4>Grabando...</h4>
+        <div class="tiempo-grabacion">{{ formatearTiempo(tiempoGrabacion) }}</div>
+        <div class="tiempo-limite">Límite: {{ formatearTiempo(limiteSegundos) }}</div>
+      </div>
+      
+      <!-- Visualizador de audio -->
+      <div class="visualizador-audio">
+        <div class="barra-audio" [style.height.%]="nivelAudio"></div>
+      </div>
+      
+      <button class="btn-detener" (click)="detenerGrabacion()">
+        <i class="fas fa-stop"></i>
+        <span>Detener grabación</span>
+      </button>
+    </div>
+
+    <!-- Procesando -->
+    <div class="estado-procesando" *ngIf="estaProcesando">
+      <div class="spinner-procesando">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+      <h4>Transcribiendo audio...</h4>
+      <p>Por favor espere mientras procesamos su grabación</p>
+    </div>
+
+    <!-- Resultado -->
+    <div class="estado-resultado" *ngIf="tieneResultado">
+      <div class="resultado-header">
+        <h4>
+          <i class="fas fa-check-circle"></i>
+          Transcripción completada
+        </h4>
+        <div class="resultado-info">
+          <span class="info-item">
+            <i class="fas fa-clock"></i>
+            {{ formatearTiempo(tiempoGrabacion) }}
+          </span>
+          <span class="info-item" *ngIf="confianzaTranscripcion > 0">
+            <i class="fas fa-chart-line"></i>
+            {{ (confianzaTranscripcion * 100).toFixed(0) }}% confianza
+          </span>
+          <span class="info-item">
+            <i class="fas fa-robot"></i>
+            {{ modeloSeleccionado?.modelo }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Área de texto -->
+      <div class="texto-resultado">
+        <div class="texto-view" *ngIf="!editandoTexto">
+          <p>{{ textoTranscrito }}</p>
+          <button 
+            class="btn-editar"
+            *ngIf="modoEdicion"
+            (click)="editarTexto()"
+            title="Editar texto">
+            <i class="fas fa-edit"></i>
+          </button>
+        </div>
+        
+        <div class="texto-edit" *ngIf="editandoTexto">
+          <textarea 
+            [(ngModel)]="textoEditado"
+            class="form-control"
+            rows="5"
+            placeholder="Edite el texto transcrito..."></textarea>
+          <div class="edit-actions">
+            <button class="btn btn-sm btn-secondary" (click)="cancelarEdicion()">
+              Cancelar
+            </button>
+            <button class="btn btn-sm btn-primary" (click)="guardarEdicion()">
+              <i class="fas fa-save"></i>
+              Guardar cambios
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="resultado-actions">
+        <button class="btn btn-secondary" (click)="nuevaGrabacion()">
+          <i class="fas fa-redo"></i>
+          Nueva grabación
+        </button>
+        <button class="btn btn-primary" (click)="confirmarTranscripcion()">
+          <i class="fas fa-check"></i>
+          Usar esta transcripción
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historial -->
+  <div class="historial-section" *ngIf="mostrarHistorial && historial.length > 0">
+    <h5 class="historial-title">
+      <i class="fas fa-history"></i>
+      Historial de transcripciones
+    </h5>
+    
+    <div class="historial-list">
+      <div class="historial-item" *ngFor="let item of historial">
+        <div class="historial-info">
+          <div class="historial-texto">{{ item.texto | slice:0:100 }}{{ item.texto.length > 100 ? '...' : '' }}</div>
+          <div class="historial-meta">
+            <span><i class="fas fa-clock"></i> {{ formatearTiempo(item.duracion) }}</span>
+            <span><i class="fas fa-robot"></i> {{ item.modelo }}</span>
+            <span>{{ item.fecha | date:'HH:mm' }}</span>
+          </div>
+        </div>
+        <div class="historial-actions">
+          <button 
+            class="btn-icon"
+            (click)="usarDeHistorial(item)"
+            title="Usar esta transcripción">
+            <i class="fas fa-check"></i>
+          </button>
+          <button 
+            class="btn-icon btn-danger"
+            (click)="eliminarDeHistorial(item)"
+            title="Eliminar del historial">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

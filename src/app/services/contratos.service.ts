@@ -41,6 +41,7 @@ export interface Contrato {
   contratista_identificacion?: string;
   entidad_id: number;
   entidad_nombre?: string;
+  entidad_nombre_corto?: string;
   fecha_suscripcion: string;
   fecha_inicio: string;
   fecha_terminacion: string;
