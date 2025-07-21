@@ -64,7 +64,6 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
   
   // UI
   mostrarModalObligaciones = false;
-  tabActiva: 'texto' | 'audio' | 'archivos' = 'texto';
   
   // Configuración de página
   pageTitle = 'Registrar Actividad';
@@ -304,27 +303,6 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Manejo de transcripción - Solo actualiza la descripción
-  onTranscripcionCompleta(resultado: any): void {
-    if (resultado?.texto) {
-      const descripcionActual = this.actividadForm.get('descripcion_actividad')?.value;
-      if (!descripcionActual?.trim()) {
-        this.actividadForm.patchValue({
-          descripcion_actividad: resultado.texto
-        });
-      } else {
-        this.notificationService.confirm(
-          '¿Desea reemplazar la descripción actual con el texto transcrito?',
-          () => {
-            this.actividadForm.patchValue({
-              descripcion_actividad: resultado.texto
-            });
-          }
-        );
-      }
-    }
-  }
-
   // Manejo de archivos
   onArchivosConfigurados(archivos: ArchivoConfig[]): void {
     this.archivosNuevos = archivos;
@@ -393,7 +371,7 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
       formData.append('obligaciones', JSON.stringify(this.obligacionesSeleccionadas));
     }
     
-    // Archivos nuevos (sin las opciones que no existen en la BD)
+    // Archivos nuevos
     this.archivosNuevos.forEach((archivo, index) => {
       formData.append(`archivos[${index}]`, archivo.archivo);
     });

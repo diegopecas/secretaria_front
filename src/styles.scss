@@ -2074,10 +2074,11 @@ a {
   gap: $spacing-xs;
   margin-top: $spacing-sm;
 }
+
 // FORM STYLES
 .form-control {
   @include input-base();
-  
+
   &.is-invalid {
     border-color: $color-error;
   }
@@ -2088,7 +2089,7 @@ a {
   height: 1.25rem;
   margin-top: 0.125rem;
   cursor: pointer;
-  
+
   &:checked {
     background-color: $color-dorado;
     border-color: $color-dorado;
@@ -2113,10 +2114,10 @@ a {
   gap: $spacing-md;
   padding-top: $spacing-lg;
   border-top: 1px solid var(--color-border);
-  
+
   @include mobile-down {
     flex-direction: column;
-    
+
     .btn {
       width: 100%;
     }
@@ -2126,12 +2127,12 @@ a {
 .roles-list {
   max-height: 400px;
   overflow-y: auto;
-  
+
   .form-check {
     padding: $spacing-sm;
     border-radius: $border-radius-medium;
     margin-bottom: $spacing-xs;
-    
+
     &:hover {
       background: var(--hover-overlay);
     }
@@ -2145,16 +2146,16 @@ a {
   box-shadow: var(--shadow-medium);
   transition: $transition-base;
   border: 1px solid var(--color-border);
-  
+
   .card-body {
     padding: 0; // Reset padding ya que el card ya tiene
   }
-  
+
   .card-header {
     margin-bottom: $spacing-md;
     padding-bottom: $spacing-md;
     border-bottom: 1px solid var(--color-border);
-    
+
     h4 {
       margin: 0;
       color: var(--color-text);
@@ -2174,7 +2175,7 @@ a {
   background: var(--color-surface-alt);
   border-radius: $border-radius-medium;
   border: 1px dashed var(--color-border);
-  
+
   &.chips-empty {
     align-items: center;
     justify-content: center;
@@ -2193,12 +2194,12 @@ a {
   font-weight: 500;
   box-shadow: $shadow-small;
   transition: $transition-fast;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: $shadow-medium;
   }
-  
+
   .chip-remove {
     cursor: pointer;
     margin-left: 0.25rem;
@@ -2213,7 +2214,7 @@ a {
     font-size: 1rem;
     line-height: 1;
     transition: $transition-fast;
-    
+
     &:hover {
       background: rgba(0, 0, 0, 0.3);
       transform: scale(1.1);
@@ -2227,7 +2228,7 @@ a {
   font-size: 0.9rem;
   text-align: center;
   padding: $spacing-md;
-  
+
   i {
     font-size: 2rem;
     opacity: 0.3;
@@ -2235,26 +2236,27 @@ a {
     margin-bottom: $spacing-sm;
   }
 }
+
 // INFO LIST STYLES
 .info-list {
   margin: 0;
-  
+
   .info-row {
     display: flex;
     justify-content: space-between;
     padding: $spacing-xs 0;
     border-bottom: 1px solid var(--color-border);
-    
+
     &:last-child {
       border-bottom: none;
     }
-    
+
     dt {
       font-weight: 500;
       color: var(--color-text-secondary);
       font-size: 0.9rem;
     }
-    
+
     dd {
       margin: 0;
       font-weight: 500;
@@ -2271,4 +2273,1231 @@ a {
   align-items: center;
   justify-content: center;
   gap: $spacing-xs;
+}
+
+// Textarea siempre editable
+.texto-editable {
+  width: 100%;
+  min-height: 150px;
+  padding: 1rem;
+  border: 2px solid var(--color-borde);
+  border-radius: var(--border-radius-medium);
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    border-color: var(--color-dorado);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25);
+  }
+}
+
+// Información del texto
+.texto-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 0 0.25rem;
+
+  .caracteres-count {
+    color: var(--color-gris-oscuro);
+    font-weight: 500;
+  }
+}
+
+// Textarea en tiempo real
+.texto-tiempo-real {
+  width: 100%;
+  min-height: 100px;
+  margin: 1rem 0;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px dashed var(--color-dorado);
+
+  &:focus {
+    border-style: solid;
+  }
+}
+
+// Animación para texto nuevo
+@keyframes textoNuevo {
+  from {
+    background-color: rgba(255, 215, 0, 0.1);
+  }
+
+  to {
+    background-color: transparent;
+  }
+}
+
+.transcripcion-tiempo-real {
+  animation: textoNuevo 0.5s ease;
+}
+
+// Estilos para el componente de transcripción unificado
+// ESTILOS PARA TRANSCRIPCIÓN DE AUDIO - VERSIÓN LIMPIA
+.transcripcion-audio-field {
+  width: 100%;
+
+  .textarea-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  textarea.form-control {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    padding-bottom: 3.5rem; // Espacio para controles
+    resize: vertical;
+    border: 2px solid $color-borde;
+    border-radius: $border-radius-medium;
+    font-size: 0.95rem;
+    line-height: 1.6;
+
+    &:focus {
+      border-color: $color-dorado;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($color-dorado, 0.1);
+    }
+
+    &:disabled {
+      background-color: $color-gris-claro;
+      cursor: not-allowed;
+    }
+  }
+
+  // Barra de controles
+  .controls-bar {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    height: 40px;
+    display: flex;
+    align-items: center;
+  }
+
+  // Selector de modelo
+  .modelo-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+
+    .btn-selector {
+      flex: 1;
+      height: 36px;
+      padding: 0 1rem;
+      background: white;
+      border: 1px solid $color-borde;
+      border-radius: $border-radius-small;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: $color-gris-oscuro;
+      transition: $transition-fast;
+
+      &:hover {
+        border-color: $color-dorado;
+        background: rgba($color-dorado, 0.05);
+      }
+
+      .selector-text {
+        flex: 1;
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      i {
+        font-size: 0.75rem;
+        color: $color-gris;
+        margin-left: 0.5rem;
+      }
+    }
+
+    .btn-mic {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: $color-dorado;
+      color: $color-negro;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: $transition-fast;
+      flex-shrink: 0;
+
+      i {
+        font-size: 1rem;
+      }
+
+      &:hover:not(:disabled) {
+        background: $color-dorado-oscuro;
+        transform: scale(1.1);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .dropdown-modelos {
+      position: absolute;
+      bottom: calc(100% + 0.5rem);
+      left: 0;
+      right: 50px;
+      background: white;
+      border: 1px solid $color-borde;
+      border-radius: $border-radius-medium;
+      box-shadow: $shadow-medium;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: $z-index-dropdown;
+
+      .modelo-item {
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: $transition-fast;
+
+        &:hover {
+          background: $color-gris-claro;
+        }
+
+        &.active {
+          background: rgba($color-dorado, 0.1);
+          color: $color-dorado-oscuro;
+          font-weight: 500;
+        }
+
+        &:not(:last-child) {
+          border-bottom: 1px solid $color-borde;
+        }
+
+        .modelo-icon {
+          font-size: 1.1rem;
+        }
+
+        .modelo-name {
+          flex: 1;
+        }
+      }
+    }
+  }
+
+  // Controles cuando está grabando
+  .grabando-controls {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .grabando-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: $color-gris-oscuro;
+
+      .recording-dot {
+        width: 10px;
+        height: 10px;
+        background: #dc3545;
+        border-radius: 50%;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+    }
+
+    .btn-stop {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: #dc3545;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: $transition-fast;
+
+      &:hover {
+        background: #c82333;
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  // Indicador de procesamiento
+  .processing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: $color-gris-oscuro;
+
+    .spinner-border {
+      width: 20px;
+      height: 20px;
+      border-width: 2px;
+    }
+  }
+
+  // Mensaje de error
+  .error-msg {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba($color-error, 0.1);
+    border: 1px solid rgba($color-error, 0.2);
+    border-radius: $border-radius-small;
+    color: $color-error;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i {
+      font-size: 1rem;
+    }
+  }
+}
+
+// Modal de resultados
+.transcripcion-result {
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: $color-gris-oscuro;
+  }
+
+  .texto-result {
+    padding: 1rem;
+    background: $color-gris-claro;
+    border: 1px solid $color-borde;
+    border-radius: $border-radius-medium;
+    margin-bottom: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+
+  .result-info {
+    font-size: 0.85rem;
+    color: $color-gris;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i {
+      color: $color-dorado;
+    }
+  }
+}
+
+// Animación de pulso
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .transcripcion-audio-field {
+    .btn-selector .selector-text {
+      font-size: 0.8rem;
+    }
+
+    .modelo-selector {
+      .dropdown-modelos {
+        left: 0;
+        right: 0;
+      }
+    }
+  }
+}
+
+// Tema oscuro
+.theme-dark {
+  .transcripcion-audio-field {
+    textarea.form-control {
+      background: #2a2a2a;
+      border-color: #404040;
+      color: #f0f0f0;
+
+      &:focus {
+        border-color: $color-dorado;
+        background: #333333;
+      }
+
+      &:disabled {
+        background: #1a1a1a;
+      }
+    }
+
+    .btn-selector {
+      background: #2a2a2a;
+      border-color: #404040;
+      color: #f0f0f0;
+
+      &:hover {
+        background: #333333;
+        border-color: $color-dorado;
+      }
+    }
+
+    .dropdown-modelos {
+      background: #2a2a2a;
+      border-color: #404040;
+
+      .modelo-item {
+        color: #f0f0f0;
+
+        &:hover {
+          background: #333333;
+        }
+
+        &.active {
+          background: rgba($color-dorado, 0.2);
+        }
+
+        &:not(:last-child) {
+          border-bottom-color: #404040;
+        }
+      }
+    }
+  }
+
+  .transcripcion-result {
+    .texto-result {
+      background: #2a2a2a;
+      border-color: #404040;
+      color: #f0f0f0;
+    }
+  }
+}
+
+// Estilos para el modal de transcripción
+.transcripcion-preview {
+  padding: 1rem;
+
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-texto);
+  }
+
+  .texto-preview {
+    padding: 1rem;
+    background: var(--color-fondo);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--border-radius-medium);
+    margin-bottom: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    color: var(--color-texto);
+    font-size: 0.9375rem;
+  }
+
+  .info-transcripcion {
+    color: var(--color-gris-oscuro);
+    font-size: 0.875rem;
+
+    i {
+      color: var(--color-dorado);
+      margin-right: 0.25rem;
+    }
+  }
+}
+
+// Animación de pulso
+@keyframes pulso {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+
+  // ESTILOS PARA TRANSCRIPCIÓN DE AUDIO - VERSIÓN LIMPIA
+  .transcripcion-audio-field {
+    width: 100%;
+
+    .textarea-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    textarea.form-control {
+      width: 100%;
+      min-height: 120px;
+      padding: 1rem;
+      padding-bottom: 3.5rem; // Espacio para controles
+      resize: vertical;
+      border: 2px solid $color-borde;
+      border-radius: $border-radius-medium;
+      font-size: 0.95rem;
+      line-height: 1.6;
+
+      &:focus {
+        border-color: $color-dorado;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba($color-dorado, 0.1);
+      }
+
+      &:disabled {
+        background-color: $color-gris-claro;
+        cursor: not-allowed;
+      }
+    }
+
+    // Barra de controles
+    .controls-bar {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 0.75rem;
+      right: 0.75rem;
+      height: 40px;
+      display: flex;
+      align-items: center;
+    }
+
+    // Selector de modelo
+    .modelo-selector {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+
+      .btn-selector {
+        flex: 1;
+        height: 36px;
+        padding: 0 1rem;
+        background: white;
+        border: 1px solid $color-borde;
+        border-radius: $border-radius-small;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: $color-gris-oscuro;
+        transition: $transition-fast;
+
+        &:hover {
+          border-color: $color-dorado;
+          background: rgba($color-dorado, 0.05);
+        }
+
+        .selector-text {
+          flex: 1;
+          text-align: left;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        i {
+          font-size: 0.75rem;
+          color: $color-gris;
+          margin-left: 0.5rem;
+        }
+      }
+
+      .btn-mic {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: $color-dorado;
+        color: $color-negro;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: $transition-fast;
+        flex-shrink: 0;
+
+        i {
+          font-size: 1rem;
+        }
+
+        &:hover:not(:disabled) {
+          background: $color-dorado-oscuro;
+          transform: scale(1.1);
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+
+      .dropdown-modelos {
+        position: absolute;
+        bottom: calc(100% + 0.5rem);
+        left: 0;
+        right: 50px;
+        background: white;
+        border: 1px solid $color-borde;
+        border-radius: $border-radius-medium;
+        box-shadow: $shadow-medium;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: $z-index-dropdown;
+
+        .modelo-item {
+          padding: 0.75rem 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+          font-size: 0.85rem;
+          transition: $transition-fast;
+
+          &:hover {
+            background: $color-gris-claro;
+          }
+
+          &.active {
+            background: rgba($color-dorado, 0.1);
+            color: $color-dorado-oscuro;
+            font-weight: 500;
+          }
+
+          &:not(:last-child) {
+            border-bottom: 1px solid $color-borde;
+          }
+
+          .modelo-icon {
+            font-size: 1.1rem;
+          }
+
+          .modelo-name {
+            flex: 1;
+          }
+        }
+      }
+    }
+
+    // Controles cuando está grabando
+    .grabando-controls {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .grabando-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: $color-gris-oscuro;
+
+        .recording-dot {
+          width: 10px;
+          height: 10px;
+          background: #dc3545;
+          border-radius: 50%;
+          animation: pulse 1.5s ease-in-out infinite;
+        }
+      }
+
+      .btn-stop {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: #dc3545;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: $transition-fast;
+
+        &:hover {
+          background: #c82333;
+          transform: scale(1.1);
+        }
+      }
+    }
+
+    // Indicador de procesamiento
+    .processing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: $color-gris-oscuro;
+
+      .spinner-border {
+        width: 20px;
+        height: 20px;
+        border-width: 2px;
+      }
+    }
+
+    // Mensaje de error
+    .error-msg {
+      margin-top: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba($color-error, 0.1);
+      border: 1px solid rgba($color-error, 0.2);
+      border-radius: $border-radius-small;
+      color: $color-error;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      i {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  // Modal de resultados
+  .transcripcion-result {
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: $color-gris-oscuro;
+    }
+
+    .texto-result {
+      padding: 1rem;
+      background: $color-gris-claro;
+      border: 1px solid $color-borde;
+      border-radius: $border-radius-medium;
+      margin-bottom: 1rem;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .result-info {
+      font-size: 0.85rem;
+      color: $color-gris;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      i {
+        color: $color-dorado;
+      }
+    }
+  }
+
+  // Animación de pulso
+  @keyframes pulse {
+
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.5;
+      transform: scale(1.2);
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    .transcripcion-audio-field {
+      .btn-selector .selector-text {
+        font-size: 0.8rem;
+      }
+
+      .modelo-selector {
+        .dropdown-modelos {
+          left: 0;
+          right: 0;
+        }
+      }
+    }
+  }
+
+  // Tema oscuro
+  .theme-dark {
+    .transcripcion-audio-field {
+      textarea.form-control {
+        background: #2a2a2a;
+        border-color: #404040;
+        color: #f0f0f0;
+
+        &:focus {
+          border-color: $color-dorado;
+          background: #333333;
+        }
+
+        &:disabled {
+          background: #1a1a1a;
+        }
+      }
+
+      .btn-selector {
+        background: #2a2a2a;
+        border-color: #404040;
+        color: #f0f0f0;
+
+        &:hover {
+          background: #333333;
+          border-color: $color-dorado;
+        }
+      }
+
+      .dropdown-modelos {
+        background: #2a2a2a;
+        border-color: #404040;
+
+        .modelo-item {
+          color: #f0f0f0;
+
+          &:hover {
+            background: #333333;
+          }
+
+          &.active {
+            background: rgba($color-dorado, 0.2);
+          }
+
+          &:not(:last-child) {
+            border-bottom-color: #404040;
+          }
+        }
+      }
+    }
+
+    .transcripcion-result {
+      .texto-result {
+        background: #2a2a2a;
+        border-color: #404040;
+        color: #f0f0f0;
+      }
+    }
+  }
+}
+
+// Tema oscuro
+:host-context(.dark-theme) {
+
+  // ESTILOS PARA TRANSCRIPCIÓN DE AUDIO - VERSIÓN LIMPIA
+  .transcripcion-audio-field {
+    width: 100%;
+
+    .textarea-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    textarea.form-control {
+      width: 100%;
+      min-height: 120px;
+      padding: 1rem;
+      padding-bottom: 3.5rem; // Espacio para controles
+      resize: vertical;
+      border: 2px solid $color-borde;
+      border-radius: $border-radius-medium;
+      font-size: 0.95rem;
+      line-height: 1.6;
+
+      &:focus {
+        border-color: $color-dorado;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba($color-dorado, 0.1);
+      }
+
+      &:disabled {
+        background-color: $color-gris-claro;
+        cursor: not-allowed;
+      }
+    }
+
+    // Barra de controles
+    .controls-bar {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 0.75rem;
+      right: 0.75rem;
+      height: 40px;
+      display: flex;
+      align-items: center;
+    }
+
+    // Selector de modelo
+    .modelo-selector {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+
+      .btn-selector {
+        flex: 1;
+        height: 36px;
+        padding: 0 1rem;
+        background: white;
+        border: 1px solid $color-borde;
+        border-radius: $border-radius-small;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: $color-gris-oscuro;
+        transition: $transition-fast;
+
+        &:hover {
+          border-color: $color-dorado;
+          background: rgba($color-dorado, 0.05);
+        }
+
+        .selector-text {
+          flex: 1;
+          text-align: left;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        i {
+          font-size: 0.75rem;
+          color: $color-gris;
+          margin-left: 0.5rem;
+        }
+      }
+
+      .btn-mic {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: $color-dorado;
+        color: $color-negro;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: $transition-fast;
+        flex-shrink: 0;
+
+        i {
+          font-size: 1rem;
+        }
+
+        &:hover:not(:disabled) {
+          background: $color-dorado-oscuro;
+          transform: scale(1.1);
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+
+      .dropdown-modelos {
+        position: absolute;
+        bottom: calc(100% + 0.5rem);
+        left: 0;
+        right: 50px;
+        background: white;
+        border: 1px solid $color-borde;
+        border-radius: $border-radius-medium;
+        box-shadow: $shadow-medium;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: $z-index-dropdown;
+
+        .modelo-item {
+          padding: 0.75rem 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+          font-size: 0.85rem;
+          transition: $transition-fast;
+
+          &:hover {
+            background: $color-gris-claro;
+          }
+
+          &.active {
+            background: rgba($color-dorado, 0.1);
+            color: $color-dorado-oscuro;
+            font-weight: 500;
+          }
+
+          &:not(:last-child) {
+            border-bottom: 1px solid $color-borde;
+          }
+
+          .modelo-icon {
+            font-size: 1.1rem;
+          }
+
+          .modelo-name {
+            flex: 1;
+          }
+        }
+      }
+    }
+
+    // Controles cuando está grabando
+    .grabando-controls {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .grabando-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: $color-gris-oscuro;
+
+        .recording-dot {
+          width: 10px;
+          height: 10px;
+          background: #dc3545;
+          border-radius: 50%;
+          animation: pulse 1.5s ease-in-out infinite;
+        }
+      }
+
+      .btn-stop {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: #dc3545;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: $transition-fast;
+
+        &:hover {
+          background: #c82333;
+          transform: scale(1.1);
+        }
+      }
+    }
+
+    // Indicador de procesamiento
+    .processing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: $color-gris-oscuro;
+
+      .spinner-border {
+        width: 20px;
+        height: 20px;
+        border-width: 2px;
+      }
+    }
+
+    // Mensaje de error
+    .error-msg {
+      margin-top: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba($color-error, 0.1);
+      border: 1px solid rgba($color-error, 0.2);
+      border-radius: $border-radius-small;
+      color: $color-error;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      i {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  // Modal de resultados
+  .transcripcion-result {
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: $color-gris-oscuro;
+    }
+
+    .texto-result {
+      padding: 1rem;
+      background: $color-gris-claro;
+      border: 1px solid $color-borde;
+      border-radius: $border-radius-medium;
+      margin-bottom: 1rem;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .result-info {
+      font-size: 0.85rem;
+      color: $color-gris;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      i {
+        color: $color-dorado;
+      }
+    }
+  }
+
+  // Animación de pulso
+  @keyframes pulse {
+
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.5;
+      transform: scale(1.2);
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    .transcripcion-audio-field {
+      .btn-selector .selector-text {
+        font-size: 0.8rem;
+      }
+
+      .modelo-selector {
+        .dropdown-modelos {
+          left: 0;
+          right: 0;
+        }
+      }
+    }
+  }
+
+  // Tema oscuro
+  .theme-dark {
+    .transcripcion-audio-field {
+      textarea.form-control {
+        background: #2a2a2a;
+        border-color: #404040;
+        color: #f0f0f0;
+
+        &:focus {
+          border-color: $color-dorado;
+          background: #333333;
+        }
+
+        &:disabled {
+          background: #1a1a1a;
+        }
+      }
+
+      .btn-selector {
+        background: #2a2a2a;
+        border-color: #404040;
+        color: #f0f0f0;
+
+        &:hover {
+          background: #333333;
+          border-color: $color-dorado;
+        }
+      }
+
+      .dropdown-modelos {
+        background: #2a2a2a;
+        border-color: #404040;
+
+        .modelo-item {
+          color: #f0f0f0;
+
+          &:hover {
+            background: #333333;
+          }
+
+          &.active {
+            background: rgba($color-dorado, 0.2);
+          }
+
+          &:not(:last-child) {
+            border-bottom-color: #404040;
+          }
+        }
+      }
+    }
+
+    .transcripcion-result {
+      .texto-result {
+        background: #2a2a2a;
+        border-color: #404040;
+        color: #f0f0f0;
+      }
+    }
+  }
+
+  .transcripcion-preview {
+    .texto-preview {
+      background: var(--color-fondo-tarjeta);
+      border-color: var(--color-borde-dark);
+      color: var(--color-texto);
+    }
+  }
 }

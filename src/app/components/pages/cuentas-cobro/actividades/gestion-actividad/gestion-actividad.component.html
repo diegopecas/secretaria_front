@@ -132,81 +132,40 @@
 
         <!-- Contenido Principal -->
         <div class="main-content-area" *ngIf="contratoSeleccionado">
-          
-          <!-- Tabs de entrada (solo en modo crear/editar) -->
-          <div class="input-tabs" *ngIf="!isViewMode">
-            <button 
-              type="button" 
-              class="tab-button"
-              [class.active]="tabActiva === 'texto'"
-              (click)="tabActiva = 'texto'">
-              <i class="fas fa-keyboard"></i>
-              Escribir
-            </button>
-            <button 
-              type="button" 
-              class="tab-button"
-              [class.active]="tabActiva === 'audio'"
-              (click)="tabActiva = 'audio'">
-              <i class="fas fa-microphone"></i>
-              Transcribir Audio
-            </button>
-            <button 
-              type="button" 
-              class="tab-button"
-              [class.active]="tabActiva === 'archivos'"
-              (click)="tabActiva = 'archivos'">
-              <i class="fas fa-paperclip"></i>
-              Adjuntar Archivos
-            </button>
-          </div>
-
-          <!-- Contenido de tabs -->
-          <div class="tab-content">
-            
-            <!-- Tab Texto -->
-            <div class="tab-pane" *ngIf="tabActiva === 'texto' || isViewMode">
-              <div class="form-group">
-                <label for="descripcion_actividad" *ngIf="!isViewMode">
-                  Descripción de la Actividad
-                  <span class="text-danger">*</span>
-                </label>
-                
-                <!-- Modo edición -->
-                <textarea 
-                  *ngIf="!isViewMode"
-                  id="descripcion_actividad"
-                  formControlName="descripcion_actividad"
-                  class="form-control"
-                  rows="8"
-                  placeholder="Describe las actividades realizadas..."
-                  [class.is-invalid]="f['descripcion_actividad'].invalid && f['descripcion_actividad'].touched">
-                </textarea>
-                <div class="invalid-feedback" *ngIf="f['descripcion_actividad'].invalid && f['descripcion_actividad'].touched">
-                  <span *ngIf="f['descripcion_actividad'].errors?.['required']">La descripción es requerida</span>
-                  <span *ngIf="f['descripcion_actividad'].errors?.['minlength']">Mínimo 10 caracteres</span>
-                </div>
-                
-                <!-- Modo vista -->
-                <div class="descripcion-view" *ngIf="isViewMode">
-                  <h4>Descripción de la Actividad</h4>
-                  <p>{{ actividadForm.get('descripcion_actividad')?.value || 'Sin descripción' }}</p>
-                </div>
+          <div class="content-card">
+            <!-- Campo de descripción con transcripción integrada -->
+            <div class="form-group">
+              <label for="descripcion_actividad">
+                Descripción de la Actividad
+                <span class="text-danger" *ngIf="!isViewMode">*</span>
+              </label>
+              
+              <!-- Componente de transcripción para edición -->
+              <app-transcripcion-audio
+                *ngIf="!isViewMode"
+                formControlName="descripcion_actividad"
+                [placeholder]="'Describe las actividades realizadas o use el micrófono para transcribir...'"
+                [mostrarSelectorModelo]="true"
+                [modoInline]="true">
+              </app-transcripcion-audio>
+              
+              <!-- Vista de solo lectura -->
+              <div class="descripcion-view" *ngIf="isViewMode">
+                <p>{{ actividadForm.get('descripcion_actividad')?.value || 'Sin descripción' }}</p>
+              </div>
+              
+              <div class="invalid-feedback" *ngIf="!isViewMode && f['descripcion_actividad'].invalid && f['descripcion_actividad'].touched">
+                <span *ngIf="f['descripcion_actividad'].errors?.['required']">La descripción es requerida</span>
+                <span *ngIf="f['descripcion_actividad'].errors?.['minlength']">Mínimo 10 caracteres</span>
               </div>
             </div>
-
-            <!-- Tab Audio -->
-            <div class="tab-pane" *ngIf="tabActiva === 'audio' && !isViewMode">
-              <app-transcripcion-audio
-                [limiteSegundos]="300"
-                [mostrarHistorial]="true"
-                [modoEdicion]="true"
-                (textoTranscrito)="onTranscripcionCompleta($event)">
-              </app-transcripcion-audio>
-            </div>
-
-            <!-- Tab Archivos -->
-            <div class="tab-pane" *ngIf="tabActiva === 'archivos' && !isViewMode">
+            
+            <!-- Sección de archivos -->
+            <div class="archivos-section mt-4" *ngIf="!isViewMode">
+              <h5>
+                <i class="fas fa-paperclip"></i>
+                Archivos adjuntos
+              </h5>
               <app-cargar-archivo
                 [maximoArchivos]="10"
                 [tamanioMaximoMB]="10"

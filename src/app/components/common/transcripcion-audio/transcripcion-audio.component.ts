@@ -1,9 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, forwardRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { IAModelo, IAModelosService } from '../../../services/ia-modelo.service';
 import { NotificationService } from '../../../services/notification.service';
-
+import { ModalComponent } from '../modal/modal.component';
+import { SimpleSpeechService } from '../../../services/simple-speech.service';
+import { Subject, takeUntil } from 'rxjs';
 
 export interface TranscripcionResultado {
   texto: string;
@@ -14,25 +16,27 @@ export interface TranscripcionResultado {
   duracionAudio?: number;
 }
 
-interface TranscripcionHistorial {
-  id: number;
-  texto: string;
-  fecha: Date;
-  duracion: number;
-  modelo: string;
-}
-
 @Component({
   selector: 'app-transcripcion-audio',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ModalComponent],
   templateUrl: './transcripcion-audio.component.html',
-  styleUrls: ['./transcripcion-audio.component.scss']
+  styleUrls: ['./transcripcion-audio.component.scss'],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => TranscripcionAudioComponent),
+      multi: true
+    }
+  ]
 })
-export class TranscripcionAudioComponent implements OnInit, OnDestroy {
-  @Input() limiteSegundos: number = 300; // 5 minutos por defecto
-  @Input() mostrarHistorial: boolean = true;
-  @Input() modoEdicion: boolean = true;
+export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlValueAccessor {
+  @Input() limiteSegundos: number = 300;
+  @Input() placeholder: string = 'Escriba o use el micrófono para transcribir...';
+  @Input() label: string = '';
+  @Input() requerido: boolean = false;
+  @Input() mostrarSelectorModelo: boolean = true;
+  @Input() modoInline: boolean = true;
   
   @Output() textoTranscrito = new EventEmitter<TranscripcionResultado>();
 
@@ -41,93 +45,190 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy {
   modeloSeleccionado: IAModelo | null = null;
   cargandoModelos = false;
 
-  // Estados de grabación
-  estado: 'inicial' | 'grabando' | 'procesando' | 'completado' | 'error' = 'inicial';
-  
-  // Grabación
+  // Estados simplificados
+  estaGrabando = false;
+  estaProcesando = false;
+
+  // Grabación para IA
   mediaRecorder: MediaRecorder | null = null;
   audioChunks: Blob[] = [];
   tiempoGrabacion = 0;
   intervaloTiempo: any;
-  nivelAudio = 0;
-  audioContext: AudioContext | null = null;
-  analyser: AnalyserNode | null = null;
-  microphone: MediaStreamAudioSourceNode | null = null;
-  animationId: number | null = null;
 
-  // Transcripción - CORREGIDO: cambié el nombre de la variable
+  // Transcripción
   textoTranscritoActual: string = '';
+  textoTranscritoTemporal: string = '';
   confianzaTranscripcion: number = 0;
-  editandoTexto = false;
-  textoEditado: string = '';
 
-  // Historial
-  historial: TranscripcionHistorial[] = [];
-  historialId = 0;
+  // UI
+  mostrarDropdown = false;
+  mostrarModalConfirmacion = false;
 
   // Web Speech API
   recognition: any = null;
   soportaWebSpeech = false;
+  transcripcionContinua = '';
+  reconocimientoActivo = false;
 
   // Mensajes
   mensajeError: string = '';
 
+  // Observable cleanup
+  private destroy$ = new Subject<void>();
+
+  // ControlValueAccessor
+  private onChange: (value: string) => void = () => {};
+  private onTouched: () => void = () => {};
+  disabled = false;
+  
+  private _value: string = '';
+  
+  get value(): string {
+    return this._value;
+  }
+  
+  set value(val: string) {
+    this._value = val;
+    this.textoTranscritoActual = val;
+    this.onChange(val);
+  }
+
   constructor(
     private iaModelosService: IAModelosService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private speechService: SimpleSpeechService
   ) {
-    // Verificar soporte de Web Speech API
-    this.verificarSoporteWebSpeech();
+    this.soportaWebSpeech = this.speechService.isAvailable();
   }
 
   ngOnInit() {
     this.cargarModelos();
+    this.configurarSpeechRecognizer();
   }
 
   ngOnDestroy() {
-    this.detenerGrabacion();
-    if (this.audioContext) {
-      this.audioContext.close();
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.detenerTodo();
+  }
+
+  // ControlValueAccessor Methods
+  writeValue(value: string): void {
+    if (value !== undefined) {
+      this._value = value;
+      this.textoTranscritoActual = value;
+    }
+  }
+  
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+  
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
+  }
+  
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+  }
+
+  onTextoModificado() {
+    this.value = this.textoTranscritoActual;
+    this.onTouched();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.modelo-selector')) {
+      this.mostrarDropdown = false;
     }
   }
 
-  private verificarSoporteWebSpeech() {
-    const win = window as any;
-    this.soportaWebSpeech = 'webkitSpeechRecognition' in win || 'SpeechRecognition' in win;
+  toggleDropdown() {
+    this.mostrarDropdown = !this.mostrarDropdown;
+  }
+
+  seleccionarModelo(modelo: IAModelo) {
+    this.modeloSeleccionado = modelo;
+    this.mostrarDropdown = false;
+  }
+
+  private configurarSpeechRecognizer() {
+    if (!this.soportaWebSpeech) return;
+
+    // Suscribirse al texto transcrito
+    this.speechService.getTranscript()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(texto => {
+        if (texto && texto !== this.textoTranscritoActual) {
+          this.textoTranscritoActual = texto;
+          this.onTextoModificado();
+        }
+      });
+
+    // Suscribirse al estado de escucha
+    this.speechService.getIsListening()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isListening => {
+        this.reconocimientoActivo = isListening;
+        
+        // Si se detuvo y estábamos grabando, procesar el resultado
+        if (!isListening && this.estaGrabando && this.modeloSeleccionado?.proveedor === 'navegador') {
+          this.procesarResultadoWebSpeech();
+        }
+      });
+
+    // Suscribirse a errores
+    this.speechService.getError()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(error => {
+        if (error) {
+          this.mensajeError = error;
+          this.estaGrabando = false;
+        }
+      });
   }
 
   private cargarModelos() {
     this.cargandoModelos = true;
-    
+
+    // Primero agregar Web Speech API si está soportado
+    if (this.soportaWebSpeech) {
+      this.modelosDisponibles = [{
+        id: 0,
+        proveedor: 'navegador',
+        modelo: 'Web Speech API',
+        tipo_modelo_id: 0,
+        activo: true,
+        es_predeterminado: true,
+        costo_por_1k_tokens: 0,
+        tipo_nombre: 'Transcripción del navegador',
+        tipo_codigo: 'transcripcion'
+      }];
+      
+      this.modeloSeleccionado = this.modelosDisponibles[0];
+    }
+
+    // Luego cargar modelos de IA
     this.iaModelosService.obtenerPorTipo('transcripcion').subscribe({
       next: (response: any) => {
-        this.modelosDisponibles = response.modelos || [];
+        const modelosIA = response.modelos || [];
         
-        // Agregar modelo del navegador si está soportado
         if (this.soportaWebSpeech) {
-          this.modelosDisponibles.unshift({
-            id: 0,
-            proveedor: 'navegador',
-            modelo: 'Web Speech API',
-            tipo_modelo_id: 0,
-            activo: true,
-            es_predeterminado: false,
-            costo_por_1k_tokens: 0,
-            tipo_nombre: 'Transcripción del navegador',
-            tipo_codigo: 'transcripcion'
-          });
+          this.modelosDisponibles = [...this.modelosDisponibles, ...modelosIA];
+        } else {
+          this.modelosDisponibles = modelosIA;
+          const modeloPredeterminado = modelosIA.find((m: IAModelo) => m.es_predeterminado);
+          this.modeloSeleccionado = modeloPredeterminado || modelosIA[0] || null;
         }
-        
-        // Seleccionar modelo predeterminado
-        const modeloPredeterminado = this.modelosDisponibles.find(m => m.es_predeterminado);
-        this.modeloSeleccionado = modeloPredeterminado || this.modelosDisponibles[0] || null;
-        
+
         this.cargandoModelos = false;
       },
       error: (error: any) => {
         console.error('Error cargando modelos:', error);
-        this.notificationService.error('Error al cargar modelos de transcripción');
         this.cargandoModelos = false;
+        // Si hay error, al menos tenemos Web Speech API
       }
     });
   }
@@ -140,111 +241,53 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy {
 
     this.mensajeError = '';
     
+    // Guardar el texto actual como base
+    this.transcripcionContinua = this.textoTranscritoActual || '';
+
     try {
-      // Si es modelo del navegador, usar Web Speech API
       if (this.modeloSeleccionado.proveedor === 'navegador') {
-        this.iniciarWebSpeech();
+        // Marcar como grabando antes de iniciar
+        this.estaGrabando = true;
+        await this.speechService.startListening();
+        console.log('Transcripción iniciada');
       } else {
-        // Para otros modelos, grabar audio
+        this.estaGrabando = true;
         await this.iniciarGrabacionAudio();
       }
-      
-      this.estado = 'grabando';
-      this.iniciarTemporizador();
-      
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al iniciar grabación:', error);
-      this.mensajeError = 'No se pudo acceder al micrófono';
-      this.estado = 'error';
-    }
-  }
-
-  private iniciarWebSpeech() {
-    const win = window as any;
-    const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
-    
-    this.recognition = new SpeechRecognition();
-    this.recognition.continuous = true;
-    this.recognition.interimResults = true;
-    this.recognition.lang = 'es-ES';
-    
-    let textoFinal = '';
-    
-    this.recognition.onresult = (event: any) => {
-      let textoInterino = '';
+      this.estaGrabando = false;
       
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const resultado = event.results[i];
-        if (resultado.isFinal) {
-          textoFinal += resultado[0].transcript + ' ';
-        } else {
-          textoInterino = resultado[0].transcript;
-        }
+      if (error.name === 'NotAllowedError' || error.message?.includes('denied')) {
+        this.mensajeError = 'Permisos de micrófono denegados. Por favor, permite el acceso al micrófono.';
+      } else {
+        this.mensajeError = 'No se pudo acceder al micrófono: ' + (error.message || 'Error desconocido');
       }
-      
-      this.textoTranscritoActual = textoFinal + textoInterino;
-    };
-    
-    this.recognition.onerror = (event: any) => {
-      console.error('Error en reconocimiento:', event.error);
-      this.mensajeError = 'Error en el reconocimiento de voz';
-      this.estado = 'error';
-    };
-    
-    this.recognition.start();
+    }
   }
 
   private async iniciarGrabacionAudio() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    
-    // Configurar MediaRecorder
+
     this.mediaRecorder = new MediaRecorder(stream);
     this.audioChunks = [];
-    
+
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
         this.audioChunks.push(event.data);
       }
     };
-    
-    // Configurar análisis de audio para visualización
-    this.configurarAnalizadorAudio(stream);
-    
-    // Iniciar grabación
-    this.mediaRecorder.start();
-  }
 
-  private configurarAnalizadorAudio(stream: MediaStream) {
-    this.audioContext = new AudioContext();
-    this.analyser = this.audioContext.createAnalyser();
-    this.microphone = this.audioContext.createMediaStreamSource(stream);
-    
-    this.analyser.fftSize = 256;
-    const bufferLength = this.analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    
-    this.microphone.connect(this.analyser);
-    
-    const actualizarNivelAudio = () => {
-      if (this.estado !== 'grabando') return;
-      
-      this.analyser!.getByteFrequencyData(dataArray);
-      const promedio = dataArray.reduce((a, b) => a + b) / bufferLength;
-      this.nivelAudio = Math.min(100, (promedio / 128) * 100);
-      
-      this.animationId = requestAnimationFrame(actualizarNivelAudio);
-    };
-    
-    actualizarNivelAudio();
+    this.mediaRecorder.start();
+    this.iniciarTemporizador();
   }
 
   private iniciarTemporizador() {
     this.tiempoGrabacion = 0;
-    
+
     this.intervaloTiempo = setInterval(() => {
       this.tiempoGrabacion++;
-      
-      // Verificar límite de tiempo
+
       if (this.tiempoGrabacion >= this.limiteSegundos) {
         this.detenerGrabacion();
         this.notificationService.warning(`Límite de grabación alcanzado (${this.limiteSegundos} segundos)`);
@@ -253,243 +296,143 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy {
   }
 
   async detenerGrabacion() {
-    if (this.estado !== 'grabando') return;
-    
-    // Detener temporizador
+    if (!this.estaGrabando) return;
+
+    this.estaGrabando = false;
+
     if (this.intervaloTiempo) {
       clearInterval(this.intervaloTiempo);
     }
-    
-    // Detener animación
-    if (this.animationId) {
-      cancelAnimationFrame(this.animationId);
-    }
-    
-    this.estado = 'procesando';
-    
+
     try {
       if (this.modeloSeleccionado?.proveedor === 'navegador') {
-        // Detener Web Speech API
-        if (this.recognition) {
-          this.recognition.stop();
-          await this.procesarTranscripcionNavegador();
-        }
+        this.speechService.stopListening();
+        // El procesamiento se hace en el subscribe cuando isListening cambia a false
       } else {
-        // Detener grabación de audio
+        // Lógica para IA
+        this.estaProcesando = true;
+        
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
           this.mediaRecorder.stop();
-          
-          // Esperar a que se procesen todos los chunks
+
           await new Promise(resolve => {
             this.mediaRecorder!.onstop = resolve;
           });
-          
+
           await this.procesarTranscripcionIA();
         }
       }
     } catch (error) {
       console.error('Error al detener grabación:', error);
       this.mensajeError = 'Error al procesar la grabación';
-      this.estado = 'error';
     } finally {
-      // Limpiar recursos
       this.limpiarRecursos();
+      this.estaProcesando = false;
     }
   }
 
-  private async procesarTranscripcionNavegador() {
-    // La transcripción ya está en textoTranscritoActual
+  private procesarResultadoWebSpeech() {
+    const textoNuevo = this.speechService.getCurrentTranscript().trim();
+    const textoOriginal = (this.transcripcionContinua || '').trim();
     
-    if (this.textoTranscritoActual.trim()) {
-      this.confianzaTranscripcion = 0.85; // Confianza estimada para Web Speech
-      this.estado = 'completado';
+    console.log('Procesando resultado:', { textoNuevo, textoOriginal });
+    
+    if (textoNuevo && textoNuevo !== textoOriginal) {
+      this.textoTranscritoTemporal = textoNuevo;
+      this.confianzaTranscripcion = 0.95;
       
-      // Agregar al historial
-      this.agregarAlHistorial();
-      
-      // Emitir resultado
-      this.emitirResultado();
-    } else {
-      this.mensajeError = 'No se detectó ningún audio';
-      this.estado = 'error';
+      if (textoOriginal) {
+        this.mostrarModalConfirmacion = true;
+      } else {
+        this.usarTextoCompleto();
+      }
+    } else if (!textoNuevo) {
+      this.notificationService.info('No se detectó ninguna transcripción. Habla más cerca del micrófono.');
     }
   }
 
   private async procesarTranscripcionIA() {
     if (this.audioChunks.length === 0) {
       this.mensajeError = 'No se grabó audio';
-      this.estado = 'error';
       return;
     }
-    
-    // Crear blob de audio
+
     const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-    
-    // Crear FormData
     const formData = new FormData();
     formData.append('audio', audioBlob, 'grabacion.webm');
     formData.append('modelo_id', this.modeloSeleccionado!.id.toString());
-    
+
     try {
       const resultado = await this.iaModelosService.transcribir(formData).toPromise();
-      
+
       if (resultado?.success && resultado.texto) {
-        this.textoTranscritoActual = resultado.texto;
+        this.textoTranscritoTemporal = resultado.texto;
         this.confianzaTranscripcion = resultado.confianza || 0.95;
-        this.estado = 'completado';
-        
-        // Agregar al historial
-        this.agregarAlHistorial();
-        
-        // Emitir resultado
-        this.emitirResultado();
+
+        if (this.value && this.value.trim()) {
+          this.mostrarModalConfirmacion = true;
+        } else {
+          this.usarTextoCompleto();
+        }
       } else {
         throw new Error(resultado?.error || 'Error en la transcripción');
       }
-      
+
     } catch (error: any) {
       console.error('Error en transcripción:', error);
       this.mensajeError = error.message || 'Error al transcribir el audio';
-      this.estado = 'error';
     }
   }
 
   private limpiarRecursos() {
-    // Detener streams de audio
     if (this.mediaRecorder && this.mediaRecorder.stream) {
       this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
     }
     
-    // Desconectar nodos de audio
-    if (this.microphone) {
-      this.microphone.disconnect();
+    this.mediaRecorder = null;
+    this.audioChunks = [];
+  }
+
+  private detenerTodo() {
+    if (this.soportaWebSpeech) {
+      this.speechService.stopListening();
     }
+    this.limpiarRecursos();
     
-    // Resetear nivel de audio
-    this.nivelAudio = 0;
-  }
-
-  editarTexto() {
-    this.textoEditado = this.textoTranscritoActual;
-    this.editandoTexto = true;
-  }
-
-  guardarEdicion() {
-    this.textoTranscritoActual = this.textoEditado;
-    this.editandoTexto = false;
-    this.emitirResultado();
-  }
-
-  cancelarEdicion() {
-    this.editandoTexto = false;
-    this.textoEditado = '';
-  }
-
-  confirmarTranscripcion() {
-    if (!this.textoTranscritoActual.trim()) {
-      this.notificationService.warning('El texto no puede estar vacío');
-      return;
-    }
-    
-    this.emitirResultado();
-  }
-
-  private emitirResultado() {
-    if (!this.modeloSeleccionado) return;
-    
-    const resultado: TranscripcionResultado = {
-      texto: this.textoTranscritoActual,
-      modeloId: this.modeloSeleccionado.id,
-      proveedor: this.modeloSeleccionado.proveedor,
-      modelo: this.modeloSeleccionado.modelo,
-      confianza: this.confianzaTranscripcion,
-      duracionAudio: this.tiempoGrabacion
-    };
-    
-    this.textoTranscrito.emit(resultado);
-  }
-
-  private agregarAlHistorial() {
-    if (!this.mostrarHistorial || !this.modeloSeleccionado) return;
-    
-    this.historial.unshift({
-      id: ++this.historialId,
-      texto: this.textoTranscritoActual,
-      fecha: new Date(),
-      duracion: this.tiempoGrabacion,
-      modelo: this.modeloSeleccionado.modelo
-    });
-    
-    // Limitar historial a 10 elementos
-    if (this.historial.length > 10) {
-      this.historial.pop();
+    if (this.intervaloTiempo) {
+      clearInterval(this.intervaloTiempo);
     }
   }
 
-  usarDeHistorial(item: TranscripcionHistorial) {
-    this.textoTranscritoActual = item.texto;
-    this.estado = 'completado';
-    this.tiempoGrabacion = item.duracion;
-    
-    // Buscar el modelo usado
-    const modelo = this.modelosDisponibles.find(m => m.modelo === item.modelo);
-    if (modelo) {
-      this.modeloSeleccionado = modelo;
-    }
+  // Métodos del modal
+  cancelarTranscripcion() {
+    this.mostrarModalConfirmacion = false;
+    this.textoTranscritoTemporal = '';
   }
 
-  eliminarDeHistorial(item: TranscripcionHistorial) {
-    const index = this.historial.findIndex(h => h.id === item.id);
-    if (index > -1) {
-      this.historial.splice(index, 1);
-    }
+  reemplazarTexto() {
+    this.value = this.textoTranscritoTemporal;
+    this.mostrarModalConfirmacion = false;
+    this.textoTranscritoTemporal = '';
   }
 
-  nuevaGrabacion() {
-    this.estado = 'inicial';
-    this.textoTranscritoActual = '';
-    this.confianzaTranscripcion = 0;
-    this.tiempoGrabacion = 0;
-    this.mensajeError = '';
-    this.editandoTexto = false;
+  agregarAlFinal() {
+    const textoActual = this.value || '';
+    const separador = textoActual.endsWith('.') || !textoActual ? ' ' : '. ';
+    this.value = textoActual + separador + this.textoTranscritoTemporal;
+    this.mostrarModalConfirmacion = false;
+    this.textoTranscritoTemporal = '';
+  }
+
+  usarTextoCompleto() {
+    this.value = this.textoTranscritoTemporal;
+    this.mostrarModalConfirmacion = false;
+    this.textoTranscritoTemporal = '';
   }
 
   formatearTiempo(segundos: number): string {
     const mins = Math.floor(segundos / 60);
     const secs = segundos % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
-  }
-
-  obtenerCostoEstimado(): string {
-    if (!this.modeloSeleccionado) return '';
-    
-    if (this.modeloSeleccionado.proveedor === 'navegador') {
-      return 'Gratis';
-    }
-    
-    if (this.modeloSeleccionado.costo_por_1k_tokens) {
-      // Estimación: 150 palabras por minuto, ~200 tokens por minuto
-      const tokensEstimados = (this.limiteSegundos / 60) * 200;
-      const costo = (tokensEstimados / 1000) * this.modeloSeleccionado.costo_por_1k_tokens;
-      return `~$${costo.toFixed(4)} USD`;
-    }
-    
-    return 'Variable';
-  }
-
-  get puedeGrabar(): boolean {
-    return this.estado === 'inicial' && this.modeloSeleccionado !== null;
-  }
-
-  get estaGrabando(): boolean {
-    return this.estado === 'grabando';
-  }
-
-  get estaProcesando(): boolean {
-    return this.estado === 'procesando';
-  }
-
-  get tieneResultado(): boolean {
-    return this.estado === 'completado' && this.textoTranscritoActual.length > 0;
   }
 }

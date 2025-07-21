@@ -28,79 +28,40 @@
   }
 }
 
-// Tabs de entrada
-.input-tabs {
-  display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-  border-bottom: 2px solid var(--color-borde);
-  padding-bottom: 0;
-  
-  .tab-button {
-    padding: 0.75rem 1.25rem;
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    font-size: 0.9375rem;
-    color: var(--color-gris);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    
-    &:hover {
-      color: var(--color-texto);
-    }
-    
-    &.active {
-      color: var(--color-dorado-oscuro);
-      border-bottom-color: var(--color-dorado);
-      background: rgba(255, 215, 0, 0.05);
-    }
-    
-    i {
-      font-size: 1.125rem;
-    }
-  }
-}
-
-// Contenido de tabs
-.tab-content {
+// Card de contenido principal
+.content-card {
   background: white;
   padding: 1.5rem;
   border-radius: var(--border-radius-large);
   box-shadow: var(--shadow-small);
-  min-height: 400px;
+  
+  .archivos-section {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-borde);
+    
+    h5 {
+      font-size: 1.125rem;
+      margin-bottom: 1rem;
+      color: var(--color-texto);
+      
+      i {
+        color: var(--color-dorado);
+        margin-right: 0.5rem;
+      }
+    }
+  }
 }
 
 // Vista de descripción
 .descripcion-view {
-  h4 {
-    font-size: 1.125rem;
-    margin-bottom: 1rem;
-    color: var(--color-texto);
-  }
-  
   p {
     white-space: pre-wrap;
     line-height: 1.6;
     color: var(--color-texto);
-  }
-  
-  .transcripcion-info {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    
-    small {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      
-      i {
-        color: var(--color-dorado);
-      }
-    }
+    background: var(--color-fondo);
+    padding: 1rem;
+    border-radius: var(--border-radius-medium);
+    margin: 0;
   }
 }
 
@@ -274,7 +235,7 @@
 // Tema oscuro
 :host-context(.dark-theme) {
   .selectors-card,
-  .tab-content,
+  .content-card,
   .contract-info-panel,
   .archivos-view {
     background: var(--color-fondo-tarjeta);
@@ -294,5 +255,9 @@
     .obligacion-item {
       background: rgba(255, 255, 255, 0.05);
     }
+  }
+  
+  .descripcion-view p {
+    background: rgba(255, 255, 255, 0.05);
   }
 }
