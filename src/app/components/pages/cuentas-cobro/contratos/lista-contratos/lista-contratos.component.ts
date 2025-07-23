@@ -95,7 +95,6 @@ export class ListaContratosComponent implements OnInit {
     
     this.contratosService.obtenerTodos().subscribe({
       next: (contratos) => {
-        console.log('Contratos recibidos:', contratos);
         this.contratos = contratos.map(contrato => ({
           ...contrato,
           fecha_periodo: this.generarPeriodo(contrato),

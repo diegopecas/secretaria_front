@@ -39,7 +39,6 @@ export class ContratistasService {
     private http: HttpClient,
     private authService: AuthService
   ) {
-    console.log('URL del servicio de contratistas:', this.apiUrl);
   }
 
   private getHttpOptions() {
@@ -53,8 +52,6 @@ export class ContratistasService {
   }
 
   obtenerTodos(): Observable<Contratista[]> {
-    console.log('Llamando a:', this.apiUrl);
-    console.log('Headers:', this.getHttpOptions());
 
     return this.http.get<any>(this.apiUrl, this.getHttpOptions())
       .pipe(

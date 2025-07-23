@@ -93,7 +93,6 @@ export class ListaContratistasComponent implements OnInit {
     
     this.contratistasService.obtenerTodos().subscribe({
       next: (contratistas) => {
-        console.log('Contratistas recibidos:', contratistas);
         this.contratistas = contratistas.map(contratista => ({
           ...contratista,
           contratos_info: this.generarInfoContratos(contratista),

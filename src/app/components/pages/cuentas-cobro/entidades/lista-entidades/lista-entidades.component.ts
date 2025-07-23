@@ -93,7 +93,6 @@ export class ListaEntidadesComponent implements OnInit {
     
     this.entidadesService.obtenerTodos().subscribe({
       next: (entidades) => {
-        console.log('Entidades recibidas:', entidades);
         this.entidades = entidades.map(entidad => ({
           ...entidad,
           contratos_info: this.generarInfoContratos(entidad),

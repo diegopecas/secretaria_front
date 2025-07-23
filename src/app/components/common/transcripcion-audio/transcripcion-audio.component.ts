@@ -37,7 +37,7 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
   @Input() requerido: boolean = false;
   @Input() mostrarSelectorModelo: boolean = true;
   @Input() modoInline: boolean = true;
-  
+
   @Output() textoTranscrito = new EventEmitter<TranscripcionResultado>();
 
   // Modelos disponibles
@@ -77,16 +77,16 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
   private destroy$ = new Subject<void>();
 
   // ControlValueAccessor
-  private onChange: (value: string) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: string) => void = () => { };
+  private onTouched: () => void = () => { };
   disabled = false;
-  
+
   private _value: string = '';
-  
+
   get value(): string {
     return this._value;
   }
-  
+
   set value(val: string) {
     this._value = val;
     this.textoTranscritoActual = val;
@@ -119,15 +119,15 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
       this.textoTranscritoActual = value;
     }
   }
-  
+
   registerOnChange(fn: any): void {
     this.onChange = fn;
   }
-  
+
   registerOnTouched(fn: any): void {
     this.onTouched = fn;
   }
-  
+
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
   }
@@ -172,7 +172,7 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
       .pipe(takeUntil(this.destroy$))
       .subscribe(isListening => {
         this.reconocimientoActivo = isListening;
-        
+
         // Si se detuvo y estábamos grabando, procesar el resultado
         if (!isListening && this.estaGrabando && this.modeloSeleccionado?.proveedor === 'navegador') {
           this.procesarResultadoWebSpeech();
@@ -206,7 +206,7 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
         tipo_nombre: 'Transcripción del navegador',
         tipo_codigo: 'transcripcion'
       }];
-      
+
       this.modeloSeleccionado = this.modelosDisponibles[0];
     }
 
@@ -214,7 +214,7 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
     this.iaModelosService.obtenerPorTipo('transcripcion').subscribe({
       next: (response: any) => {
         const modelosIA = response.modelos || [];
-        
+
         if (this.soportaWebSpeech) {
           this.modelosDisponibles = [...this.modelosDisponibles, ...modelosIA];
         } else {
@@ -240,7 +240,7 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
     }
 
     this.mensajeError = '';
-    
+
     // Guardar el texto actual como base
     this.transcripcionContinua = this.textoTranscritoActual || '';
 
@@ -249,7 +249,6 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
         // Marcar como grabando antes de iniciar
         this.estaGrabando = true;
         await this.speechService.startListening();
-        console.log('Transcripción iniciada');
       } else {
         this.estaGrabando = true;
         await this.iniciarGrabacionAudio();
@@ -257,7 +256,7 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
     } catch (error: any) {
       console.error('Error al iniciar grabación:', error);
       this.estaGrabando = false;
-      
+
       if (error.name === 'NotAllowedError' || error.message?.includes('denied')) {
         this.mensajeError = 'Permisos de micrófono denegados. Por favor, permite el acceso al micrófono.';
       } else {
@@ -266,21 +265,21 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
     }
   }
 
-  private async iniciarGrabacionAudio() {
+private async iniciarGrabacionAudio() {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
     this.mediaRecorder = new MediaRecorder(stream);
     this.audioChunks = [];
 
     this.mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        this.audioChunks.push(event.data);
-      }
+        if (event.data.size > 0) {
+            this.audioChunks.push(event.data);
+        }
     };
 
     this.mediaRecorder.start();
     this.iniciarTemporizador();
-  }
+}
 
   private iniciarTemporizador() {
     this.tiempoGrabacion = 0;
@@ -311,7 +310,7 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
       } else {
         // Lógica para IA
         this.estaProcesando = true;
-        
+
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
           this.mediaRecorder.stop();
 
@@ -334,13 +333,10 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
   private procesarResultadoWebSpeech() {
     const textoNuevo = this.speechService.getCurrentTranscript().trim();
     const textoOriginal = (this.transcripcionContinua || '').trim();
-    
-    console.log('Procesando resultado:', { textoNuevo, textoOriginal });
-    
     if (textoNuevo && textoNuevo !== textoOriginal) {
       this.textoTranscritoTemporal = textoNuevo;
       this.confianzaTranscripcion = 0.95;
-      
+
       if (textoOriginal) {
         this.mostrarModalConfirmacion = true;
       } else {
@@ -364,7 +360,6 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
 
     try {
       const resultado = await this.iaModelosService.transcribir(formData).toPromise();
-
       if (resultado?.success && resultado.texto) {
         this.textoTranscritoTemporal = resultado.texto;
         this.confianzaTranscripcion = resultado.confianza || 0.95;
@@ -388,7 +383,7 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
     if (this.mediaRecorder && this.mediaRecorder.stream) {
       this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
     }
-    
+
     this.mediaRecorder = null;
     this.audioChunks = [];
   }
@@ -398,7 +393,7 @@ export class TranscripcionAudioComponent implements OnInit, OnDestroy, ControlVa
       this.speechService.stopListening();
     }
     this.limpiarRecursos();
-    
+
     if (this.intervaloTiempo) {
       clearInterval(this.intervaloTiempo);
     }
