@@ -1,4 +1,4 @@
-// services/chat.service.ts
+import { NgZone } from '@angular/core';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
@@ -33,7 +33,10 @@ export interface RespuestaChat {
   tokens_usados?: number;
   puede_continuar?: boolean;
 }
-
+export interface SSEEvent {
+  event: string;
+  data: any;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -42,8 +45,9 @@ export class ChatService {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private ngZone: NgZone
+  ) { }
 
   private getHttpOptions() {
     const token = this.authService.getAccessToken();
@@ -114,13 +118,130 @@ export class ChatService {
   private handleError(error: any): Observable<never> {
     console.error('Error en ChatService:', error);
     let errorMessage = 'Ocurrió un error al procesar la solicitud';
-    
+
     if (error.error?.error) {
       errorMessage = error.error.error;
     } else if (error.message) {
       errorMessage = error.message;
     }
-    
+
     return throwError(() => new Error(errorMessage));
+  }
+
+  /**
+   * Iniciar conversación con streaming
+   */
+  conversarStreaming(params: {
+    contrato_id: number;
+    pregunta: string;
+    continuar_sesion?: boolean;
+    sesion_id?: string;
+  },
+    onMessage: (event: SSEEvent) => void,
+    onError?: (error: any) => void,
+    onComplete?: () => void): EventSource {
+
+    const token = this.authService.getAccessToken();
+    const baseUrl = environment.api.replace(/\/$/, '');
+
+    // Codificar parámetros en la URL
+    const queryParams = new URLSearchParams({
+      contrato_id: params.contrato_id.toString(),
+      pregunta: params.pregunta,
+      continuar_sesion: params.continuar_sesion ? 'true' : 'false',
+      sesion_id: params.sesion_id || ''
+    });
+
+    const url = `${baseUrl}/chat/conversar-stream?${queryParams.toString()}`;
+
+    // Crear EventSource con token en URL
+    const eventSource = new EventSource(`${url}&token=${encodeURIComponent(token || '')}`);
+
+    // Manejar evento de sesión
+    eventSource.addEventListener('session', (event: any) => {
+      try {
+        const data = JSON.parse(event.data);
+        this.ngZone.run(() => {
+          onMessage({ event: 'session', data });
+        });
+      } catch (e) {
+        console.error('Error parseando sesión:', e);
+      }
+    });
+
+    // Manejar evento de estado
+    eventSource.addEventListener('status', (event: any) => {
+      try {
+        const data = JSON.parse(event.data);
+        this.ngZone.run(() => {
+          onMessage({ event: 'status', data });
+        });
+      } catch (e) {
+        console.error('Error parseando status:', e);
+      }
+    });
+
+    // Manejar evento de fuentes
+    eventSource.addEventListener('sources', (event: any) => {
+      try {
+        const data = JSON.parse(event.data);
+        this.ngZone.run(() => {
+          onMessage({ event: 'sources', data });
+        });
+      } catch (e) {
+        console.error('Error parseando sources:', e);
+      }
+    });
+
+    // Manejar evento de mensaje
+    eventSource.addEventListener('message', (event: any) => {
+      try {
+        const data = JSON.parse(event.data);
+        this.ngZone.run(() => {
+          onMessage({ event: 'message', data });
+        });
+      } catch (e) {
+        console.error('Error parseando message:', e);
+      }
+    });
+
+    // Manejar evento de error
+    eventSource.addEventListener('error', (event: any) => {
+      if (event.data) {
+        try {
+          const data = JSON.parse(event.data);
+          this.ngZone.run(() => {
+            onMessage({ event: 'error', data });
+          });
+        } catch (e) {
+          console.error('Error parseando error:', e);
+        }
+      }
+    });
+
+    // Manejar evento de finalización
+    eventSource.addEventListener('done', (event: any) => {
+      try {
+        const data = JSON.parse(event.data);
+        this.ngZone.run(() => {
+          onMessage({ event: 'done', data });
+          if (onComplete) onComplete();
+        });
+        eventSource.close();
+      } catch (e) {
+        console.error('Error parseando done:', e);
+      }
+    });
+
+    // Manejar errores de conexión
+    eventSource.onerror = (error) => {
+      console.error('Error SSE:', error);
+      this.ngZone.run(() => {
+        if (onError) onError(error);
+      });
+      eventSource.close();
+    };
+
+    return eventSource;
   }
 }

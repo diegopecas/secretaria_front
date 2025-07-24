@@ -142,8 +142,40 @@
   overflow-y: auto;
   padding: 1.5rem;
   background: var(--color-background);
+  position: relative; // Para posicionar el botón
 }
-
+// Botón para volver al final
+.btn-scroll-bottom {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text);
+  border: none;
+  box-shadow: var(--shadow-medium);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-large);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  i {
+    font-size: 1rem;
+  }
+}
 .chat-mensajes-lista {
   display: flex;
   flex-direction: column;

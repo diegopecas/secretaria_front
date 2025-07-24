@@ -19,52 +19,83 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
   @Input() tituloChat: string = 'Asistente IA';
   @Input() placeholder: string = 'Escribe tu pregunta aquí...';
   @Input() mostrarHistorial: boolean = true;
-  
+
   @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
   @ViewChild('inputMensaje') private inputMensaje!: ElementRef;
 
   private destroy$ = new Subject<void>();
+  private eventSource?: EventSource;
+  private mensajeStreamActual: string = '';
   
+  // Control de scroll
+  private shouldScrollToBottom = true;
+  userScrolling = false; // Pública para el template
+
   // Estado del chat
   mensajes: MensajeChat[] = [];
   mensajeActual: string = '';
   sesionActual: SesionChat | null = null;
   sesionesAnteriores: SesionChat[] = [];
-  
+
   // UI State
   isLoading = false;
   isSending = false;
   mostrarPanelHistorial = false;
   escribiendo = false;
-  
-  // Control de scroll
-  private shouldScrollToBottom = true;
 
   constructor(
     private chatService: ChatService,
     private notificationService: NotificationService,
     private spinnerService: SpinnerService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     if (!this.contratoId) {
       console.error('ChatIaComponent: contratoId es requerido');
       return;
     }
-    
+
     this.cargarSesionesAnteriores();
     this.iniciarNuevaConversacion();
+    this.setupScrollListener();
   }
 
   ngOnDestroy(): void {
+    if (this.eventSource) {
+      this.eventSource.close();
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   ngAfterViewChecked(): void {
-    if (this.shouldScrollToBottom) {
+    if (this.shouldScrollToBottom && !this.userScrolling) {
       this.scrollToBottom();
     }
+  }
+
+  private setupScrollListener(): void {
+    setTimeout(() => {
+      if (this.scrollContainer) {
+        const element = this.scrollContainer.nativeElement;
+        
+        element.addEventListener('scroll', () => {
+          const scrollTop = element.scrollTop;
+          const scrollHeight = element.scrollHeight;
+          const clientHeight = element.clientHeight;
+          
+          const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+          
+          if (!isNearBottom) {
+            this.userScrolling = true;
+            this.shouldScrollToBottom = false;
+          } else {
+            this.userScrolling = false;
+            this.shouldScrollToBottom = true;
+          }
+        });
+      }
+    }, 500);
   }
 
   private scrollToBottom(): void {
@@ -72,14 +103,20 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
       if (this.scrollContainer) {
         this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
       }
-    } catch(err) {
+    } catch (err) {
       console.error('Error al hacer scroll:', err);
     }
   }
 
+  scrollToBottomManual(): void {
+    this.userScrolling = false;
+    this.shouldScrollToBottom = true;
+    this.scrollToBottom();
+  }
+
   cargarSesionesAnteriores(): void {
     if (!this.mostrarHistorial) return;
-    
+
     this.chatService.listarSesiones(this.contratoId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -96,7 +133,8 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.mensajes = [];
     this.sesionActual = null;
     this.shouldScrollToBottom = true;
-    
+    this.userScrolling = false; // Reset
+
     // Mensaje de bienvenida
     this.agregarMensajeSistema(
       `¡Hola! Soy tu asistente de actividades. 
@@ -109,13 +147,14 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.isLoading = true;
     this.sesionActual = sesion;
     this.mensajes = [];
-    
+
     this.chatService.obtenerHistorial(sesion.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           this.mensajes = response.mensajes || [];
           this.shouldScrollToBottom = true;
+          this.userScrolling = false; // Reset
           this.mostrarPanelHistorial = false;
         },
         error: (error) => {
@@ -129,56 +168,111 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   async enviarMensaje(): Promise<void> {
     if (!this.mensajeActual.trim() || this.isSending) return;
-    
+
     const pregunta = this.mensajeActual.trim();
     this.mensajeActual = '';
     this.isSending = true;
-    
+
     // Agregar mensaje del usuario
     this.agregarMensajeUsuario(pregunta);
-    
+
     // Mostrar indicador de escritura
     this.escribiendo = true;
-    
+
+    // Resetear mensaje stream
+    this.mensajeStreamActual = '';
+
     try {
-      const response = await this.chatService.conversar({
-        contrato_id: this.contratoId,
-        pregunta: pregunta,
-        continuar_sesion: !!this.sesionActual,
-        sesion_id: this.sesionActual?.id
-      }).toPromise();
-      
-      if (response) {
-        // Actualizar sesión actual si es nueva
-        if (!this.sesionActual && response.sesion_id) {
-          this.sesionActual = {
-            id: response.sesion_id,
-            titulo: pregunta.substring(0, 100) + '...',
-            mensajes_count: 2,
-            fecha_inicio: new Date().toISOString(),
-            fecha_ultimo_mensaje: new Date().toISOString()
-          };
-        }
-        
-        // Agregar respuesta de la IA
-        this.agregarMensajeAsistente(response.respuesta, response.fuentes);
-        
-        // Actualizar lista de sesiones
-        this.cargarSesionesAnteriores();
+      // Cerrar conexión anterior si existe
+      if (this.eventSource) {
+        this.eventSource.close();
       }
-      
+
+      // Usar streaming
+      this.eventSource = this.chatService.conversarStreaming(
+        {
+          contrato_id: this.contratoId,
+          pregunta: pregunta,
+          continuar_sesion: !!this.sesionActual,
+          sesion_id: this.sesionActual?.id
+        },
+        // onMessage
+        (event) => {
+          this.manejarEventoSSE(event);
+        },
+        // onError
+        (error) => {
+          console.error('Error en streaming:', error);
+          this.notificationService.error('Error al procesar tu pregunta');
+          this.escribiendo = false;
+          this.isSending = false;
+        },
+        // onComplete
+        () => {
+          this.escribiendo = false;
+          this.isSending = false;
+          this.cargarSesionesAnteriores();
+
+          // Focus en el input
+          setTimeout(() => {
+            this.inputMensaje?.nativeElement?.focus();
+          }, 100);
+        }
+      );
+
     } catch (error: any) {
       console.error('Error en chat:', error);
       this.notificationService.error(error.message || 'Error al procesar tu pregunta');
       this.agregarMensajeSistema('Lo siento, ocurrió un error al procesar tu pregunta. Por favor, intenta nuevamente.');
-    } finally {
       this.isSending = false;
       this.escribiendo = false;
-      
-      // Focus en el input
-      setTimeout(() => {
-        this.inputMensaje?.nativeElement?.focus();
-      }, 100);
+    }
+  }
+
+  private manejarEventoSSE(event: any): void {
+    switch (event.event) {
+      case 'session':
+        if (!this.sesionActual && event.data.sesion_id) {
+          this.sesionActual = {
+            id: event.data.sesion_id,
+            titulo: this.mensajes[this.mensajes.length - 1].contenido.substring(0, 100) + '...',
+            mensajes_count: 1,
+            fecha_inicio: new Date().toISOString(),
+            fecha_ultimo_mensaje: new Date().toISOString()
+          };
+        }
+        break;
+
+      case 'status':
+        console.log('Estado:', event.data.message);
+        break;
+
+      case 'sources':
+        console.log('Fuentes encontradas:', event.data);
+        break;
+
+      case 'message':
+        // Agregar contenido al mensaje actual
+        this.mensajeStreamActual += event.data.content;
+
+        // Si es el primer chunk, crear el mensaje
+        if (this.escribiendo && this.mensajeStreamActual.length > 0) {
+          this.escribiendo = false;
+          this.agregarMensajeAsistenteStream();
+        } else {
+          // Actualizar el último mensaje
+          this.actualizarUltimoMensaje();
+        }
+        break;
+
+      case 'error':
+        this.notificationService.error(event.data.message || 'Error en la respuesta');
+        this.escribiendo = false;
+        break;
+
+      case 'done':
+        console.log('Conversación completada');
+        break;
     }
   }
 
@@ -188,7 +282,9 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
       contenido,
       fecha_mensaje: new Date().toISOString()
     });
+    // Forzar scroll al agregar mensaje del usuario
     this.shouldScrollToBottom = true;
+    this.userScrolling = false;
   }
 
   private agregarMensajeAsistente(contenido: string, fuentes?: any[]): void {
@@ -197,7 +293,10 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
       contenido,
       fecha_mensaje: new Date().toISOString()
     });
-    this.shouldScrollToBottom = true;
+    // Solo hacer scroll si el usuario está cerca del final
+    if (!this.userScrolling) {
+      this.shouldScrollToBottom = true;
+    }
   }
 
   private agregarMensajeSistema(contenido: string): void {
@@ -206,7 +305,32 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
       contenido,
       fecha_mensaje: new Date().toISOString()
     });
-    this.shouldScrollToBottom = true;
+    // Solo hacer scroll si el usuario está cerca del final
+    if (!this.userScrolling) {
+      this.shouldScrollToBottom = true;
+    }
+  }
+
+  private agregarMensajeAsistenteStream(): void {
+    this.mensajes.push({
+      rol: 'assistant',
+      contenido: this.mensajeStreamActual,
+      fecha_mensaje: new Date().toISOString()
+    });
+    // Solo hacer scroll si el usuario está cerca del final
+    if (!this.userScrolling) {
+      this.shouldScrollToBottom = true;
+    }
+  }
+
+  private actualizarUltimoMensaje(): void {
+    if (this.mensajes.length > 0 && this.mensajes[this.mensajes.length - 1].rol === 'assistant') {
+      this.mensajes[this.mensajes.length - 1].contenido = this.mensajeStreamActual;
+      // Solo hacer scroll si el usuario está cerca del final
+      if (!this.userScrolling) {
+        this.shouldScrollToBottom = true;
+      }
+    }
   }
 
   onKeyDown(event: KeyboardEvent): void {
@@ -222,19 +346,19 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   formatearFecha(fecha: string): string {
     if (!fecha) return '';
-    
+
     const date = new Date(fecha);
     const ahora = new Date();
     const diffMs = ahora.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHoras = Math.floor(diffMs / 3600000);
     const diffDias = Math.floor(diffMs / 86400000);
-    
+
     if (diffMins < 1) return 'Justo ahora';
     if (diffMins < 60) return `hace ${diffMins} minuto${diffMins > 1 ? 's' : ''}`;
     if (diffHoras < 24) return `hace ${diffHoras} hora${diffHoras > 1 ? 's' : ''}`;
     if (diffDias < 7) return `hace ${diffDias} día${diffDias > 1 ? 's' : ''}`;
-    
+
     return date.toLocaleDateString('es-CO', {
       day: 'numeric',
       month: 'short',
