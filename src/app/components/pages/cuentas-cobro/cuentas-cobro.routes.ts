@@ -20,6 +20,7 @@ import { GestionContratoComponent } from './contratos/gestion-contrato/gestion-c
 // Componentes de actividades
 import { ListaActividadesComponent } from './actividades/lista-actividades/lista-actividades.component';
 import { GestionActividadComponent } from './actividades/gestion-actividad/gestion-actividad.component';
+import { ContratistaChatIaComponent } from './actividades/contratista-chat-ia/contratista-chat-ia.component';
 
 
 export const CUENTAS_COBRO_ROUTES: Routes = [
@@ -196,7 +197,15 @@ export const CUENTAS_COBRO_ROUTES: Routes = [
       }
     ]
   },
-
+  {
+    path: 'chat-ia',
+    component: ContratistaChatIaComponent,
+    canActivate: [authGuard, roleGuard],
+    data: {
+      breadcrumb: 'Chat IA',
+      permissions: ['actividades.chat']
+    }
+  },
   // Rutas futuras (mantenidas como redirects)
   {
     path: 'generar',

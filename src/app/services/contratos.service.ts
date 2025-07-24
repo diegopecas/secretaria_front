@@ -54,11 +54,16 @@ export interface Contrato {
   dias_restantes?: number;
   total_obligaciones?: number;
   total_supervisores?: number;
+  
+  // Campos de IA
+  resumen_ia?: string;
+  fecha_resumen_ia?: string;
+  
+  // Relaciones
   supervisores?: Supervisor[];
   obligaciones?: Obligacion[];
   valores_mensuales?: ValorMensual[];
 }
-
 @Injectable({
   providedIn: 'root'
 })

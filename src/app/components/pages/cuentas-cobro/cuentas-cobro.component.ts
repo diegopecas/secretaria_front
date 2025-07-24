@@ -57,6 +57,15 @@ export class CuentasCobroComponent implements OnInit {
       color: '#4CAF50',
       permissions: ['actividades.registrar']
     },
+    // En el array cuentasCobroItems, agregar:
+    {
+      title: 'Chat con IA',
+      icon: '🤖',
+      route: '/cuentas-cobro/chat-ia',
+      description: 'Consultar información con el asistente IA',
+      color: '#00BCD4',
+      permissions: ['actividades.chat']
+    },
     {
       title: 'Generar Cuenta',
       icon: '💳',
@@ -82,7 +91,7 @@ export class CuentasCobroComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.filterMenuItems();
@@ -99,7 +108,7 @@ export class CuentasCobroComponent implements OnInit {
       const hasPermission = item.requireAll
         ? item.permissions.every(p => this.authService.hasPermission(p))
         : item.permissions.some(p => this.authService.hasPermission(p));
-      
+
       return hasPermission;
     });
   }

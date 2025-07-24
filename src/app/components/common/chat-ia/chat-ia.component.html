@@ -1,0 +1,164 @@
+<!-- components/common/chat-ia/chat-ia.component.html -->
+<div class="chat-container" [class.historial-abierto]="mostrarPanelHistorial">
+  <!-- Panel de historial (lateral izquierdo) -->
+  <div class="chat-historial-panel" *ngIf="mostrarHistorial" [class.visible]="mostrarPanelHistorial">
+    <div class="chat-historial-header">
+      <h3>Conversaciones</h3>
+      <button class="btn-icon" (click)="toggleHistorial()" aria-label="Cerrar historial">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="chat-historial-content">
+      <!-- Nueva conversación -->
+      <button class="btn btn-primary btn-block mb-3" (click)="iniciarNuevaConversacion()">
+        <i class="fas fa-plus"></i>
+        Nueva conversación
+      </button>
+      
+      <!-- Lista de sesiones -->
+      <div class="chat-sesiones-lista">
+        <div 
+          class="chat-sesion-item"
+          *ngFor="let sesion of sesionesAnteriores"
+          [class.activa]="sesionActual?.id === sesion.id"
+          (click)="cargarConversacion(sesion)">
+          <div class="sesion-titulo">{{ sesion.titulo }}</div>
+          <div class="sesion-meta">
+            <span class="text-muted text-small">
+              <i class="fas fa-comment"></i> {{ sesion.mensajes_count }}
+            </span>
+            <span class="text-muted text-small">{{ formatearFecha(sesion.fecha_ultimo_mensaje) }}</span>
+          </div>
+        </div>
+        
+        <div class="empty-state" *ngIf="sesionesAnteriores.length === 0">
+          <div class="empty-icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <p class="empty-subtitle">No hay conversaciones anteriores</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Área principal del chat -->
+  <div class="chat-main">
+    <!-- Header del chat -->
+    <div class="chat-header">
+      <button 
+        class="btn-icon"
+        *ngIf="mostrarHistorial"
+        (click)="toggleHistorial()"
+        [attr.aria-label]="mostrarPanelHistorial ? 'Ocultar historial' : 'Mostrar historial'">
+        <i class="fas fa-bars"></i>
+      </button>
+      
+      <h2 class="chat-titulo">
+        <i class="fas fa-robot text-primary"></i>
+        {{ tituloChat }}
+      </h2>
+      
+      <div class="chat-info">
+        <small *ngIf="sesionActual" class="text-muted">
+          Sesión: {{ sesionActual.mensajes_count }} mensajes
+        </small>
+      </div>
+    </div>
+    
+    <!-- Área de mensajes -->
+    <div class="chat-mensajes-container" #scrollContainer>
+      <div class="chat-mensajes-lista">
+        <div 
+          class="chat-mensaje"
+          *ngFor="let mensaje of mensajes"
+          [class.mensaje-usuario]="mensaje.rol === 'user'"
+          [class.mensaje-asistente]="mensaje.rol === 'assistant'"
+          [class.mensaje-sistema]="mensaje.rol === 'system'">
+          
+          <!-- Avatar -->
+          <div class="mensaje-avatar">
+            <i class="fas" [ngClass]="{
+              'fa-user': mensaje.rol === 'user',
+              'fa-robot': mensaje.rol === 'assistant',
+              'fa-info-circle': mensaje.rol === 'system'
+            }"></i>
+          </div>
+          
+          <!-- Contenido -->
+          <div class="mensaje-contenido">
+            <div class="mensaje-autor">
+              {{ mensaje.rol === 'user' ? 'Tú' : 
+                 mensaje.rol === 'assistant' ? 'Asistente IA' : 
+                 'Sistema' }}
+              <span class="text-muted text-small" *ngIf="mensaje.fecha_mensaje">
+                • {{ formatearFecha(mensaje.fecha_mensaje) }}
+              </span>
+            </div>
+            
+            <div class="mensaje-texto" [innerHTML]="mensaje.contenido"></div>
+            
+            <div class="mensaje-meta mt-2" *ngIf="mensaje.tokens_usados">
+              <small class="text-muted">
+                <i class="fas fa-coins"></i> {{ mensaje.tokens_usados }} tokens
+              </small>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Indicador de escritura -->
+        <div class="chat-mensaje mensaje-asistente" *ngIf="escribiendo">
+          <div class="mensaje-avatar">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="mensaje-contenido">
+            <div class="mensaje-autor">Asistente IA</div>
+            <div class="escribiendo-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Estado de carga -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Input de mensaje -->
+    <div class="chat-input-container">
+      <div class="chat-input-wrapper">
+        <textarea
+          #inputMensaje
+          [(ngModel)]="mensajeActual"
+          [placeholder]="placeholder"
+          [disabled]="isSending"
+          (keydown)="onKeyDown($event)"
+          class="form-control chat-input"
+          rows="1"
+          maxlength="1000">
+        </textarea>
+        
+        <button 
+          class="btn btn-primary btn-icon-only"
+          [disabled]="!mensajeActual.trim() || isSending"
+          (click)="enviarMensaje()"
+          [attr.aria-label]="'Enviar mensaje'">
+          <i class="fas fa-paper-plane" *ngIf="!isSending"></i>
+          <span class="spinner-border spinner-border-sm" *ngIf="isSending"></span>
+        </button>
+      </div>
+      
+      <div class="chat-input-info text-right">
+        <small class="text-muted">
+          {{ mensajeActual.length }}/1000 • Presiona Enter para enviar
+        </small>
+      </div>
+    </div>
+  </div>
+</div>

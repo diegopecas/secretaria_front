@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+// Sección del chat - altura calculada
+.chat-section {
+  height: calc(100vh - 400px);
+  min-height: 500px;
+  
+  @media (max-width: 768px) {
+    height: calc(100vh - 450px);
+    min-height: 400px;
+  }
+}
