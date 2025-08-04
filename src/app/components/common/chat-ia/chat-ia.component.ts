@@ -6,6 +6,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ChatService, MensajeChat, SesionChat, RespuestaChat } from '../../../services/chat.service';
 import { NotificationService } from '../../../services/notification.service';
 import { SpinnerService } from '../../../services/spinner.service';
+import { ContratosIAConfigService, ModeloIA } from '../../../services/contratos-ia-config.service';
 
 @Component({
   selector: 'app-chat-ia',
@@ -26,7 +27,8 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
   private destroy$ = new Subject<void>();
   private eventSource?: EventSource;
   private mensajeStreamActual: string = '';
-  
+
+
   // Control de scroll
   private shouldScrollToBottom = true;
   userScrolling = false; // Pública para el template
@@ -43,10 +45,15 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
   mostrarPanelHistorial = false;
   escribiendo = false;
 
+  proveedoresDisponibles: ModeloIA[] = [];
+  proveedorSeleccionado: string | undefined = undefined;
+
+
   constructor(
     private chatService: ChatService,
     private notificationService: NotificationService,
-    private spinnerService: SpinnerService
+    private spinnerService: SpinnerService,
+    private contratosIAConfigService: ContratosIAConfigService
   ) { }
 
   ngOnInit(): void {
@@ -54,7 +61,7 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
       console.error('ChatIaComponent: contratoId es requerido');
       return;
     }
-
+    this.cargarProveedoresDisponibles();
     this.cargarSesionesAnteriores();
     this.iniciarNuevaConversacion();
     this.setupScrollListener();
@@ -78,14 +85,14 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
     setTimeout(() => {
       if (this.scrollContainer) {
         const element = this.scrollContainer.nativeElement;
-        
+
         element.addEventListener('scroll', () => {
           const scrollTop = element.scrollTop;
           const scrollHeight = element.scrollHeight;
           const clientHeight = element.clientHeight;
-          
+
           const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-          
+
           if (!isNearBottom) {
             this.userScrolling = true;
             this.shouldScrollToBottom = false;
@@ -169,6 +176,12 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
   async enviarMensaje(): Promise<void> {
     if (!this.mensajeActual.trim() || this.isSending) return;
 
+    // Verificar si hay proveedores disponibles
+    if (this.proveedoresDisponibles.length === 0) {
+      this.notificationService.error('No hay proveedores de IA configurados para este contrato');
+      return;
+    }
+
     const pregunta = this.mensajeActual.trim();
     this.mensajeActual = '';
     this.isSending = true;
@@ -188,14 +201,21 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.eventSource.close();
       }
 
+      // Preparar parámetros base
+      const params: any = {
+        contrato_id: this.contratoId,
+        pregunta: pregunta,
+        continuar_sesion: !!this.sesionActual,
+        sesion_id: this.sesionActual?.id
+      };
+
+      // Solo agregar proveedor si está seleccionado
+      if (this.proveedorSeleccionado) {
+        params.proveedor = this.proveedorSeleccionado;
+      }
       // Usar streaming
       this.eventSource = this.chatService.conversarStreaming(
-        {
-          contrato_id: this.contratoId,
-          pregunta: pregunta,
-          continuar_sesion: !!this.sesionActual,
-          sesion_id: this.sesionActual?.id
-        },
+        params,
         // onMessage
         (event) => {
           this.manejarEventoSSE(event);
@@ -206,6 +226,9 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
           this.notificationService.error('Error al procesar tu pregunta');
           this.escribiendo = false;
           this.isSending = false;
+
+          // Agregar mensaje de error al chat
+          this.agregarMensajeSistema('Lo siento, ocurrió un error al procesar tu pregunta. Por favor, intenta nuevamente.');
         },
         // onComplete
         () => {
@@ -226,6 +249,12 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.agregarMensajeSistema('Lo siento, ocurrió un error al procesar tu pregunta. Por favor, intenta nuevamente.');
       this.isSending = false;
       this.escribiendo = false;
+
+      // Cerrar EventSource si existe
+      if (this.eventSource) {
+        this.eventSource.close();
+        this.eventSource = undefined;
+      }
     }
   }
 
@@ -364,5 +393,49 @@ export class ChatIaComponent implements OnInit, OnDestroy, AfterViewChecked {
       month: 'short',
       year: date.getFullYear() !== ahora.getFullYear() ? 'numeric' : undefined
     });
+  }
+  private cargarProveedoresDisponibles(): void {
+    // Obtener modelos de análisis disponibles
+    this.contratosIAConfigService.obtenerModelosAnalisis()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.modelos && response.modelos.length > 0) {
+            this.proveedoresDisponibles = response.modelos;
+
+            // Seleccionar el predeterminado si existe
+            const predeterminado = response.modelos.find((m: ModeloIA) => m.es_predeterminado);
+            if (predeterminado) {
+              this.proveedorSeleccionado = predeterminado.proveedor;
+            }
+          } else {
+            console.warn('No hay proveedores de IA disponibles');
+          }
+        },
+        error: (error) => {
+          console.error('Error cargando proveedores:', error);
+          // No mostrar error al usuario, usar proveedor por defecto
+        }
+      });
+  }
+
+  onProveedorChange(): void {
+    // Guardar preferencia en localStorage para esta sesión
+    if (this.proveedorSeleccionado) {
+      localStorage.setItem(`chat_provider_${this.contratoId}`, this.proveedorSeleccionado);
+    } else {
+      localStorage.removeItem(`chat_provider_${this.contratoId}`);
+    }
+  }
+
+  getNombreProveedorAmigable(proveedor: string): string {
+    const nombres: { [key: string]: string } = {
+      'openai': 'OpenAI (GPT-4)',
+      'gemini': 'Google Gemini',
+      'anthropic': 'Anthropic Claude',
+      'navegador': 'Navegador Local'
+    };
+
+    return nombres[proveedor] || proveedor;
   }
 }

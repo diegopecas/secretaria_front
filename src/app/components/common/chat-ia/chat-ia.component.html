@@ -59,7 +59,48 @@
         </small>
       </div>
     </div>
+    <!-- Agregar después del header del chat -->
+    <div class="chat-header">
+      <button class="btn-icon" *ngIf="mostrarHistorial" (click)="toggleHistorial()"
+        [attr.aria-label]="mostrarPanelHistorial ? 'Ocultar historial' : 'Mostrar historial'">
+        <i class="fas fa-bars"></i>
+      </button>
 
+      <h2 class="chat-titulo">
+        <i class="fas fa-robot text-primary"></i>
+        {{ tituloChat }}
+      </h2>
+
+      <!-- NUEVO: Selector de proveedor IA -->
+      <div class="chat-provider-selector" *ngIf="proveedoresDisponibles.length > 0">
+        <select [(ngModel)]="proveedorSeleccionado" (change)="onProveedorChange()" class="form-control form-control-sm"
+          [disabled]="isSending">
+          <option [value]="null">Proveedor por defecto</option>
+          <option *ngFor="let proveedor of proveedoresDisponibles" [value]="proveedor.proveedor">
+            {{ getNombreProveedorAmigable(proveedor.proveedor) }}
+            <span *ngIf="proveedor.es_predeterminado">(Predeterminado)</span>
+          </option>
+        </select>
+        <small class="text-muted d-block">
+          <i class="fas fa-info-circle"></i>
+          {{ proveedorSeleccionado ? 'Usando: ' + getNombreProveedorAmigable(proveedorSeleccionado) : 'Usando
+          configuración predeterminada' }}
+        </small>
+      </div>
+
+      <div class="chat-info">
+        <small *ngIf="sesionActual" class="text-muted">
+          Sesión: {{ sesionActual.mensajes_count }} mensajes
+        </small>
+      </div>
+    </div>
+
+    <!-- Si no hay proveedores configurados, mostrar mensaje -->
+    <div class="alert alert-warning m-3" *ngIf="proveedoresDisponibles.length === 0 && !isLoading">
+      <i class="fas fa-exclamation-triangle"></i>
+      No hay proveedores de IA configurados para este contrato.
+      Contacte al administrador para configurar al menos un proveedor.
+    </div>
     <!-- Área de mensajes -->
     <div class="chat-mensajes-container" #scrollContainer>
       <div class="chat-mensajes-lista">

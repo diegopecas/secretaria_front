@@ -54,15 +54,27 @@ export interface Contrato {
   dias_restantes?: number;
   total_obligaciones?: number;
   total_supervisores?: number;
-  
+
   // Campos de IA
   resumen_ia?: string;
   fecha_resumen_ia?: string;
-  
+
   // Relaciones
   supervisores?: Supervisor[];
   obligaciones?: Obligacion[];
   valores_mensuales?: ValorMensual[];
+  proyectos?: Proyecto[];
+}
+
+export interface Proyecto {
+  id?: number;
+  contrato_id?: number;
+  numero_proyecto: number;
+  titulo: string;
+  descripcion: string;
+  activo?: boolean;
+  procesado?: boolean;
+  fecha_procesamiento?: string;
 }
 @Injectable({
   providedIn: 'root'
@@ -152,7 +164,15 @@ export class ContratosService {
       catchError(this.handleError)
     );
   }
-
+  gestionarProyectos(contrato_id: number, proyectos: Proyecto[]): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/proyectos`,
+      { contrato_id, proyectos },
+      this.getHttpOptions()
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
   buscar(params: {
     q?: string;
     estado?: string;

@@ -5,6 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
+
 export interface Actividad {
   id?: number;
   contrato_id: number;
@@ -27,6 +28,7 @@ export interface Actividad {
   // Relaciones
   obligaciones?: Obligacion[];
   archivos?: ArchivoAdjunto[];
+  proyectos?: Proyecto[];
   
   // Campos para mostrar
   numero_contrato?: string;
@@ -40,7 +42,12 @@ export interface Obligacion {
   numero_obligacion: number;
   descripcion: string;
 }
-
+export interface Proyecto {
+  id?: number;
+  numero_proyecto: number;
+  titulo: string;
+  descripcion: string;
+}
 export interface ArchivoAdjunto {
   id: number;
   nombre_archivo: string;

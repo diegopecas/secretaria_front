@@ -136,6 +136,7 @@ export class ChatService {
     pregunta: string;
     continuar_sesion?: boolean;
     sesion_id?: string;
+    proveedor?: string;
   },
     onMessage: (event: SSEEvent) => void,
     onError?: (error: any) => void,
@@ -149,7 +150,8 @@ export class ChatService {
       contrato_id: params.contrato_id.toString(),
       pregunta: params.pregunta,
       continuar_sesion: params.continuar_sesion ? 'true' : 'false',
-      sesion_id: params.sesion_id || ''
+      sesion_id: params.sesion_id || '',
+      proveedor: params.proveedor || ''
     });
 
     const url = `${baseUrl}/chat/conversar-stream?${queryParams.toString()}`;

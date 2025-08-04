@@ -18,10 +18,10 @@
   grid-template-columns: 1fr 350px;
   gap: 1.5rem;
   align-items: start;
-  
+
   @media (max-width: 992px) {
     grid-template-columns: 1fr;
-    
+
     .contract-info-panel {
       order: -1; // Mover info del contrato arriba en móvil
     }
@@ -34,16 +34,16 @@
   padding: 1.5rem;
   border-radius: var(--border-radius-large);
   box-shadow: var(--shadow-small);
-  
+
   .archivos-section {
     padding-top: 1.5rem;
     border-top: 1px solid var(--color-borde);
-    
+
     h5 {
       font-size: 1.125rem;
       margin-bottom: 1rem;
       color: var(--color-texto);
-      
+
       i {
         color: var(--color-dorado);
         margin-right: 0.5rem;
@@ -72,12 +72,12 @@
   border-radius: var(--border-radius-large);
   box-shadow: var(--shadow-small);
   margin-top: 1.5rem;
-  
+
   h4 {
     font-size: 1.125rem;
     margin-bottom: 1rem;
     color: var(--color-texto);
-    
+
     i {
       color: var(--color-dorado);
       margin-right: 0.5rem;
@@ -93,7 +93,7 @@
   box-shadow: var(--shadow-small);
   position: sticky;
   top: 1rem;
-  
+
   h4 {
     font-size: 1.125rem;
     margin-bottom: 1rem;
@@ -101,16 +101,16 @@
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--color-borde);
   }
-  
+
   h5 {
     font-size: 1rem;
     margin-bottom: 0.75rem;
     color: var(--color-texto);
   }
-  
+
   .info-item {
     margin-bottom: 0.75rem;
-    
+
     label {
       font-weight: 600;
       color: var(--color-gris-oscuro);
@@ -118,19 +118,21 @@
       display: block;
       margin-bottom: 0.25rem;
     }
-    
+
     span {
       color: var(--color-texto);
       font-size: 0.875rem;
     }
   }
-  
-  .obligaciones-seleccionadas {
+
+  .obligaciones-seleccionadas ,
+  .proyectos-seleccionados { 
     margin-top: 1.5rem;
     padding-top: 1rem;
     border-top: 1px solid var(--color-borde);
-    
-    .obligacion-item {
+
+    .obligacion-item ,
+    .proyecto-item {
       font-size: 0.8125rem;
       line-height: 1.5;
       margin-bottom: 0.5rem;
@@ -152,26 +154,26 @@
 .obligaciones-list {
   max-height: 400px;
   overflow-y: auto;
-  
+
   .obligacion-checkbox {
     padding: 0.75rem;
     margin-bottom: 0.5rem;
     border: 1px solid var(--color-borde);
     border-radius: var(--border-radius-medium);
     transition: all 0.2s ease;
-    
+
     &:hover {
       background: var(--color-fondo);
     }
-    
+
     &.selected {
       background: rgba(255, 215, 0, 0.1);
       border-color: var(--color-dorado);
     }
-    
+
     .form-check {
       margin: 0;
-      
+
       .form-check-label {
         cursor: pointer;
         font-size: 0.875rem;
@@ -185,19 +187,19 @@
 .empty-state {
   text-align: center;
   padding: 3rem;
-  
+
   .empty-icon {
     font-size: 4rem;
     color: var(--color-gris-claro);
     margin-bottom: 1rem;
   }
-  
+
   h3 {
     font-size: 1.5rem;
     color: var(--color-texto);
     margin-bottom: 0.5rem;
   }
-  
+
   p {
     color: var(--color-gris);
     margin: 0;
@@ -207,7 +209,7 @@
 .loading-state {
   text-align: center;
   padding: 5rem;
-  
+
   .spinner-border {
     width: 3rem;
     height: 3rem;
@@ -222,10 +224,10 @@
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 1px solid var(--color-borde);
-  
+
   @media (max-width: 576px) {
     flex-direction: column;
-    
+
     .btn {
       width: 100%;
     }
@@ -234,30 +236,54 @@
 
 // Tema oscuro
 :host-context(.dark-theme) {
+
   .selectors-card,
   .content-card,
   .contract-info-panel,
   .archivos-view {
     background: var(--color-fondo-tarjeta);
   }
-  
+
   .obligacion-checkbox {
     &:hover {
       background: rgba(255, 255, 255, 0.05);
     }
-    
+
     &.selected {
       background: rgba(255, 215, 0, 0.15);
     }
   }
-  
+
   .contract-info-panel {
     .obligacion-item {
       background: rgba(255, 255, 255, 0.05);
     }
   }
-  
+
   .descripcion-view p {
     background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+// Badges de obligaciones y proyectos
+.obligaciones-badges,
+.proyectos-badges {
+  // AGREGAR proyectos-badges
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+// Lista de obligaciones y proyectos en modal
+.obligaciones-list,
+.proyectos-list {
+  // AGREGAR proyectos-list
+  max-height: 400px;
+  overflow-y: auto;
+
+  .obligacion-checkbox,
+  .proyecto-checkbox {
+    // AGREGAR proyecto-checkbox
+    // ... estilos existentes ...
   }
 }

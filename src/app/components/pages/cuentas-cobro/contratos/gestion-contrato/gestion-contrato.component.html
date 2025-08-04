@@ -5,7 +5,7 @@
       <div class="page-header-content">
         <!-- Breadcrumb automático -->
         <app-breadcrumb></app-breadcrumb>
-        
+
         <!-- Título con icono -->
         <h1 class="page-title">
           <span class="page-icon">
@@ -24,7 +24,7 @@
       <form [formGroup]="contratoForm" (ngSubmit)="onSubmit()">
         <!-- Acordeón -->
         <div class="accordion-container">
-          
+
           <!-- Sección 1: Información Básica -->
           <div class="accordion-item" [class.active]="isAccordionActive('informacion-basica')">
             <div class="accordion-header" (click)="toggleAccordion('informacion-basica')">
@@ -32,9 +32,10 @@
                 <i class="fas fa-file-contract me-2"></i>
                 Información Básica del Contrato
               </h3>
-              <i class="fas" [ngClass]="isAccordionActive('informacion-basica') ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+              <i class="fas"
+                [ngClass]="isAccordionActive('informacion-basica') ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
             </div>
-            
+
             <div class="accordion-content" *ngIf="isAccordionActive('informacion-basica')">
               <div class="row">
                 <!-- Número de contrato -->
@@ -44,11 +45,7 @@
                       Número de Contrato
                       <span class="text-danger" *ngIf="!isViewMode">*</span>
                     </label>
-                    <input 
-                      type="text" 
-                      id="numero_contrato" 
-                      formControlName="numero_contrato"
-                      class="form-control"
+                    <input type="text" id="numero_contrato" formControlName="numero_contrato" class="form-control"
                       [class.is-invalid]="f['numero_contrato'].invalid && f['numero_contrato'].touched"
                       placeholder="Ej: CONT-2024-001">
                     <div *ngIf="f['numero_contrato'].invalid && f['numero_contrato'].touched" class="invalid-feedback">
@@ -65,10 +62,7 @@
                       Contratista
                       <span class="text-danger" *ngIf="!isViewMode">*</span>
                     </label>
-                    <select 
-                      id="contratista_id" 
-                      formControlName="contratista_id"
-                      class="form-control"
+                    <select id="contratista_id" formControlName="contratista_id" class="form-control"
                       [class.is-invalid]="f['contratista_id'].invalid && f['contratista_id'].touched">
                       <option value="">-- Seleccione --</option>
                       <option *ngFor="let contratista of contratistas" [value]="contratista.id">
@@ -88,10 +82,7 @@
                       Entidad Contratante
                       <span class="text-danger" *ngIf="!isViewMode">*</span>
                     </label>
-                    <select 
-                      id="entidad_id" 
-                      formControlName="entidad_id"
-                      class="form-control"
+                    <select id="entidad_id" formControlName="entidad_id" class="form-control"
                       [class.is-invalid]="f['entidad_id'].invalid && f['entidad_id'].touched">
                       <option value="">-- Seleccione --</option>
                       <option *ngFor="let entidad of entidades" [value]="entidad.id">
@@ -111,13 +102,10 @@
                       Fecha de Suscripción
                       <span class="text-danger" *ngIf="!isViewMode">*</span>
                     </label>
-                    <input 
-                      type="date" 
-                      id="fecha_suscripcion" 
-                      formControlName="fecha_suscripcion"
-                      class="form-control"
+                    <input type="date" id="fecha_suscripcion" formControlName="fecha_suscripcion" class="form-control"
                       [class.is-invalid]="f['fecha_suscripcion'].invalid && f['fecha_suscripcion'].touched">
-                    <div *ngIf="f['fecha_suscripcion'].invalid && f['fecha_suscripcion'].touched" class="invalid-feedback">
+                    <div *ngIf="f['fecha_suscripcion'].invalid && f['fecha_suscripcion'].touched"
+                      class="invalid-feedback">
                       <span *ngIf="f['fecha_suscripcion'].errors?.['required']">La fecha es requerida</span>
                     </div>
                   </div>
@@ -129,11 +117,7 @@
                       Fecha de Inicio
                       <span class="text-danger" *ngIf="!isViewMode">*</span>
                     </label>
-                    <input 
-                      type="date" 
-                      id="fecha_inicio" 
-                      formControlName="fecha_inicio"
-                      class="form-control"
+                    <input type="date" id="fecha_inicio" formControlName="fecha_inicio" class="form-control"
                       [class.is-invalid]="(f['fecha_inicio'].invalid && f['fecha_inicio'].touched) || contratoForm.errors?.['fechasInvalidas']">
                     <div *ngIf="f['fecha_inicio'].invalid && f['fecha_inicio'].touched" class="invalid-feedback">
                       <span *ngIf="f['fecha_inicio'].errors?.['required']">La fecha es requerida</span>
@@ -147,16 +131,14 @@
                       Fecha de Terminación
                       <span class="text-danger" *ngIf="!isViewMode">*</span>
                     </label>
-                    <input 
-                      type="date" 
-                      id="fecha_terminacion" 
-                      formControlName="fecha_terminacion"
-                      class="form-control"
+                    <input type="date" id="fecha_terminacion" formControlName="fecha_terminacion" class="form-control"
                       [class.is-invalid]="(f['fecha_terminacion'].invalid && f['fecha_terminacion'].touched) || contratoForm.errors?.['fechasInvalidas']">
-                    <div *ngIf="f['fecha_terminacion'].invalid && f['fecha_terminacion'].touched" class="invalid-feedback">
+                    <div *ngIf="f['fecha_terminacion'].invalid && f['fecha_terminacion'].touched"
+                      class="invalid-feedback">
                       <span *ngIf="f['fecha_terminacion'].errors?.['required']">La fecha es requerida</span>
                     </div>
-                    <div *ngIf="contratoForm.errors?.['fechasInvalidas'] && f['fecha_terminacion'].touched" class="invalid-feedback d-block">
+                    <div *ngIf="contratoForm.errors?.['fechasInvalidas'] && f['fecha_terminacion'].touched"
+                      class="invalid-feedback d-block">
                       La fecha de terminación debe ser posterior a la fecha de inicio
                     </div>
                   </div>
@@ -169,13 +151,9 @@
                       Objeto del Contrato
                       <span class="text-danger" *ngIf="!isViewMode">*</span>
                     </label>
-                    <textarea 
-                      id="objeto_contrato" 
-                      formControlName="objeto_contrato"
-                      class="form-control"
+                    <textarea id="objeto_contrato" formControlName="objeto_contrato" class="form-control"
                       [class.is-invalid]="f['objeto_contrato'].invalid && f['objeto_contrato'].touched"
-                      placeholder="Describa el objeto del contrato"
-                      rows="3"></textarea>
+                      placeholder="Describa el objeto del contrato" rows="3"></textarea>
                     <div *ngIf="f['objeto_contrato'].invalid && f['objeto_contrato'].touched" class="invalid-feedback">
                       <span *ngIf="f['objeto_contrato'].errors?.['required']">El objeto es requerido</span>
                       <span *ngIf="f['objeto_contrato'].errors?.['minlength']">Mínimo 10 caracteres</span>
@@ -190,14 +168,8 @@
                       Valor Total
                       <span class="text-danger" *ngIf="!isViewMode">*</span>
                     </label>
-                    <input 
-                      type="number" 
-                      id="valor_total" 
-                      formControlName="valor_total"
-                      class="form-control"
-                      [class.is-invalid]="f['valor_total'].invalid && f['valor_total'].touched"
-                      placeholder="0"
-                      min="1">
+                    <input type="number" id="valor_total" formControlName="valor_total" class="form-control"
+                      [class.is-invalid]="f['valor_total'].invalid && f['valor_total'].touched" placeholder="0" min="1">
                     <div *ngIf="f['valor_total'].invalid && f['valor_total'].touched" class="invalid-feedback">
                       <span *ngIf="f['valor_total'].errors?.['required']">El valor es requerido</span>
                       <span *ngIf="f['valor_total'].errors?.['min']">El valor debe ser mayor a 0</span>
@@ -209,11 +181,7 @@
                 <div class="col-12 col-md-4">
                   <div class="form-group">
                     <label for="dependencia">Dependencia</label>
-                    <input 
-                      type="text" 
-                      id="dependencia" 
-                      formControlName="dependencia"
-                      class="form-control"
+                    <input type="text" id="dependencia" formControlName="dependencia" class="form-control"
                       placeholder="Ej: Secretaría de Hacienda">
                   </div>
                 </div>
@@ -222,11 +190,7 @@
                 <div class="col-12 col-md-4">
                   <div class="form-group">
                     <label for="unidad_operativa">Unidad Operativa</label>
-                    <input 
-                      type="text" 
-                      id="unidad_operativa" 
-                      formControlName="unidad_operativa"
-                      class="form-control"
+                    <input type="text" id="unidad_operativa" formControlName="unidad_operativa" class="form-control"
                       placeholder="Ej: Área de Contratación">
                   </div>
                 </div>
@@ -235,10 +199,7 @@
                 <div class="col-12 col-md-4" *ngIf="mode !== 'create'">
                   <div class="form-group">
                     <label for="estado">Estado</label>
-                    <select 
-                      id="estado" 
-                      formControlName="estado"
-                      class="form-control">
+                    <select id="estado" formControlName="estado" class="form-control">
                       <option value="activo">Activo</option>
                       <option value="suspendido">Suspendido</option>
                       <option value="finalizado">Finalizado</option>
@@ -260,7 +221,7 @@
               </h3>
               <i class="fas" [ngClass]="isAccordionActive('supervisores') ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
             </div>
-            
+
             <div class="accordion-content" *ngIf="isAccordionActive('supervisores')">
               <div class="mb-3" *ngIf="!isViewMode">
                 <button type="button" class="btn btn-sm btn-primary" (click)="agregarSupervisor()">
@@ -269,34 +230,30 @@
               </div>
 
               <div formArrayName="supervisores">
-                <div class="supervisor-item" *ngFor="let supervisor of supervisoresArray.controls; let i = index" [formGroupName]="i">
+                <div class="supervisor-item" *ngFor="let supervisor of supervisoresArray.controls; let i = index"
+                  [formGroupName]="i">
                   <div class="row align-items-end">
                     <div class="col-12 col-md-5">
                       <div class="form-group">
                         <label>Nombre del Supervisor <span class="text-danger">*</span></label>
-                        <input 
-                          type="text" 
-                          formControlName="nombre"
-                          class="form-control"
+                        <input type="text" formControlName="nombre" class="form-control"
                           [class.is-invalid]="supervisor.get('nombre')?.invalid && supervisor.get('nombre')?.touched"
                           placeholder="Nombre completo">
-                        <div *ngIf="supervisor.get('nombre')?.invalid && supervisor.get('nombre')?.touched" class="invalid-feedback">
+                        <div *ngIf="supervisor.get('nombre')?.invalid && supervisor.get('nombre')?.touched"
+                          class="invalid-feedback">
                           <span *ngIf="supervisor.get('nombre')?.errors?.['required']">El nombre es requerido</span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div class="col-12 col-md-4">
                       <div class="form-group">
                         <label>Cargo</label>
-                        <input 
-                          type="text" 
-                          formControlName="cargo"
-                          class="form-control"
+                        <input type="text" formControlName="cargo" class="form-control"
                           placeholder="Cargo del supervisor">
                       </div>
                     </div>
-                    
+
                     <div class="col-12 col-md-2">
                       <div class="form-group">
                         <label>Tipo</label>
@@ -306,12 +263,9 @@
                         </select>
                       </div>
                     </div>
-                    
+
                     <div class="col-12 col-md-1" *ngIf="!isViewMode">
-                      <button 
-                        type="button" 
-                        class="btn btn-sm btn-danger mb-3"
-                        (click)="eliminarSupervisor(i)"
+                      <button type="button" class="btn btn-sm btn-danger mb-3" (click)="eliminarSupervisor(i)"
                         [disabled]="supervisoresArray.length === 1">
                         <i class="fas fa-trash"></i>
                       </button>
@@ -332,7 +286,7 @@
               </h3>
               <i class="fas" [ngClass]="isAccordionActive('obligaciones') ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
             </div>
-            
+
             <div class="accordion-content" *ngIf="isAccordionActive('obligaciones')">
               <div class="mb-3" *ngIf="!isViewMode">
                 <button type="button" class="btn btn-sm btn-primary" (click)="agregarObligacion()">
@@ -341,40 +295,33 @@
               </div>
 
               <div formArrayName="obligaciones">
-                <div class="obligacion-item" *ngFor="let obligacion of obligacionesArray.controls; let i = index" [formGroupName]="i">
+                <div class="obligacion-item" *ngFor="let obligacion of obligacionesArray.controls; let i = index"
+                  [formGroupName]="i">
                   <div class="row align-items-end">
                     <div class="col-12 col-md-2">
                       <div class="form-group">
                         <label>Número <span class="text-danger">*</span></label>
-                        <input 
-                          type="number" 
-                          formControlName="numero_obligacion"
-                          class="form-control"
-                          readonly>
+                        <input type="number" formControlName="numero_obligacion" class="form-control" readonly>
                       </div>
                     </div>
-                    
+
                     <div class="col-12 col-md-9">
                       <div class="form-group">
                         <label>Descripción de la Obligación <span class="text-danger">*</span></label>
-                        <textarea 
-                          formControlName="descripcion"
-                          class="form-control"
+                        <textarea formControlName="descripcion" class="form-control"
                           [class.is-invalid]="obligacion.get('descripcion')?.invalid && obligacion.get('descripcion')?.touched"
-                          placeholder="Describa la obligación contractual"
-                          rows="2"></textarea>
-                        <div *ngIf="obligacion.get('descripcion')?.invalid && obligacion.get('descripcion')?.touched" class="invalid-feedback">
-                          <span *ngIf="obligacion.get('descripcion')?.errors?.['required']">La descripción es requerida</span>
+                          placeholder="Describa la obligación contractual" rows="2"></textarea>
+                        <div *ngIf="obligacion.get('descripcion')?.invalid && obligacion.get('descripcion')?.touched"
+                          class="invalid-feedback">
+                          <span *ngIf="obligacion.get('descripcion')?.errors?.['required']">La descripción es
+                            requerida</span>
                           <span *ngIf="obligacion.get('descripcion')?.errors?.['minlength']">Mínimo 10 caracteres</span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div class="col-12 col-md-1" *ngIf="!isViewMode">
-                      <button 
-                        type="button" 
-                        class="btn btn-sm btn-danger mb-3"
-                        (click)="eliminarObligacion(i)"
+                      <button type="button" class="btn btn-sm btn-danger mb-3" (click)="eliminarObligacion(i)"
                         [disabled]="obligacionesArray.length === 1">
                         <i class="fas fa-trash"></i>
                       </button>
@@ -384,8 +331,76 @@
               </div>
             </div>
           </div>
+          <!-- Sección 4: Proyectos del Contrato -->
+          <div class="accordion-item" [class.active]="isAccordionActive('proyectos')">
+            <div class="accordion-header" (click)="toggleAccordion('proyectos')">
+              <h3>
+                <i class="fas fa-project-diagram me-2"></i>
+                Proyectos del Contrato
+                <span class="badge badge-primary ms-2">{{ proyectosArray.length }}</span>
+              </h3>
+              <i class="fas" [ngClass]="isAccordionActive('proyectos') ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </div>
 
-          <!-- Sección 4: Valores Mensuales -->
+            <div class="accordion-content" *ngIf="isAccordionActive('proyectos')">
+              <div class="mb-3" *ngIf="!isViewMode">
+                <button type="button" class="btn btn-sm btn-primary" (click)="agregarProyecto()">
+                  <i class="fas fa-plus"></i> Agregar Proyecto
+                </button>
+              </div>
+
+              <div formArrayName="proyectos">
+                <div class="proyecto-item" *ngFor="let proyecto of proyectosArray.controls; let i = index"
+                  [formGroupName]="i">
+                  <div class="row align-items-end">
+                    <div class="col-12 col-md-1">
+                      <div class="form-group">
+                        <label>Número <span class="text-danger">*</span></label>
+                        <input type="number" formControlName="numero_proyecto" class="form-control" readonly>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                      <div class="form-group">
+                        <label>Título <span class="text-danger">*</span></label>
+                        <input type="text" formControlName="titulo" class="form-control"
+                          [class.is-invalid]="proyecto.get('titulo')?.invalid && proyecto.get('titulo')?.touched"
+                          placeholder="Título del proyecto">
+                        <div *ngIf="proyecto.get('titulo')?.invalid && proyecto.get('titulo')?.touched"
+                          class="invalid-feedback">
+                          <span *ngIf="proyecto.get('titulo')?.errors?.['required']">El título es requerido</span>
+                          <span *ngIf="proyecto.get('titulo')?.errors?.['minlength']">Mínimo 3 caracteres</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-7">
+                      <div class="form-group">
+                        <label>Descripción del Proyecto <span class="text-danger">*</span></label>
+                        <textarea formControlName="descripcion" class="form-control"
+                          [class.is-invalid]="proyecto.get('descripcion')?.invalid && proyecto.get('descripcion')?.touched"
+                          placeholder="Describa el proyecto" rows="2"></textarea>
+                        <div *ngIf="proyecto.get('descripcion')?.invalid && proyecto.get('descripcion')?.touched"
+                          class="invalid-feedback">
+                          <span *ngIf="proyecto.get('descripcion')?.errors?.['required']">La descripción es
+                            requerida</span>
+                          <span *ngIf="proyecto.get('descripcion')?.errors?.['minlength']">Mínimo 10 caracteres</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-1" *ngIf="!isViewMode">
+                      <button type="button" class="btn btn-sm btn-danger mb-3" (click)="eliminarProyecto(i)"
+                        [disabled]="proyectosArray.length === 1">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Sección 5: Valores Mensuales -->
           <div class="accordion-item" [class.active]="isAccordionActive('valores')">
             <div class="accordion-header" (click)="toggleAccordion('valores')">
               <h3>
@@ -395,7 +410,7 @@
               </h3>
               <i class="fas" [ngClass]="isAccordionActive('valores') ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
             </div>
-            
+
             <div class="accordion-content" *ngIf="isAccordionActive('valores')">
               <div class="mb-3" *ngIf="!isViewMode">
                 <button type="button" class="btn btn-sm btn-primary me-2" (click)="agregarValorMensual()">
@@ -434,16 +449,15 @@
                           <input type="number" formControlName="valor" class="form-control form-control-sm" min="1">
                         </td>
                         <td>
-                          <input type="number" formControlName="porcentaje_avance_fisico" class="form-control form-control-sm" min="0" max="100">
+                          <input type="number" formControlName="porcentaje_avance_fisico"
+                            class="form-control form-control-sm" min="0" max="100">
                         </td>
                         <td>
-                          <input type="number" formControlName="porcentaje_avance_financiero" class="form-control form-control-sm" min="0" max="100">
+                          <input type="number" formControlName="porcentaje_avance_financiero"
+                            class="form-control form-control-sm" min="0" max="100">
                         </td>
                         <td *ngIf="!isViewMode">
-                          <button 
-                            type="button" 
-                            class="btn btn-sm btn-danger"
-                            (click)="eliminarValorMensual(i)">
+                          <button type="button" class="btn btn-sm btn-danger" (click)="eliminarValorMensual(i)">
                             <i class="fas fa-trash"></i>
                           </button>
                         </td>
@@ -451,7 +465,7 @@
                     </tbody>
                   </table>
                 </div>
-                
+
                 <div class="alert alert-info" *ngIf="valoresMensualesArray.length === 0">
                   <i class="fas fa-info-circle me-2"></i>
                   No hay valores mensuales definidos. Puede agregarlos manualmente o generarlos automáticamente.
@@ -477,10 +491,7 @@
           <button type="button" class="btn btn-secondary" (click)="cancelar()">
             <i class="fas fa-arrow-left"></i> Volver
           </button>
-          <button 
-            type="button" 
-            class="btn btn-primary" 
-            *hasPermission="'contratos.gestionar'"
+          <button type="button" class="btn btn-primary" *hasPermission="'contratos.gestionar'"
             (click)="editarContrato()">
             <i class="fas fa-edit"></i> Editar Contrato
           </button>

@@ -4,7 +4,7 @@
     <div class="container">
       <div class="page-header-content">
         <app-breadcrumb></app-breadcrumb>
-        
+
         <h1 class="page-title">
           <span class="page-icon">{{ pageIcon }}</span>
           {{ pageTitle }}
@@ -17,7 +17,7 @@
   <div class="container">
     <div class="page-content-wrapper">
       <form [formGroup]="actividadForm" (ngSubmit)="onSubmit()">
-        
+
         <!-- Selectores de Contratista y Contrato -->
         <div class="selectors-card">
           <div class="row">
@@ -28,10 +28,7 @@
                   Contratista
                   <span class="text-danger" *ngIf="!isViewMode">*</span>
                 </label>
-                <select 
-                  id="contratista_id" 
-                  formControlName="contratista_id"
-                  class="form-control"
+                <select id="contratista_id" formControlName="contratista_id" class="form-control"
                   (change)="onContratistaChange()"
                   [class.is-invalid]="f['contratista_id'].invalid && f['contratista_id'].touched">
                   <option [ngValue]="null">-- Seleccione un contratista --</option>
@@ -55,10 +52,7 @@
                   Contrato
                   <span class="text-danger" *ngIf="!isViewMode">*</span>
                 </label>
-                <select 
-                  id="contrato_id" 
-                  formControlName="contrato_id"
-                  class="form-control"
+                <select id="contrato_id" formControlName="contrato_id" class="form-control"
                   (change)="onContratoChange()"
                   [class.is-invalid]="f['contrato_id'].invalid && f['contrato_id'].touched">
                   <option [ngValue]="null">-- Seleccione un contrato --</option>
@@ -82,11 +76,7 @@
                   Fecha de Actividad
                   <span class="text-danger" *ngIf="!isViewMode">*</span>
                 </label>
-                <input 
-                  type="date" 
-                  id="fecha_actividad" 
-                  formControlName="fecha_actividad"
-                  class="form-control"
+                <input type="date" id="fecha_actividad" formControlName="fecha_actividad" class="form-control"
                   [class.is-invalid]="f['fecha_actividad'].invalid && f['fecha_actividad'].touched">
                 <div class="invalid-feedback" *ngIf="f['fecha_actividad'].invalid && f['fecha_actividad'].touched">
                   <span *ngIf="f['fecha_actividad'].errors?.['required']">La fecha es requerida</span>
@@ -101,29 +91,54 @@
                   Obligaciones Relacionadas
                   <small class="text-muted">({{ obligacionesSeleccionadas.length }} seleccionadas)</small>
                 </label>
-                
+
                 <!-- Modo edición -->
-                <button 
-                  type="button" 
-                  class="btn btn-outline-primary btn-sm w-100"
+                <button type="button" class="btn btn-outline-primary btn-sm w-100"
                   *ngIf="!isViewMode && contratoSeleccionado && obligaciones.length > 0"
                   (click)="abrirModalObligaciones()">
                   <i class="fas fa-tasks"></i>
                   Seleccionar Obligaciones
                 </button>
-                
+
                 <!-- Modo vista -->
                 <div class="obligaciones-badges" *ngIf="isViewMode && obligacionesSeleccionadas.length > 0">
-                  <span 
-                    class="badge badge-info me-1 mb-1" 
-                    *ngFor="let oblId of obligacionesSeleccionadas">
+                  <span class="badge badge-info me-1 mb-1" *ngFor="let oblId of obligacionesSeleccionadas">
                     #{{ oblId }}
                   </span>
                 </div>
-                
+
                 <!-- Sin obligaciones -->
                 <p class="text-muted small mb-0" *ngIf="contratoSeleccionado && obligaciones.length === 0">
                   Este contrato no tiene obligaciones registradas
+                </p>
+              </div>
+            </div>
+
+            <!-- Proyectos -->
+            <div class="col-12 col-md-6">
+              <div class="form-group">
+                <label>
+                  Proyectos Relacionados
+                  <small class="text-muted">({{ proyectosSeleccionados.length }} seleccionados)</small>
+                </label>
+
+                <!-- Modo edición -->
+                <button type="button" class="btn btn-outline-primary btn-sm w-100"
+                  *ngIf="!isViewMode && contratoSeleccionado && proyectos.length > 0" (click)="abrirModalProyectos()">
+                  <i class="fas fa-project-diagram"></i>
+                  Seleccionar Proyectos
+                </button>
+
+                <!-- Modo vista -->
+                <div class="proyectos-badges" *ngIf="isViewMode && proyectosSeleccionados.length > 0">
+                  <span class="badge badge-info me-1 mb-1" *ngFor="let proyId of proyectosSeleccionados">
+                    #{{ proyId }}
+                  </span>
+                </div>
+
+                <!-- Sin proyectos -->
+                <p class="text-muted small mb-0" *ngIf="contratoSeleccionado && proyectos.length === 0">
+                  Este contrato no tiene proyectos registrados
                 </p>
               </div>
             </div>
@@ -139,39 +154,33 @@
                 Descripción de la Actividad
                 <span class="text-danger" *ngIf="!isViewMode">*</span>
               </label>
-              
+
               <!-- Componente de transcripción para edición -->
-              <app-transcripcion-audio
-                *ngIf="!isViewMode"
-                formControlName="descripcion_actividad"
+              <app-transcripcion-audio *ngIf="!isViewMode" formControlName="descripcion_actividad"
                 [placeholder]="'Describe las actividades realizadas o use el micrófono para transcribir...'"
-                [mostrarSelectorModelo]="true"
-                [modoInline]="true">
+                [mostrarSelectorModelo]="true" [modoInline]="true">
               </app-transcripcion-audio>
-              
+
               <!-- Vista de solo lectura -->
               <div class="descripcion-view" *ngIf="isViewMode">
                 <p>{{ actividadForm.get('descripcion_actividad')?.value || 'Sin descripción' }}</p>
               </div>
-              
-              <div class="invalid-feedback" *ngIf="!isViewMode && f['descripcion_actividad'].invalid && f['descripcion_actividad'].touched">
+
+              <div class="invalid-feedback"
+                *ngIf="!isViewMode && f['descripcion_actividad'].invalid && f['descripcion_actividad'].touched">
                 <span *ngIf="f['descripcion_actividad'].errors?.['required']">La descripción es requerida</span>
                 <span *ngIf="f['descripcion_actividad'].errors?.['minlength']">Mínimo 10 caracteres</span>
               </div>
             </div>
-            
+
             <!-- Sección de archivos -->
             <div class="archivos-section mt-4" *ngIf="!isViewMode">
               <h5>
                 <i class="fas fa-paperclip"></i>
                 Archivos adjuntos
               </h5>
-              <app-cargar-archivo
-                [maximoArchivos]="10"
-                [tamanioMaximoMB]="10"
-                [archivosExistentes]="archivosExistentes"
-                [modoEdicion]="isEditMode"
-                [soloLectura]="isViewMode"
+              <app-cargar-archivo [maximoArchivos]="10" [tamanioMaximoMB]="10" [archivosExistentes]="archivosExistentes"
+                [modoEdicion]="isEditMode" [soloLectura]="isViewMode"
                 (archivosConfigurados)="onArchivosConfigurados($event)"
                 (archivoExistenteEliminado)="onArchivoExistenteEliminado($event)">
               </app-cargar-archivo>
@@ -184,39 +193,37 @@
               <i class="fas fa-paperclip"></i>
               Archivos Adjuntos ({{ archivosExistentes.length }})
             </h4>
-            <app-cargar-archivo
-              [archivosExistentes]="archivosExistentes"
-              [soloLectura]="true">
+            <app-cargar-archivo [archivosExistentes]="archivosExistentes" [soloLectura]="true">
             </app-cargar-archivo>
           </div>
 
           <!-- Información del contrato (panel lateral en desktop) -->
           <div class="contract-info-panel" *ngIf="contratoSeleccionado">
             <h4>Información del Contrato</h4>
-            
+
             <div class="info-item">
               <label>Número:</label>
               <span>{{ contratoSeleccionado.numero_contrato }}</span>
             </div>
-            
+
             <div class="info-item">
               <label>Entidad:</label>
               <span>{{ contratoSeleccionado.entidad_nombre }}</span>
             </div>
-            
+
             <div class="info-item">
               <label>Valor:</label>
               <span>{{ contratoSeleccionado.valor_total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
             </div>
-            
+
             <div class="info-item">
               <label>Vigencia:</label>
               <span>
-                {{ contratoSeleccionado.fecha_inicio | date:'dd/MM/yyyy' }} - 
+                {{ contratoSeleccionado.fecha_inicio | date:'dd/MM/yyyy' }} -
                 {{ contratoSeleccionado.fecha_terminacion | date:'dd/MM/yyyy' }}
               </span>
             </div>
-            
+
             <div class="info-item" *ngIf="contratoSeleccionado.estado !== 'activo'">
               <label>Estado:</label>
               <span class="badge" [ngClass]="{
@@ -225,7 +232,7 @@
                 'badge-info': contratoSeleccionado.estado === 'liquidado'
               }">{{ contratoSeleccionado.estado }}</span>
             </div>
-            
+
             <!-- Obligaciones seleccionadas -->
             <div class="obligaciones-seleccionadas" *ngIf="obligacionesSeleccionadas.length > 0">
               <h5 class="mt-3">Obligaciones ({{ obligacionesSeleccionadas.length }})</h5>
@@ -234,6 +241,18 @@
                   <small *ngIf="obl.id === oblId">
                     <strong>{{ obl.numero_obligacion }}.</strong>
                     {{ obl.descripcion | slice:0:60 }}{{ obl.descripcion.length > 60 ? '...' : '' }}
+                  </small>
+                </ng-container>
+              </div>
+            </div>
+            <!-- Proyectos seleccionados -->
+            <div class="proyectos-seleccionados" *ngIf="proyectosSeleccionados.length > 0">
+              <h5 class="mt-3">Proyectos ({{ proyectosSeleccionados.length }})</h5>
+              <div class="proyecto-item" *ngFor="let proyId of proyectosSeleccionados">
+                <ng-container *ngFor="let proy of proyectos">
+                  <small *ngIf="proy.id === proyId">
+                    <strong>{{ proy.numero_proyecto }}. {{ proy.titulo }}</strong><br>
+                    {{ proy.descripcion | slice:0:60 }}{{ proy.descripcion.length > 60 ? '...' : '' }}
                   </small>
                 </ng-container>
               </div>
@@ -259,29 +278,20 @@
 
         <!-- Acciones del formulario -->
         <div class="form-actions" *ngIf="contratoSeleccionado">
-          <button 
-            type="button" 
-            class="btn btn-secondary"
-            (click)="cancelar()">
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">
             <i class="fas fa-times"></i>
             Cancelar
           </button>
-          
-          <button 
-            type="submit" 
-            class="btn btn-primary"
-            *ngIf="!isViewMode"
+
+          <button type="submit" class="btn btn-primary" *ngIf="!isViewMode"
             [disabled]="actividadForm.invalid || isLoading">
             <span class="spinner-border spinner-border-sm me-2" *ngIf="isLoading"></span>
             <i class="fas fa-save" *ngIf="!isLoading"></i>
             {{ isCreateMode ? 'Registrar Actividad' : 'Guardar Cambios' }}
           </button>
-          
+
           <ng-container *ngIf="isViewMode">
-            <button 
-              type="button" 
-              class="btn btn-primary"
-              *hasPermission="'actividades.registrar'"
+            <button type="button" class="btn btn-primary" *hasPermission="'actividades.registrar'"
               (click)="editarActividad()">
               <i class="fas fa-edit"></i>
               Editar Actividad
@@ -294,30 +304,19 @@
 </app-layout>
 
 <!-- Modal de Obligaciones -->
-<app-modal 
-  *ngIf="mostrarModalObligaciones"
-  title="Seleccionar Obligaciones"
-  size="large"
+<app-modal *ngIf="mostrarModalObligaciones" title="Seleccionar Obligaciones" size="large"
   (close)="cerrarModalObligaciones()">
-  
+
   <div modal-body>
     <div class="obligaciones-list">
-      <div 
-        class="obligacion-checkbox"
-        *ngFor="let obligacion of obligaciones"
+      <div class="obligacion-checkbox" *ngFor="let obligacion of obligaciones"
         [class.selected]="isObligacionSeleccionada(obligacion.id!)">
-        
+
         <div class="form-check">
-          <input 
-            type="checkbox"
-            class="form-check-input"
-            [id]="'obl-' + obligacion.id"
-            [checked]="isObligacionSeleccionada(obligacion.id!)"
-            (change)="toggleObligacion(obligacion.id!)">
-          
-          <label 
-            class="form-check-label"
-            [for]="'obl-' + obligacion.id">
+          <input type="checkbox" class="form-check-input" [id]="'obl-' + obligacion.id"
+            [checked]="isObligacionSeleccionada(obligacion.id!)" (change)="toggleObligacion(obligacion.id!)">
+
+          <label class="form-check-label" [for]="'obl-' + obligacion.id">
             <strong>{{ obligacion.numero_obligacion }}.</strong>
             {{ obligacion.descripcion }}
           </label>
@@ -325,20 +324,46 @@
       </div>
     </div>
   </div>
-  
+
   <div modal-footer>
-    <button 
-      type="button" 
-      class="btn btn-secondary"
-      (click)="cerrarModalObligaciones()">
+    <button type="button" class="btn btn-secondary" (click)="cerrarModalObligaciones()">
       Cancelar
     </button>
-    <button 
-      type="button" 
-      class="btn btn-primary"
-      (click)="cerrarModalObligaciones()">
+    <button type="button" class="btn btn-primary" (click)="cerrarModalObligaciones()">
       <i class="fas fa-check"></i>
       Confirmar ({{ obligacionesSeleccionadas.length }})
+    </button>
+  </div>
+</app-modal>
+<!-- Modal de Proyectos -->
+<app-modal *ngIf="mostrarModalProyectos" title="Seleccionar Proyectos" size="large" (close)="cerrarModalProyectos()">
+
+  <div modal-body>
+    <div class="proyectos-list">
+      <div class="proyecto-checkbox" *ngFor="let proyecto of proyectos"
+        [class.selected]="isProyectoSeleccionado(proyecto.id!)">
+
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" [id]="'proy-' + proyecto.id"
+            [checked]="isProyectoSeleccionado(proyecto.id!)" (change)="toggleProyecto(proyecto.id!)">
+
+          <label class="form-check-label" [for]="'proy-' + proyecto.id">
+            <strong>{{ proyecto.numero_proyecto }}. {{ proyecto.titulo }}</strong>
+            <br>
+            <small class="text-muted">{{ proyecto.descripcion }}</small>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div modal-footer>
+    <button type="button" class="btn btn-secondary" (click)="cerrarModalProyectos()">
+      Cancelar
+    </button>
+    <button type="button" class="btn btn-primary" (click)="cerrarModalProyectos()">
+      <i class="fas fa-check"></i>
+      Confirmar ({{ proyectosSeleccionados.length }})
     </button>
   </div>
 </app-modal>
