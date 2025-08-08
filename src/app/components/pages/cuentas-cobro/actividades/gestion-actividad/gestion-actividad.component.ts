@@ -61,6 +61,7 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
   // Archivos
   archivosNuevos: ArchivoConfig[] = [];
   archivosExistentes: any[] = [];
+  archivosExistentesModificados: any[] = [];
 
   // Proyectos
   proyectos: Proyecto[] = [];
@@ -407,14 +408,28 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
     if (this.obligacionesSeleccionadas.length > 0) {
       formData.append('obligaciones', JSON.stringify(this.obligacionesSeleccionadas));
     }
+
     // Proyectos
     if (this.proyectosSeleccionados.length > 0) {
       formData.append('proyectos', JSON.stringify(this.proyectosSeleccionados));
     }
-    // Archivos nuevos
+
+    // Archivos 
     this.archivosNuevos.forEach((archivo, index) => {
       formData.append(`archivos[${index}]`, archivo.archivo);
+      formData.append(`archivos_almacenar[${index}]`, archivo.almacenar ? '1' : '0');
+      formData.append(`archivos_extraer_texto[${index}]`, archivo.extraerTexto ? '1' : '0');
+      formData.append(`archivos_es_soporte[${index}]`, archivo.esSoporte ? '1' : '0');
     });
+
+    // Archivos existentes modificados (solo para modo edición)
+    if (this.mode === 'edit' && this.archivosExistentesModificados.length > 0) {
+      const modificaciones = this.archivosExistentesModificados.map(archivo => ({
+        id: archivo.id,
+        es_soporte: archivo.es_soporte
+      }));
+      formData.append('archivos_modificados', JSON.stringify(modificaciones));
+    }
 
     this.isLoading = true;
 
@@ -494,5 +509,8 @@ export class GestionActividadComponent implements OnInit, OnDestroy {
 
   get puedeEditarContratista(): boolean {
     return !this.esUsuarioContratista && this.mode !== 'view';
+  }
+  onArchivosExistentesModificados(archivosModificados: any[]): void {
+    this.archivosExistentesModificados = archivosModificados;
   }
 }

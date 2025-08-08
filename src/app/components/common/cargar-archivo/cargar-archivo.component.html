@@ -47,6 +47,15 @@
         <div class="file-options" *ngIf="!soloLectura">
           <div class="option-checkbox">
             <input type="checkbox" 
+                   [id]="'soporte-existente-' + archivo.id"
+                   [(ngModel)]="archivo.es_soporte" 
+                   [disabled]="soloLectura"
+                   (ngModelChange)="onArchivoExistenteModificado(archivo)">
+            <label [for]="'soporte-existente-' + archivo.id">Es soporte</label>
+          </div>
+          
+          <div class="option-checkbox">
+            <input type="checkbox" 
                    [id]="'almacenar-existente-' + archivo.id"
                    [(ngModel)]="archivo.almacenar_archivo" 
                    disabled>
@@ -64,6 +73,7 @@
         
         <div class="file-actions">
           <span class="badge badge-secondary">Guardado</span>
+          <span class="badge badge-warning" *ngIf="archivo.modificado">Modificado</span>
           <button 
             type="button" 
             class="btn-remove"
@@ -98,6 +108,14 @@
         </div>
         
         <div class="file-options" *ngIf="archivo.estado !== 'error'">
+          <div class="option-checkbox">
+            <input type="checkbox" 
+                   [id]="'soporte-' + i"
+                   [(ngModel)]="archivo.esSoporte"
+                   (ngModelChange)="emitirArchivos()">
+            <label [for]="'soporte-' + i">Es soporte</label>
+          </div>
+          
           <div class="option-checkbox">
             <input type="checkbox" 
                    [id]="'almacenar-' + i"
@@ -142,6 +160,7 @@
       <i class="fas fa-info-circle"></i>
     </div>
     <div class="info-text">
+      <strong>Es soporte:</strong> Marca el archivo como documento de soporte<br>
       <strong>Almacenar archivo:</strong> Guarda el archivo físicamente en el servidor<br>
       <strong>Extraer texto:</strong> Procesa el archivo para permitir búsquedas por contenido
     </div>

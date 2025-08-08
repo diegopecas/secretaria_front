@@ -182,7 +182,19 @@
               <app-cargar-archivo [maximoArchivos]="10" [tamanioMaximoMB]="10" [archivosExistentes]="archivosExistentes"
                 [modoEdicion]="isEditMode" [soloLectura]="isViewMode"
                 (archivosConfigurados)="onArchivosConfigurados($event)"
-                (archivoExistenteEliminado)="onArchivoExistenteEliminado($event)">
+                (archivoExistenteEliminado)="onArchivoExistenteEliminado($event)"
+                (archivosExistentesModificados)="onArchivosExistentesModificados($event)">
+              </app-cargar-archivo>
+            </div>
+
+            <!-- Vista de archivos en modo lectura -->
+            <div class="archivos-view" *ngIf="isViewMode && archivosExistentes.length > 0">
+              <h4 class="mt-4">
+                <i class="fas fa-paperclip"></i>
+                Archivos Adjuntos ({{ archivosExistentes.length }})
+              </h4>
+              <app-cargar-archivo [archivosExistentes]="archivosExistentes" [soloLectura]="true"
+                (archivosExistentesModificados)="onArchivosExistentesModificados($event)">
               </app-cargar-archivo>
             </div>
           </div>

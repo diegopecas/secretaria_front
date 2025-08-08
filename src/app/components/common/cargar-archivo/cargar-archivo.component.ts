@@ -6,6 +6,7 @@ export interface ArchivoConfig {
   archivo: File;
   almacenar: boolean;
   extraerTexto: boolean;
+  esSoporte: boolean;
 }
 
 export interface ArchivoExistente {
@@ -15,12 +16,16 @@ export interface ArchivoExistente {
   tamanio_bytes: number;
   almacenar_archivo: boolean;
   extraer_texto: boolean;
+  es_soporte?: boolean;
+  modificado?: boolean; // Para trackear cambios
+  es_soporte_original?: boolean; // Valor original
 }
 
 interface ArchivoInterno {
   archivo: File;
   almacenar: boolean;
   extraerTexto: boolean;
+  esSoporte: boolean;
   estado: 'nuevo' | 'guardado' | 'error';
   mensaje?: string;
 }
@@ -45,6 +50,7 @@ export class CargarArchivoComponent implements OnInit {
   
   @Output() archivosConfigurados = new EventEmitter<ArchivoConfig[]>();
   @Output() archivoExistenteEliminado = new EventEmitter<number>();
+  @Output() archivosExistentesModificados = new EventEmitter<ArchivoExistente[]>();
 
   archivos: ArchivoInterno[] = [];
   dragOver = false;
@@ -61,6 +67,12 @@ export class CargarArchivoComponent implements OnInit {
   };
 
   ngOnInit() {
+    // Guardar valores originales para detectar cambios
+    this.archivosExistentes.forEach(archivo => {
+      archivo.es_soporte_original = archivo.es_soporte;
+      archivo.modificado = false;
+    });
+    
     // Emitir archivos vacíos al inicio
     this.emitirArchivos();
   }
@@ -125,6 +137,7 @@ export class CargarArchivoComponent implements OnInit {
           archivo: archivo,
           almacenar: config.almacenar,
           extraerTexto: config.extraerTexto,
+          esSoporte: true, // Por defecto marcado como soporte
           estado: 'nuevo'
         });
       } else {
@@ -132,6 +145,7 @@ export class CargarArchivoComponent implements OnInit {
           archivo: archivo,
           almacenar: false,
           extraerTexto: false,
+          esSoporte: false,
           estado: 'error',
           mensaje: validacion.mensaje
         });
@@ -176,6 +190,15 @@ export class CargarArchivoComponent implements OnInit {
     }
   }
 
+  onArchivoExistenteModificado(archivo: ArchivoExistente) {
+    // Marcar como modificado si cambió el valor
+    archivo.modificado = archivo.es_soporte !== archivo.es_soporte_original;
+    
+    // Emitir lista de archivos modificados
+    const modificados = this.archivosExistentes.filter(a => a.modificado);
+    this.archivosExistentesModificados.emit(modificados);
+  }
+
   // Método público para que sea accesible desde el template
   emitirArchivos() {
     const archivosValidos = this.archivos
@@ -183,7 +206,8 @@ export class CargarArchivoComponent implements OnInit {
       .map(a => ({
         archivo: a.archivo,
         almacenar: a.almacenar,
-        extraerTexto: a.extraerTexto
+        extraerTexto: a.extraerTexto,
+        esSoporte: a.esSoporte
       }));
     
     this.archivosConfigurados.emit(archivosValidos);

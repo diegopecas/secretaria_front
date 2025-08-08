@@ -53,7 +53,15 @@ export interface ArchivoAdjunto {
   nombre_archivo: string;
   archivo_url: string;
   tipo_archivo_nombre?: string;
+  tipo_archivo_codigo?: string;
   tamanio_bytes: number;
+  almacenar_archivo?: boolean;
+  extraer_texto?: boolean;
+  es_soporte?: boolean;
+  estado_extraccion?: string;
+  procesado?: boolean;
+  fecha_carga?: string;
+  usuario_carga_nombre?: string;
 }
 
 export interface FiltrosActividad {
